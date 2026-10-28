@@ -1,0 +1,14 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/job_history.json
+*.zip
+*.mf4
+*.blf
+*.asc
+*.log
+.DS_Store
+job_history.json

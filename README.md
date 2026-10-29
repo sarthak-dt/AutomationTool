@@ -10,7 +10,7 @@ unzip decoder_comparator.zip && cd decoder_comparator
 ```
 
 Windows: `run.bat`. Manual: `python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt && streamlit run app.py`.
-Requires Python 3.10+. The app opens at <http://localhost:8501> (`PORT=9000 ./run.sh` to change).
+Requires Python 3.12+. The app opens at <http://localhost:8501> (`PORT=9000 ./run.sh` to change).
 
 Run the tests: `./verify.sh` (installs dev requirements first).
 

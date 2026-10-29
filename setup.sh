@@ -5,8 +5,8 @@ cd "$(dirname "$0")"
 PY="${PYTHON:-python3}"
 "$PY" - <<'PYCHK'
 import sys
-if sys.version_info < (3, 10):
-    sys.exit("Python 3.10+ is required (found %s)" % sys.version.split()[0])
+if sys.version_info < (3, 12):
+    sys.exit("Python 3.12+ is required (found %s)" % sys.version.split()[0])
 PYCHK
 [ -d .venv ] || "$PY" -m venv .venv
 # shellcheck disable=SC1091

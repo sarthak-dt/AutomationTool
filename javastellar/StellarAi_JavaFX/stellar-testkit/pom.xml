@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.stellar.platform</groupId>
+        <artifactId>stellar-ai-platform</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>stellar-testkit</artifactId>
+    <name>stellar-testkit</name>
+    <description>Reusable test fixtures and end-to-end integration quality gates</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-processing-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-dbc-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-parser-mf4</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-parser-asc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-parser-blf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-parser-spi</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <mainClass>com.stellar.platform.testkit.compat.ParserCompatibilityHarness</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,32 @@
+VERSION "asc_ground_truth_1.0"
+
+NS_ :
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	BO_TX_BU_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: ECU1 ECU2 Gateway
+
+BO_ 256 EngineData: 8 ECU1
+ SG_ EngineSpeed : 0|16@1+ (0.25,0) [0|8000] "rpm" Gateway
+ SG_ EngineTemp : 16|8@1- (1,-40) [-40|215] "degC" Gateway
+ SG_ StatusFlags : 24|8@1+ (1,0) [0|255] "" Gateway
+
+BO_ 2566582544 ChassisStatus: 8 ECU2
+ SG_ WheelSpeedFL : 0|16@1+ (0.01,0) [0|655.35] "km/h" Gateway
+ SG_ WheelSpeedFR : 16|16@1+ (0.01,0) [0|655.35] "km/h" Gateway
+
+BO_ 768 GpsPosition: 8 ECU1
+ SG_ Latitude : 0|32@1- (1e-7,0) [-90|90] "deg" Gateway
+ SG_ Longitude : 32|32@1- (1e-7,0) [-180|180] "deg" Gateway
+
+CM_ BO_ 256 "Engine data";
+CM_ BO_ 768 "GPS WGS84";
+CM_ SG_ 768 Latitude "Geodetic latitude";
+CM_ SG_ 768 Longitude "Geodetic longitude";

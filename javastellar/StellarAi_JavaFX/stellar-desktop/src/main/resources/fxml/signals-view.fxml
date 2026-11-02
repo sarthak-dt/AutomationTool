@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import com.stellar.platform.desktop.ui.signals.SignalBrowserPane?>
+<?import com.stellar.platform.desktop.ui.signals.ActiveSignalWorkspacePane?>
+<?import com.stellar.platform.desktop.ui.signals.SignalInspectorPane?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.stellar.platform.desktop.ui.SignalsController"
+      fx:id="signalsRoot"
+      styleClass="signals-page"
+      spacing="8"
+      fillWidth="true"
+      minWidth="0" minHeight="0"
+      maxWidth="Infinity" maxHeight="Infinity">
+
+    <HBox fx:id="processingContextBar" spacing="8" alignment="CENTER_LEFT"
+          styleClass="signals-context-bar,processing-context-bar,context-bar"
+          minHeight="44" prefHeight="48" maxHeight="52">
+        <HBox fx:id="contextMeasurementCard" spacing="8" alignment="CENTER_LEFT" styleClass="context-item,context-item-card,context-item-measurement,context-measurement-card" HBox.hgrow="ALWAYS" minWidth="180" maxWidth="Infinity">
+            <VBox fx:id="contextSourceIconHost" alignment="CENTER" minWidth="18" prefWidth="18" maxWidth="18"/>
+            <VBox spacing="1" HBox.hgrow="ALWAYS" minWidth="0">
+                <Label text="MEASUREMENT" styleClass="context-label,signals-context-chip-label"/>
+                <Label fx:id="contextSourceLabel" text="—" styleClass="context-value,signals-context-chip-value" minWidth="0" maxWidth="Infinity"/>
+            </VBox>
+        </HBox>
+        <HBox spacing="8" alignment="CENTER_LEFT" styleClass="context-item,context-item-card,context-item-definition" minWidth="140" prefWidth="220" maxWidth="360" HBox.hgrow="ALWAYS">
+            <VBox fx:id="contextDbcIconHost" alignment="CENTER" minWidth="18" prefWidth="18" maxWidth="18"/>
+            <VBox spacing="1" minWidth="0" HBox.hgrow="ALWAYS">
+                <Label fx:id="contextDbcCaption" text="APPLIED DBC" styleClass="context-label,signals-context-chip-label"/>
+                <Label fx:id="contextDbcLabel" text="—" styleClass="context-value,signals-context-chip-value" minWidth="0" maxWidth="Infinity"/>
+            </VBox>
+        </HBox>
+        <HBox spacing="8" alignment="CENTER_LEFT" styleClass="context-item,context-item-card" minWidth="110" prefWidth="140" maxWidth="170">
+            <VBox fx:id="contextChannelsIconHost" alignment="CENTER" minWidth="18" prefWidth="18" maxWidth="18"/>
+            <VBox spacing="1" minWidth="0">
+                <Label text="CHANNELS" styleClass="context-label,signals-context-chip-label"/>
+                <Label fx:id="contextChannelsLabel" text="—" styleClass="context-value,signals-context-chip-value" minWidth="0" maxWidth="Infinity"/>
+            </VBox>
+        </HBox>
+        <HBox spacing="8" alignment="CENTER_LEFT" styleClass="context-item,context-item-card" minWidth="132" prefWidth="148" maxWidth="180">
+            <VBox spacing="1" minWidth="0">
+                <Label text="MODE" styleClass="context-label,signals-context-chip-label"/>
+                <Label fx:id="contextModeBadge" text="LOCAL" styleClass="signals-mode-badge,badge-local,local-badge"/>
+            </VBox>
+        </HBox>
+        <Region minWidth="8" HBox.hgrow="ALWAYS"/>
+        <HBox fx:id="contextActions" spacing="8" alignment="CENTER_RIGHT"
+              styleClass="signals-context-actions" minWidth="-Infinity"/>
+        <Label fx:id="contextModeLabel" text="Mode: LOCAL" managed="false" visible="false"/>
+        <Label fx:id="contextSignalCountLabel" text="0 signals" managed="false" visible="false"/>
+    </HBox>
+
+    <VBox fx:id="updateBanner" spacing="4" styleClass="signals-update-banner" managed="false" visible="false">
+        <Label fx:id="updateBannerTitle" text="" styleClass="section-subtitle"/>
+        <Label fx:id="updateBannerDetail" text="" styleClass="muted" wrapText="true"/>
+        <HBox spacing="8" alignment="CENTER_LEFT">
+            <ProgressBar fx:id="updateProgressBar" prefWidth="240" progress="0"/>
+            <Button fx:id="updateCancelButton" text="Cancel" onAction="#onCancelReprocess"
+                    styleClass="secondary-button,compact-button"/>
+            <Button fx:id="updateDetailsButton" text="View Details" onAction="#onViewProcessingDetails"
+                    styleClass="secondary-button,compact-button"/>
+            <Button fx:id="updateRetryButton" text="Retry" onAction="#onRetryReprocess"
+                    styleClass="primary-button,compact-button" managed="false" visible="false"/>
+        </HBox>
+    </VBox>
+
+    <!-- StackPane hosts temporary Focus Mode drawers over the three-pane workbench. -->
+    <StackPane fx:id="signalsWorkbenchHost"
+               minWidth="0" minHeight="0"
+               maxWidth="Infinity" maxHeight="Infinity"
+               VBox.vgrow="ALWAYS"
+               styleClass="signals-workbench-host">
+        <HBox fx:id="signalsWorkbench"
+              spacing="8"
+              alignment="TOP_LEFT"
+              fillHeight="true"
+              minWidth="0" minHeight="0"
+              maxWidth="Infinity" maxHeight="Infinity"
+              styleClass="signals-workbench">
+
+            <SignalBrowserPane fx:id="signalBrowser"
+                               minWidth="320"
+                               prefWidth="330"
+                               maxWidth="350"/>
+
+            <ActiveSignalWorkspacePane fx:id="workspacePane"
+                                       minWidth="640"
+                                       maxWidth="Infinity"
+                                       HBox.hgrow="ALWAYS"/>
+
+            <SignalInspectorPane fx:id="inspectorPane"
+                                 minWidth="320"
+                                 prefWidth="330"
+                                 maxWidth="340"/>
+        </HBox>
+    </StackPane>
+</VBox>

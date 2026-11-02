@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.stellar.platform</groupId>
+        <artifactId>stellar-ai-platform</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>stellar-desktop</artifactId>
+    <name>stellar-desktop</name>
+    <description>JavaFX desktop application — local measurement processing vertical slice</description>
+
+    <properties>
+        <!-- Production launch does not set this. Tests stay on the software pipeline unless overridden. -->
+        <stellar.test.jvmArgs>-Dprism.order=sw -Dprism.verbose=false -Dstellarai.test.isolate=true -Djdk.net.URLClassPath.disableClassPathURLCheck=true</stellar.test.jvmArgs>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-parser-spi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-processing-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-analysis-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-dbc-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-storage-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-storage-core</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-api</artifactId>
+        </dependency>
+        <!-- Parser plugins on the application classpath for ServiceLoader discovery -->
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-parser-mf4</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-parser-asc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-parser-blf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.stellar.platform</groupId>
+            <artifactId>stellar-parser-text</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.npm</groupId>
+            <artifactId>echarts</artifactId>
+            <version>6.1.0</version>
+        </dependency>
+        <!-- Local Leaflet for Map Route — never loaded from CDN at runtime. -->
+        <dependency>
+            <groupId>org.webjars.npm</groupId>
+            <artifactId>leaflet</artifactId>
+            <version>1.9.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!--
+                      JavaFX UI tests can exercise native Windows graphics/windowing code.
+                      Force the software Prism pipeline for test JVMs so the acceptance suite
+                      does not depend on the host GPU/D3D driver. Override stellar.test.jvmArgs
+                      for a single D3D probe. Production runtime is unchanged.
+                      Keep class-level fork isolation to avoid JavaFX Stage/Scene state leaking
+                      between UI regression test classes.
+                    -->
+                    <reuseForks>false</reuseForks>
+                    <argLine>${stellar.test.jvmArgs}</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <!-- Non-Application main class required by jpackage classpath launches. -->
+                            <mainClass>com.stellar.platform.desktop.StellarDesktopLauncher</mainClass>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Implementation-Title>StellarAI Desktop</Implementation-Title>
+                            <!-- Product label, not the Maven reactor GAV (0.1.0-SNAPSHOT). -->
+                            <Implementation-Version>1.0.4</Implementation-Version>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <configuration>
+                    <!--
+                      Non-modular multi-module app: Maven puts SNAPSHOT dependencies on the
+                      classpath from ~/.m2 when this module is launched in isolation.
+
+                      Isolated `mvn -pl stellar-desktop javafx:run` after `mvn verify` (no
+                      install) mixes current stellar-desktop/target/classes with stale
+                      stellar-api / stellar-storage-core SNAPSHOTs. That is a P0 packaging
+                      defect, not a missing-method bug in source.
+
+                      Required launch (from repository root):
+                        powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-desktop.ps1
+
+                      Equivalent:
+                        mvn -pl stellar-desktop -am -DskipTests install
+                        mvn -pl stellar-desktop org.openjfx:javafx-maven-plugin:run
+
+                      Do NOT use isolated javafx:run after verify-only. Do not put
+                      release/*.jar on the development classpath.
+
+                      Isolated javafx:run is not made "compatible" — RuntimeModuleConsistency
+                      fails the launch (and process-classes) when sibling SNAPSHOTs are stale.
+                    -->
+                    <mainClass>com.stellar.platform.desktop.StellarDesktopApp</mainClass>
+                    <includePathExceptionsInClasspath>true</includePathExceptionsInClasspath>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>verify-runtime-module-binaries</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.stellar.platform.desktop.RuntimeModuleConsistency</mainClass>
+                            <classpathScope>compile</classpathScope>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

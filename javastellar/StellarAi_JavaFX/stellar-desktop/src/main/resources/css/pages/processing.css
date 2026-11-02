@@ -1,0 +1,579 @@
+/* Processing workspace and review. */
+
+.signals-context-bar,
+.processing-context-bar,
+.context-bar {
+    -fx-background-color: -stellar-surface;
+    -fx-background-radius: 8;
+    -fx-border-color: #D5DFEA;
+    -fx-border-radius: 8;
+    -fx-padding: 8 12 8 12;
+    -fx-spacing: 0;
+    -fx-alignment: CENTER_LEFT;
+    -fx-min-height: 58;
+    -fx-pref-height: 60;
+    -fx-max-height: 62;
+}
+
+.processing-scroll {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.processing-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.diagnostics-pane {
+    -fx-animated: false;
+}
+
+.diagnostics-pane > .title {
+    -fx-background-color: #eef3f7;
+    -fx-padding: 8 12 8 12;
+    -fx-cursor: hand;
+}
+
+.diagnostics-pane:expanded > .title {
+    -fx-background-color: #e4edf4;
+}
+
+.diagnostics-pane .table-view {
+    -fx-pref-height: 200;
+}
+
+.processing-action-bar {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #d5dde3;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 10 14 10 14;
+}
+
+.processing-action-channels {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1b2a38;
+}
+
+/* ---- Processing Selection / Plan Review (compact enterprise) ---- */
+.processing-page-root {
+    -fx-padding: 8 12 12 12;
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+}
+.processing-selection-root,
+.processing-plan-review-root {
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+}
+.processing-selection-summary {
+    -fx-padding: 6 8 6 8;
+    -fx-background-color: -stellar-surface-subtle;
+    -fx-border-color: #d5dde3;
+    -fx-border-width: 1;
+    -fx-background-radius: 3;
+    -fx-border-radius: 3;
+    -fx-font-size: 12px;
+}
+.processing-source-group {
+    -fx-padding: 6 4 8 4;
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #d5dde3;
+    -fx-border-width: 1;
+    -fx-background-radius: 3;
+    -fx-border-radius: 3;
+}
+.processing-source-title {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1b2a38;
+}
+.processing-selection-col-header {
+    -fx-padding: 2 4 4 4;
+    -fx-border-color: transparent transparent #e2e8ee transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.processing-selection-row {
+    -fx-padding: 1 4 1 4;
+    -fx-font-size: 12px;
+}
+.processing-selection-row:hover {
+    -fx-background-color: #f3f7fb;
+}
+.processing-selection-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.processing-execution-root,
+.processing-results-root {
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+}
+.execution-job-row,
+.execution-result-row {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #d5dde3;
+    -fx-border-width: 1;
+    -fx-background-radius: 3;
+    -fx-border-radius: 3;
+}
+.execution-job-identity {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1b2a38;
+}
+.execution-diagnostic {
+    -fx-text-fill: #8a5a12;
+}
+.plan-requires-review-label {
+    -fx-text-fill: #8a2f2f;
+    -fx-font-weight: bold;
+}
+
+/* --- Shared modern surfaces -------------------------------------------------- */
+.content-surface,
+.content-pane,
+.project-files-page,
+.processing-page-root,
+.signals-page {
+    -fx-background-color: -stellar-bg;
+}
+
+.project-files-page .primary-button,
+.source-inventory-root .primary-button,
+.decision-workspace-root .primary-button,
+.decision-workspace-root .primary-action,
+.dbc-mapping-root .primary-button,
+.processing-page-root .primary-button,
+.signals-page .primary-button {
+    -fx-background-color: -stellar-accent;
+    -fx-text-fill: #FFFFFF;
+}
+
+.project-files-page .primary-button:hover,
+.source-inventory-root .primary-button:hover,
+.decision-workspace-root .primary-button:hover,
+.decision-workspace-root .primary-action:hover,
+.dbc-mapping-root .primary-button:hover,
+.processing-page-root .primary-button:hover,
+.signals-page .primary-button:hover {
+    -fx-background-color: -stellar-accent-hover;
+}
+
+/* --- Processing Selection / Plan ------------------------------------------- */
+.processing-page-root {
+    -fx-padding: 12 16 16 16;
+}
+
+.processing-selection-root,
+.processing-plan-review-root,
+.processing-execution-root,
+.processing-results-root {
+    -fx-background-color: -stellar-bg;
+}
+
+.processing-selection-root .section-header,
+.processing-plan-review-root .section-header,
+.processing-execution-root .section-header,
+.processing-results-root .section-header {
+    -fx-font-size: 17px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #162B43;
+}
+
+.processing-selection-summary {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #E2E8EF;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-padding: 8 10 8 10;
+}
+
+.processing-source-group {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 10 8 10;
+}
+
+.processing-source-title {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #18314A;
+}
+
+.processing-selection-row {
+    -fx-padding: 5 4 5 4;
+}
+
+.processing-selection-row:hover {
+    -fx-background-color: #F0F7F8;
+}
+
+/* Execution and results cards */
+.execution-job-row,
+.execution-result-row {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 9 10 9 10;
+}
+
+.execution-job-identity {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #18314A;
+}
+
+.signals-context-bar,
+.processing-context-bar,
+.context-bar {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-min-height: 58;
+    -fx-pref-height: 58;
+}
+
+/* --- Processing Center: selection + live plan in one modern workspace ------- */
+.processing-center-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #142A42;
+}
+
+.processing-center-mode-pill {
+    -fx-background-color: #F0E8FF;
+    -fx-text-fill: -stellar-definition;
+    -fx-border-color: #DECDF8;
+    -fx-padding: 3 8 3 8;
+}
+
+.processing-metric-strip {
+    -fx-spacing: 8;
+    -fx-fill-height: true;
+}
+
+.processing-metric-card {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #E0E7EE;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10 12 10 12;
+    -fx-min-height: 66;
+    -fx-pref-height: 66;
+}
+
+.processing-metric-title {
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #667A90;
+}
+
+.processing-metric-value {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #172D45;
+}
+
+.processing-metric-measurement {
+    -fx-border-color: #D7ECEE;
+}
+.processing-metric-channel {
+    -fx-border-color: #DDE6EF;
+}
+.processing-metric-definition {
+    -fx-border-color: #E6D8FB;
+}
+.processing-metric-ready {
+    -fx-border-color: #D8EEDC;
+}
+.processing-metric-attention {
+    -fx-border-color: #F4DDCC;
+}
+
+.processing-center-workspace {
+    -fx-spacing: 10;
+    -fx-fill-height: true;
+    -fx-min-height: 420;
+}
+
+.processing-selection-column {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #E0E7EE;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+}
+
+.processing-live-plan {
+    -fx-padding: 10;
+    -fx-spacing: 8;
+}
+
+.processing-live-plan-scroll,
+.processing-selection-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.processing-live-plan-scroll > .viewport,
+.processing-selection-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.processing-live-plan-header {
+    -fx-background-color: #F5F8FB;
+    -fx-border-color: transparent transparent -stellar-border transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.processing-live-plan-row {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent transparent #EDF1F4 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.processing-live-plan-row:hover {
+    -fx-background-color: #F6FAFB;
+}
+
+.processing-live-plan-summary {
+    -fx-font-size: 10.5px;
+}
+.processing-live-plan-empty {
+    -fx-padding: 18;
+}
+
+.processing-selection-col-header {
+    -fx-background-color: #F7F9FB;
+    -fx-border-color: transparent transparent #E2E8EF transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.processing-source-group .definition-accent,
+.definition-accent {
+    -fx-text-fill: -stellar-definition;
+    -fx-font-weight: 600;
+}
+
+/* Processing execution is a dense engineering queue, not a blank page. */
+.processing-execution-root,
+.processing-results-root,
+.processing-plan-review-root {
+    -fx-padding: 4 4 8 4;
+}
+
+.execution-job-list,
+.execution-result-list {
+    -fx-spacing: 8;
+    -fx-padding: 1;
+}
+
+.execution-job-row,
+.execution-result-row {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #E0E7EE;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10 12 10 12;
+}
+
+.execution-job-row:hover,
+.execution-result-row:hover {
+    -fx-border-color: #C7D8E4;
+}
+
+.execution-job-progress > .bar {
+    -fx-background-color: linear-gradient(to right, #0B8892, #35B6C0);
+    -fx-background-insets: 1;
+    -fx-background-radius: 4;
+}
+.execution-job-progress > .track {
+    -fx-background-color: #E8EEF3;
+    -fx-background-radius: 4;
+}
+
+.execution-metric-queued { -fx-border-color: #DFE6EE; }
+.execution-metric-running { -fx-border-color: #CFEAEC; }
+.execution-metric-ready { -fx-border-color: #D7ECD9; }
+.execution-metric-warning { -fx-border-color: #F3DDC8; }
+.execution-metric-failed { -fx-border-color: #F1D4D4; }
+.execution-overall-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #50657B;
+}
+.execution-result-metrics {
+    -fx-padding: 7 0 2 0;
+}
+.execution-result-metric-title {
+    -fx-font-size: 9.5px;
+    -fx-text-fill: #718196;
+}
+.execution-result-metric-value {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #20384F;
+}
+
+/* Dense live plan mirrors the compact engineering table in the approved target. */
+.processing-live-plan-header .label {
+    -fx-font-size: 9.5px;
+    -fx-font-weight: 700;
+}
+.processing-live-plan-row .label {
+    -fx-font-size: 10px;
+}
+.processing-live-plan-row .badge {
+    -fx-font-size: 8.5px;
+    -fx-padding: 2 5 2 5;
+}
+
+/* ---- Unified Processing Workspace --------------------------------------- */
+.processing-workspace-root {
+    -fx-background-color: -stellar-bg;
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+}
+
+.processing-workspace-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #162B43;
+}
+
+.processing-workspace-subtitle {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: #5B6E80;
+}
+
+.processing-workspace-summary {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #18314A;
+}
+
+.processing-workspace-status-strip {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #18314A;
+}
+
+.processing-workspace-jobs-heading {
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #18314A;
+    -fx-padding: 6 0 0 0;
+}
+
+.processing-workspace-order-hint {
+    -fx-font-size: 11.5px;
+}
+
+.processing-jobs-table {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-font-size: 12px;
+}
+
+.processing-jobs-table .column-header-background {
+    -fx-background-color: -stellar-surface-subtle;
+}
+
+.processing-job-source {
+    -fx-font-weight: 700;
+    -fx-text-fill: #197C91;
+}
+
+.processing-job-file {
+    -fx-font-size: 11px;
+}
+
+.processing-mapping-manual {
+    -fx-text-fill: #4B6278;
+    -fx-font-weight: 700;
+}
+
+.processing-status-warning {
+    -fx-background-color: #FFF4E0;
+    -fx-text-fill: #9A6700;
+}
+
+.processing-workspace-root .execution-job-progress > .bar {
+    -fx-background-color: -stellar-accent;
+    -fx-background-insets: 1;
+    -fx-background-radius: 4;
+}
+
+.processing-workspace-root .execution-job-progress > .track {
+    -fx-background-color: #E8EEF3;
+    -fx-background-radius: 4;
+}
+
+.quick-source-results-table .processing-job-source {
+    -fx-text-fill: #197C91;
+}
+
+.quick-source-results-table {
+    -fx-min-width: 0;
+}
+
+.quick-source-results-table .view-signals-button,
+.quick-source-results-table .processing-explore-signals {
+    -fx-padding: 3 8 3 8;
+    -fx-font-size: 12px;
+}
+
+
+/* ========================================================================== */
+/* Phase 3 - Review & Process / Processing execution presentation             */
+/* ========================================================================== */
+.processing-review-summary {
+    -fx-background-color: #F5F8FB;
+    -fx-background-radius: 6;
+    -fx-border-color: #DCE6EF;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+}
+.processing-review-caption {
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #6B7F90;
+}
+.processing-review-facts {
+    -fx-font-size: 11.5px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #17324D;
+}
+.review-issue-list { -fx-padding: 4 0 0 0; }
+.processing-review-issue { -fx-font-size: 11px; }
+.review-issue-blocking { -fx-text-fill: #8A2F2F; -fx-font-weight: 700; }
+.review-issue-warning { -fx-text-fill: #8A5A16; -fx-font-weight: 600; }
+.review-issue-information { -fx-text-fill: #61758A; }
+.processing-elapsed {
+    -fx-text-fill: -stellar-text;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.processing-workspace-body {
+    -fx-min-height: 0;
+}
+
+.processing-workspace-table-host {
+    -fx-min-height: 0;
+}
+
+.processing-workspace-actions {
+    -fx-spacing: 8;
+    -fx-alignment: CENTER_LEFT;
+    -fx-background-color: -stellar-bg;
+    -fx-border-color: #DDE1E9 transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-min-height: 48;
+}

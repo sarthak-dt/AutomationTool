@@ -1,0 +1,598 @@
+/* Unified Home workspace — blue + white engineering dashboard. */
+
+.home-scroll,
+.home-scroll > .viewport,
+.content-area {
+    -fx-background-color: -stellar-bg;
+    -fx-border-color: transparent;
+}
+
+.home-page {
+    -fx-background-color: -stellar-bg;
+    -fx-padding: 12 16 16 16;
+}
+
+.home-page.workspace-compact {
+    -fx-padding: 12;
+}
+
+.metric-row {
+    -fx-alignment: CENTER_LEFT;
+}
+
+.metric-card,
+.kpi-card {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 12 8 12;
+    -fx-alignment: CENTER_LEFT;
+    -fx-min-width: 0;
+    -fx-min-height: 70;
+    -fx-pref-height: 76;
+    -fx-max-height: 80;
+}
+
+.workspace-compact .metric-card,
+.workspace-compact .kpi-card {
+    -fx-padding: 8 10 8 10;
+    -fx-min-height: 60;
+    -fx-pref-height: 66;
+    -fx-max-height: 72;
+}
+
+.metric-card:hover,
+.kpi-card:hover,
+.kpi-card-hover:hover {
+    -fx-background-color: -stellar-light-blue;
+    -fx-border-color: -stellar-border-strong;
+}
+
+.metric-card-body {
+    -fx-alignment: CENTER_LEFT;
+}
+
+.metric-icon {
+    -fx-background-radius: 8;
+    -fx-alignment: CENTER;
+    -fx-min-width: 32;
+    -fx-pref-width: 32;
+    -fx-max-width: 32;
+    -fx-min-height: 32;
+    -fx-pref-height: 32;
+    -fx-max-height: 32;
+}
+
+.metric-icon-projects,
+.metric-icon-files,
+.metric-icon-signals,
+.metric-icon-decode,
+.metric-icon-frames {
+    -fx-background-color: -stellar-light-blue;
+}
+
+.metric-copy {
+    -fx-alignment: CENTER_LEFT;
+}
+
+.metric-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -stellar-text-secondary;
+}
+
+.metric-value {
+    -fx-font-size: 22px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text;
+}
+
+.workspace-compact .metric-value {
+    -fx-font-size: 22px;
+    -fx-font-weight: 600;
+}
+
+.metric-chevron {
+    -fx-font-size: 16px;
+    -fx-text-fill: -stellar-text-muted;
+}
+
+.projects-panel,
+.side-panel {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 12;
+    -fx-effect: none;
+}
+
+.workspace-main {
+    -fx-alignment: TOP_LEFT;
+}
+
+.project-row:hover,
+.project-row-hover:hover {
+    -fx-background-color: -stellar-light-blue;
+    -fx-background-radius: 6;
+}
+
+.project-cell {
+    -fx-padding: 0 10 0 10;
+}
+
+.project-cell.project-row-active {
+    -fx-background-color: -stellar-light-blue;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0 10 0 10;
+}
+
+.project-cell.project-row-active-indicator {
+    -fx-background-color: -stellar-light-blue;
+    -fx-border-color: -stellar-primary;
+    -fx-border-width: 0 0 0 3;
+    -fx-padding: 0 10 0 11;
+    -fx-background-radius: 6 0 0 6;
+}
+
+.project-active-badge {
+    -fx-background-color: -stellar-nav-selected;
+    -fx-text-fill: -stellar-primary;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 1 6 1 6;
+    -fx-background-radius: 8;
+}
+
+.project-list {
+    -fx-max-height: 10000;
+}
+
+.workspace-compact .quick-action,
+.workspace-compact .quick-action-item,
+.workspace-compact .home-action-row {
+    -fx-padding: 4 4 4 4;
+    -fx-min-height: 32;
+    -fx-pref-height: 32;
+}
+
+.workspace-compact .activity-list {
+    -fx-max-height: 120;
+}
+
+.project-table-scroll,
+.project-table-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.active-project-name {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -stellar-text;
+}
+
+.active-project-status {
+    -fx-font-size: 11px;
+}
+
+.active-stat-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text-secondary;
+}
+
+.active-stat-value {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -stellar-text;
+}
+
+.project-tabs {
+    -fx-alignment: CENTER_LEFT;
+}
+
+.project-tab {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -stellar-text-secondary;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-padding: 6 10 6 10;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.project-tab:hover {
+    -fx-background-color: -stellar-surface-subtle;
+}
+
+.project-tab-active,
+.project-tab:selected {
+    -fx-background-color: -stellar-nav-selected;
+    -fx-text-fill: -stellar-primary;
+}
+
+.project-search-host {
+    -fx-alignment: CENTER_LEFT;
+}
+
+.project-search-field {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 6 10 6 10;
+    -fx-font-size: 12px;
+    -fx-pref-height: 32;
+}
+
+.icon-button,
+.project-refresh-button {
+    -fx-background-color: transparent;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-min-width: 32;
+    -fx-pref-width: 32;
+    -fx-max-width: 32;
+    -fx-min-height: 32;
+    -fx-pref-height: 32;
+    -fx-max-height: 32;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+}
+
+.icon-button:hover,
+.project-refresh-button:hover {
+    -fx-background-color: -stellar-surface-subtle;
+}
+
+.project-table {
+    -fx-background-color: transparent;
+}
+
+.project-table-header-cell {
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -stellar-text-secondary;
+    -fx-padding: 0 4 8 4;
+}
+
+.project-cell {
+    -fx-padding: 0 10 0 10;
+}
+
+.project-name {
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -stellar-text;
+    -fx-cursor: hand;
+}
+
+.project-name:hover {
+    -fx-text-fill: -stellar-primary;
+}
+
+.favorite-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-min-width: 28;
+    -fx-pref-width: 28;
+    -fx-max-width: 28;
+    -fx-min-height: 28;
+    -fx-pref-height: 28;
+    -fx-max-height: 28;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-background-radius: 6;
+}
+
+.favorite-button:hover {
+    -fx-background-color: -stellar-light-blue;
+}
+
+.favorite-button-active {
+    -fx-background-color: transparent;
+}
+
+.project-next-step {
+    -fx-cursor: hand;
+}
+
+.project-next-step:hover {
+    -fx-text-fill: -stellar-primary;
+}
+
+.project-meta {
+    -fx-font-size: 12px;
+    -fx-font-weight: 400;
+    -fx-text-fill: -stellar-text-secondary;
+}
+
+.project-col-value {
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+    -fx-text-fill: -stellar-text;
+}
+
+.project-row-open {
+    -fx-min-height: 28;
+    -fx-pref-height: 28;
+    -fx-font-size: 12px;
+    -fx-padding: 0 10 0 10;
+}
+
+.project-more-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -stellar-text-secondary;
+    -fx-min-width: 28;
+    -fx-pref-width: 28;
+    -fx-cursor: hand;
+}
+
+.project-more-button:hover {
+    -fx-background-color: -stellar-surface-subtle;
+    -fx-background-radius: 6;
+}
+
+.side-panel-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text;
+}
+
+.quick-action,
+.quick-action-item,
+.home-action-row {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 8 4 8 4;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER_LEFT;
+    -fx-min-height: 40;
+    -fx-pref-height: 40;
+    -fx-opacity: 1;
+}
+
+.quick-action:hover,
+.quick-action-item:hover,
+.home-action-row:hover {
+    -fx-background-color: -stellar-light-blue;
+}
+
+.quick-action-disabled,
+.quick-action:disabled,
+.quick-action-item:disabled,
+.home-action-row:disabled {
+    -fx-opacity: 0.72;
+    -fx-cursor: default;
+}
+
+.quick-action-disabled:hover,
+.quick-action:disabled:hover,
+.quick-action-item:disabled:hover,
+.home-action-row:disabled:hover {
+    -fx-background-color: transparent;
+}
+
+.quick-action:disabled .quick-action-label,
+.quick-action-disabled .quick-action-label,
+.workflow-card:disabled .workflow-title,
+.workflow-card-disabled .workflow-title {
+    -fx-text-fill: -stellar-text-secondary;
+}
+
+.quick-action-icon,
+.home-action-icon {
+    -fx-background-color: -stellar-light-blue;
+    -fx-background-radius: 6;
+    -fx-alignment: CENTER;
+}
+
+.quick-action-label,
+.home-action-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -stellar-text;
+}
+
+.quick-action-chevron,
+.home-action-chevron {
+    -fx-font-size: 16px;
+    -fx-text-fill: -stellar-text-muted;
+}
+
+.activity-list {
+    -fx-padding: 12 16 12 16;
+}
+
+.activity-item {
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 6 4 6 4;
+}
+
+.activity-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -stellar-text;
+    -fx-wrap-text: false;
+}
+
+.activity-meta {
+    -fx-font-size: 12px;
+    -fx-text-fill: -stellar-text-muted;
+}
+
+.empty-state-title,
+.home-empty-row {
+    -fx-font-size: 13px;
+    -fx-text-fill: -stellar-text-secondary;
+}
+
+.empty-state-copy {
+    -fx-font-size: 12px;
+    -fx-text-fill: -stellar-text-muted;
+}
+
+.workflow-section-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text;
+}
+
+.get-started {
+    -fx-padding: 0;
+}
+
+.workflow-card {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 12 14 12 14;
+    -fx-cursor: hand;
+    -fx-alignment: TOP_LEFT;
+    -fx-min-width: 0;
+    -fx-min-height: 84;
+    -fx-pref-height: 96;
+    -fx-max-height: 112;
+    -fx-opacity: 1;
+}
+
+.workspace-compact .workflow-card {
+    -fx-padding: 10 12 10 12;
+    -fx-min-height: 72;
+    -fx-pref-height: 80;
+    -fx-max-height: 96;
+}
+
+.workflow-card:hover,
+.workflow-card-hover:hover {
+    -fx-background-color: -stellar-light-blue;
+    -fx-border-color: -stellar-border-strong;
+}
+
+.workflow-card-disabled,
+.workflow-card:disabled {
+    -fx-opacity: 0.72;
+    -fx-cursor: default;
+}
+
+.workflow-card-disabled:hover,
+.workflow-card:disabled:hover {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+}
+
+.workflow-card-body {
+    -fx-alignment: TOP_LEFT;
+}
+
+.workflow-icon {
+    -fx-background-color: -stellar-light-blue;
+    -fx-background-radius: 8;
+    -fx-alignment: CENTER;
+    -fx-min-width: 32;
+    -fx-pref-width: 32;
+    -fx-max-width: 32;
+    -fx-min-height: 32;
+    -fx-pref-height: 32;
+    -fx-max-height: 32;
+}
+
+.workflow-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text;
+}
+
+.workflow-copy {
+    -fx-font-size: 12px;
+    -fx-text-fill: -stellar-text-secondary;
+}
+
+.home-right-column,
+.workspace-side-rail {
+    -fx-min-width: 340;
+    -fx-pref-width: 360;
+    -fx-max-width: 400;
+}
+
+.workspace-split .home-right-column,
+.workspace-stacked .home-right-column {
+    -fx-min-width: 0;
+    -fx-max-width: 10000;
+}
+
+.workspace-lower-band {
+    -fx-alignment: TOP_LEFT;
+    -fx-spacing: 16;
+}
+
+.workspace-stack {
+    -fx-min-width: 0;
+}
+
+.quick-actions-panel,
+.activity-panel,
+.recent-activity-panel {
+    -fx-min-width: 280;
+}
+
+.workspace-stacked .quick-actions-panel,
+.workspace-stacked .activity-panel,
+.workspace-stacked .recent-activity-panel {
+    -fx-min-width: 0;
+}
+
+.activity-title {
+    -fx-wrap-text: false;
+}
+
+.status-ready {
+    -fx-text-fill: -stellar-success;
+}
+
+.status-warning {
+    -fx-text-fill: -stellar-warning;
+}
+
+.status-processing {
+    -fx-text-fill: -stellar-primary;
+}
+
+.status-failed,
+.status-error {
+    -fx-text-fill: -stellar-danger;
+}
+
+.recent-activity-scroll,
+.recent-activity-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.recent-activity-scroll .activity-list {
+    -fx-padding: 0;
+    -fx-max-height: 10000;
+}
+
+.recent-activity-panel .activity-item {
+    -fx-padding: 4 2 4 2;
+    -fx-min-width: 0;
+    -fx-max-width: 10000;
+}
+
+.recent-activity-panel .activity-title,
+.recent-activity-panel .activity-meta {
+    -fx-wrap-text: false;
+}

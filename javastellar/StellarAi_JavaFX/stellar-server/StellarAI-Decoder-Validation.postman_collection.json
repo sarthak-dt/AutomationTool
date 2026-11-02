@@ -1,0 +1,115 @@
+{
+  "info": {
+    "name": "StellarAI Decoder Validation API",
+    "description": "POST /api/v1/decoder/validate for StellarAI 1.0.4.\n\nStart the API by double-clicking START_DECODER_API.bat after BUILD_DECODER_API.bat and decoder-api.config are in place. The decoder profile listens on http://127.0.0.1:8091.\n\nSet the collection variables before sending a request. filePath and dbcPath are absolute paths on the machine running the API. Use a normal Windows path in the variable value, for example C:\\measurements\\sample.mf4. A collection script escapes backslashes for JSON. The measurement file and any DBC must sit inside the allowed-roots directories configured for the launcher. Do not point allowed-roots at a whole drive.\n\nReplace the placeholder variable values. Do not leave the angle-bracket placeholders in a request you expect to decode.\n\nDBC is required for ASC and BLF. Native MF4 and native MDF DAT/LOG files may omit dbcPath. Copy nextCursor from a response into the cursor variable before sending the cursor request. A cursor request sends only cursor and pageSize.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "function escapeJson(value) {",
+          "    return JSON.stringify(value == null ? '' : String(value)).slice(1, -1);",
+          "}",
+          "pm.variables.set('filePathJson', escapeJson(pm.collectionVariables.get('filePath')));",
+          "pm.variables.set('dbcPathJson', escapeJson(pm.collectionVariables.get('dbcPath')));",
+          "pm.variables.set('cursorJson', escapeJson(pm.collectionVariables.get('cursor')));"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8091"
+    },
+    {
+      "key": "filePath",
+      "value": "<measurement-file-path>"
+    },
+    {
+      "key": "dbcPath",
+      "value": "<matching-dbc-path>"
+    },
+    {
+      "key": "cursor",
+      "value": "<nextCursor-from-previous-response>"
+    }
+  ],
+  "item": [
+    {
+      "name": "Validate MF4 with DBC",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"filePath\": \"{{filePathJson}}\",\n  \"dbcPath\": \"{{dbcPathJson}}\",\n  \"pageSize\": 10000\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/decoder/validate",
+        "description": "Set filePath to an MF4 measurement and dbcPath to the matching DBC. Both files must be under allowed-roots. Native MF4 can omit dbcPath; this example sends it. pageSize maximum is 10000. A full page returns nextCursor."
+      }
+    },
+    {
+      "name": "Validate BLF with DBC",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"filePath\": \"{{filePathJson}}\",\n  \"dbcPath\": \"{{dbcPathJson}}\",\n  \"pageSize\": 10000\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/decoder/validate",
+        "description": "Set filePath to a BLF measurement and dbcPath to the matching DBC. BLF requires a DBC. Both files must be under allowed-roots."
+      }
+    },
+    {
+      "name": "Validate native DAT or LOG",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"filePath\": \"{{filePathJson}}\",\n  \"pageSize\": 10000\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/decoder/validate",
+        "description": "Set filePath to a native MDF DAT or LOG measurement. Do not send dbcPath. The file must be under allowed-roots. A timestamped text table may also omit dbcPath. ASC and BLF cannot use this request."
+      }
+    },
+    {
+      "name": "Validate next page",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cursor\": \"{{cursorJson}}\",\n  \"pageSize\": 10000\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/decoder/validate",
+        "description": "Copy nextCursor from the previous response into the collection variable cursor. Send only cursor and pageSize. Do not repeat filePath, dbcPath, projectName, or a signal filter."
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+# StellarAI Decoder Validation API local settings.
+# Copy this file to decoder-api.config in the same folder as START_DECODER_API.bat.
+# Do not add quotes around paths. Paths may contain spaces.
+# Separate allowed-roots directories with a semicolon.
+# Do not use a whole drive such as C:\ or D:\.
+#
+# These environment variables override the matching lines when they are already set:
+#   STELLAR_DECODER_ALLOWED_ROOTS
+#   STELLAR_DECODER_SESSION_DIRECTORY
+#   STELLAR_DECODER_METADATA_DB
+# BUILD_DECODER_API.bat also honors STELLAR_DECODER_MAVEN and MAVEN_HOME.
+
+allowed-roots=D:\measurements;D:\dbc
+session-directory=
+metadata-db=
+maven-cmd=

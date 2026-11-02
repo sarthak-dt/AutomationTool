@@ -1,4 +1,0 @@
-[submodule "javastellar/StellarAi_JavaFX"]
-    path = javastellar/StellarAi_JavaFX
-    url = https://github.com/Djdeven/StellarAi_JavaFX.git
-    branch = StellerAI_API

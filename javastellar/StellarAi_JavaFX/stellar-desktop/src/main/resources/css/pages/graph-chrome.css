@@ -1,0 +1,539 @@
+/* Graph page chrome only — series colors stay in GraphSeriesPalette. */
+
+/* Automotive Analysis workspace: bounded, non-overlapping responsive layout. */
+.graph-page { -fx-padding: 10; }
+.graph-toolbar { -fx-padding: 6 10 6 10; -fx-alignment: center-left; }
+.graph-signal-panel { -fx-padding: 10; }
+.graph-canvas-panel { -fx-padding: 0 0 0 10; }
+.graph-toolbar .button { -fx-min-height: 32; -fx-pref-height: 32; }
+.graph-signal-panel .list-cell { -fx-padding: 7 9 7 9; }
+
+/* Graph workspace hardening: predictable sizing, no clipped toolbar text, compact laptop-safe wrapping. */
+.graph-page { -fx-padding: 10; }
+.graph-toolbar, .graph-cursor-strip { -fx-padding: 6 10 6 10; -fx-alignment: center-left; }
+.graph-cursor-strip { -fx-border-color: transparent transparent #d8dee9 transparent; -fx-border-width: 0 0 1 0; }
+.graph-cursor-strip .label { -fx-font-size: 11px; }
+.graph-delta { -fx-font-weight: 700; }
+.graph-signal-panel { -fx-padding: 10; }
+.graph-canvas-panel { -fx-padding: 0 0 0 10; }
+.graph-toolbar .button, .graph-cursor-strip .button { -fx-min-height: 30; -fx-pref-height: 30; -fx-padding: 4 9 4 9; }
+.graph-signal-panel .list-cell { -fx-padding: 7 9 7 9; }
+.graph-page .tab-pane { -fx-tab-min-height: 30; }
+
+/* Phase 12 analysis UX: light engineering shell and searchable signal rail. */
+.graph-page, .graph-canvas-panel, .graph-signal-panel { -fx-background-color: #F7FAFC; }
+.graph-signal-panel { -fx-border-color: #D9E3EA; -fx-border-width: 0 1 0 0; }
+.graph-search { -fx-background-color: -stellar-surface; -fx-border-color: #C9D7E2; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 7 9 7 9; }
+.graph-search:focused { -fx-border-color: #0F8A96; }
+.graph-page .tab-pane > .tab-header-area > .headers-region > .tab:selected { -fx-background-color: -stellar-surface; }
+.graph-page .tab-pane > .tab-content-area { -fx-background-color: -stellar-surface; }
+
+/* Phase 13 analysis workspace: use the available viewport and keep dense engineering data readable. */
+.graph-track-scroll { -fx-background-color: -stellar-surface; -fx-background: -stellar-surface; -fx-padding: 0; }
+.graph-track-scroll > .viewport { -fx-background-color: -stellar-surface; }
+.graph-canvas-panel > .tab-pane { -fx-background-color: -stellar-surface; }
+.graph-signal-panel .button { -fx-font-size: 10.5px; }
+.graph-live-cursor {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-weight: 600;
+    -fx-text-fill: #31546f;
+}
+
+/* Modern automotive waveform workspace */
+.graph-page { -fx-background-color: #F7FAFC; -fx-padding: 8; }
+.graph-toolbar, .graph-cursor-strip { -fx-background-color: #F7FAFC; }
+.graph-signal-panel { -fx-background-color: -stellar-surface; -fx-border-color: #DCE6EE; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12; }
+.graph-signal-panel .list-view { -fx-background-color: -stellar-surface; -fx-border-color: #E3EBF1; -fx-border-radius: 7; -fx-background-radius: 7; }
+.graph-signal-panel .list-cell { -fx-background-color: -stellar-surface; -fx-padding: 8 8 8 8; -fx-border-color: transparent transparent #F0F3F6 transparent; }
+.graph-signal-panel .list-cell:selected { -fx-background-color: #EEF6FF; -fx-text-fill: #17324D; }
+.graph-signal-check { -fx-font-weight: 800; -fx-text-fill: #0F8A96; -fx-min-width: 14; }
+.graph-signal-category { -fx-font-size: 9px; -fx-text-fill: #66788A; -fx-background-color: #F1F5F8; -fx-background-radius: 9; -fx-padding: 2 5 2 5; }
+.graph-chip-scroll { -fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0; -fx-min-height: 52; -fx-pref-height: 52; }
+.graph-chip-scroll > .viewport { -fx-background-color: transparent; }
+.graph-chip-strip { -fx-padding: 4 2 5 2; }
+.graph-signal-chip { -fx-background-color: -stellar-surface; -fx-border-color: #D8E3EC; -fx-border-radius: 7; -fx-background-radius: 7; -fx-padding: 7 8 7 8; -fx-effect: dropshadow(gaussian, rgba(15,45,70,0.06), 4, 0, 0, 1); }
+.graph-chip-name { -fx-font-weight: 700; -fx-text-fill: #17324D; }
+.graph-chip-close { -fx-background-color: transparent; -fx-border-color: transparent; -fx-font-size: 14px; -fx-text-fill: #6B7F90; -fx-padding: 0 2 0 2; }
+.graph-settings-panel { -fx-background-color: -stellar-surface; -fx-border-color: #DCE6EE; -fx-border-width: 0 0 0 1; -fx-padding: 12; }
+.graph-settings-panel .check-box { -fx-font-size: 11px; -fx-text-fill: #17324D; }
+.graph-hint { -fx-font-size: 10px; -fx-text-fill: #6B7F90; }
+.graph-canvas-panel { -fx-background-color: -stellar-surface; -fx-border-color: #DCE6EE; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 0 0 0 8; }
+
+/* 2026-08-24 graph workspace visual parity pass */
+.graph-page { -fx-background-color: #F8FAFD; -fx-padding: 12 14 12 14; }
+.graph-toolbar { -fx-background-color: #F8FAFD; -fx-padding: 8 8 8 8; }
+.graph-toolbar .section-title { -fx-font-size: 18px; -fx-font-weight: 800; }
+.graph-cursor-strip { -fx-background-color: -stellar-surface; -fx-border-color: #E4EAF0; -fx-border-width: 1 0 1 0; -fx-padding: 7 10 7 10; }
+.graph-signal-panel { -fx-background-color: -stellar-surface; -fx-border-color: #DFE7EF; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 14; -fx-effect: dropshadow(gaussian, rgba(25,55,85,0.05), 10, 0, 0, 2); }
+.graph-signal-panel .section-title { -fx-font-size: 17px; -fx-font-weight: 800; }
+.graph-panel-badge { -fx-font-size: 9px; -fx-text-fill: #54708A; -fx-background-color: #EEF5FB; -fx-background-radius: 10; -fx-padding: 3 7 3 7; }
+.graph-signal-panel .list-cell { -fx-padding: 9 8 9 8; -fx-font-size: 12px; }
+.graph-signal-panel .list-cell:selected { -fx-background-color: #EEF6FF; -fx-border-color: transparent transparent #E8EEF4 transparent; }
+.graph-signal-check { -fx-font-size: 14px; -fx-min-width: 18; }
+.graph-signal-category { -fx-font-size: 9px; -fx-text-fill: #557086; -fx-background-color: #F2F6F9; -fx-background-radius: 8; -fx-padding: 2 6 2 6; }
+.graph-canvas-panel { -fx-background-color: -stellar-surface; -fx-border-color: #DFE7EF; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 0; -fx-effect: dropshadow(gaussian, rgba(25,55,85,0.04), 8, 0, 0, 1); }
+.graph-file-strip { -fx-padding: 10 14 4 14; }
+.graph-file-name { -fx-font-size: 12px; -fx-font-weight: 700; -fx-text-fill: #243B53; }
+.graph-range-pill { -fx-background-color: #F4F7FB; -fx-border-color: #DCE5EE; -fx-border-radius: 7; -fx-background-radius: 7; -fx-padding: 6 10 6 10; -fx-font-weight: 600; }
+.graph-chip-scroll { -fx-min-height: 64; -fx-pref-height: 64; -fx-padding: 2 12 2 12; }
+.graph-signal-chip { -fx-min-height: 44; -fx-background-color: -stellar-surface; -fx-border-color: #D8E3EC; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 8 10 8 10; }
+.graph-chip-name { -fx-font-size: 12px; -fx-font-weight: 800; }
+.graph-settings-panel { -fx-pref-width: 180; -fx-min-width: 170; -fx-padding: 16 14 16 14; -fx-background-color: -stellar-surface; }
+.graph-settings-panel .subsection-title { -fx-font-size: 13px; -fx-font-weight: 800; }
+.graph-settings-panel .check-box { -fx-font-size: 12px; -fx-padding: 3 0 3 0; }
+.graph-page .tab-pane > .tab-header-area > .headers-region > .tab { -fx-padding: 5 11 5 11; }
+.graph-page .tab-pane > .tab-header-area > .headers-region > .tab:selected { -fx-border-color: transparent transparent #1677FF transparent; -fx-border-width: 0 0 2 0; }
+.graph-details-tabs { -fx-background-color: -stellar-surface; }
+.graph-empty-detail { -fx-padding: 30; }
+
+/* 2026-08-24 reference-parity refinement: grouped signal browser + engineering plot readability. */
+.graph-category-header {
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #1769E0;
+    -fx-padding: 7 2 3 1;
+}
+.graph-signal-panel .list-cell {
+    -fx-padding: 2 8 5 8;
+    -fx-font-size: 12px;
+}
+.graph-signal-panel .list-cell:selected {
+    -fx-background-color: #EEF5FF;
+}
+.graph-signal-panel .list-cell:selected .graph-signal-check {
+    -fx-text-fill: -stellar-measurement;
+}
+.graph-signal-panel .scroll-bar:vertical { -fx-pref-width: 9; }
+.graph-file-strip { -fx-min-height: 42; }
+.graph-chip-scroll { -fx-min-height: 70; -fx-pref-height: 70; }
+.graph-signal-chip { -fx-min-width: 190; -fx-min-height: 50; }
+.graph-page .tab-pane > .tab-header-area > .headers-region > .tab .tab-label { -fx-font-size: 12px; -fx-font-weight: 600; }
+.graph-settings-panel { -fx-min-width: 190; -fx-pref-width: 190; }
+.graph-details-tabs { -fx-min-height: 170; }
+.graph-chip-value { -fx-font-size: 13px; -fx-font-weight: 800; -fx-text-fill: #172B4D; -fx-padding: 0 0 0 20; }
+
+/* 2026-08-24 reference-accurate signal plot workspace */
+.graph-page { -fx-padding: 10 12 10 12; -fx-background-color: #F8FAFD; }
+.graph-toolbar { -fx-padding: 7 8 9 8; -fx-background-color: #F8FAFD; -fx-border-color: transparent transparent #E5EBF2 transparent; }
+.graph-toolbar .section-title { -fx-font-size: 17px; -fx-font-weight: 800; -fx-text-fill: #13263A; }
+.graph-signal-panel { -fx-background-color: -stellar-surface; -fx-padding: 14 12 12 12; -fx-border-color: #DFE7EF; -fx-border-radius: 9; -fx-background-radius: 9; -fx-effect: none; }
+.graph-signal-panel .section-title { -fx-font-size: 16px; }
+.graph-signal-panel .list-view { -fx-border-color: transparent; -fx-background-insets: 0; }
+.graph-signal-panel .list-cell { -fx-padding: 3 7 6 7; -fx-font-size: 11.5px; -fx-border-color: transparent transparent #F2F5F8 transparent; }
+.graph-category-header { -fx-font-size: 10.5px; -fx-font-weight: 800; -fx-text-fill: #1262D6; -fx-padding: 9 0 4 0; }
+.graph-signal-check { -fx-font-size: 15px; -fx-min-width: 18; }
+.graph-selection-footer { -fx-padding: 9 8 2 8; -fx-border-color: #E6ECF2 transparent transparent transparent; }
+.graph-plot-button { -fx-min-height: 38; -fx-font-size: 12px; -fx-font-weight: 800; }
+.graph-canvas-panel { -fx-padding: 0; -fx-background-color: -stellar-surface; -fx-border-color: #DFE7EF; -fx-border-radius: 9; -fx-background-radius: 9; -fx-effect: none; }
+.graph-file-strip { -fx-padding: 10 14 6 14; -fx-min-height: 42; }
+.graph-chip-scroll { -fx-min-height: 72; -fx-pref-height: 72; -fx-padding: 2 12 6 12; }
+.graph-signal-chip { -fx-min-width: 205; -fx-min-height: 50; -fx-padding: 8 10 7 10; -fx-effect: none; }
+.graph-chip-name { -fx-font-size: 11.5px; }
+.graph-chip-value { -fx-font-size: 12.5px; }
+.graph-page .tab-pane > .tab-header-area > .headers-region > .tab { -fx-padding: 5 12 5 12; }
+.graph-track-scroll { -fx-border-color: #E8EDF3 transparent transparent transparent; }
+.graph-interaction-bar { -fx-padding: 5 10 5 10; -fx-min-height: 34; -fx-pref-height: 34; -fx-max-height: 34; -fx-background-color: #FBFCFE; -fx-border-color: #E7EDF3 transparent transparent transparent; }
+.graph-interaction-bar .label { -fx-font-size: 10.5px; }
+.graph-details-tabs { -fx-background-color: -stellar-surface; }
+.graph-settings-panel { -fx-min-width: 210; -fx-pref-width: 220; -fx-padding: 12 14 10 14; -fx-border-color: transparent transparent transparent -stellar-border; -fx-background-color: -stellar-surface; }
+.graph-settings-panel .check-box { -fx-font-size: 11.5px; -fx-padding: 2 0 2 0; }
+.graph-status { -fx-padding: 4 8 2 8; -fx-font-size: 10px; -fx-text-fill: #61758A; }
+.graph-icon-button { -fx-min-width: 31; -fx-min-height: 30; -fx-background-color: -stellar-surface; -fx-border-color: #D6E0EA; -fx-border-radius: 6; -fx-background-radius: 6; }
+
+/* Graph analysis workspace UX hardening - responsive cards, focus mode and collapsible detail rail. */
+.graph-chip-strip { -fx-padding: 5 12 7 12; -fx-background-color: -stellar-surface; }
+.graph-chip-strip .graph-signal-chip { -fx-min-width: 0; -fx-pref-height: 54; -fx-max-height: 58; }
+.graph-more-chip { -fx-background-color: #F6F9FD; -fx-alignment: center; }
+.graph-more-chip .label { -fx-font-size: 11px; -fx-text-fill: #52677B; }
+.graph-status-bar {
+    -fx-padding: 0 8 0 8;
+    -fx-background-color: -stellar-surface;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-max-height: 28px;
+    -fx-alignment: center-left;
+}
+.graph-status-bar .graph-status {
+    -fx-padding: 0 8 0 8;
+    -fx-font-size: 10px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #61758A;
+    -fx-wrap-text: false;
+    -fx-text-overrun: ellipsis;
+}
+
+/* 2026-08-24 graph reference parity pass: stable selected cards + compact icon toolbar. */
+.graph-tool-button {
+    -fx-min-width: 34; -fx-pref-width: 34; -fx-max-width: 34;
+    -fx-min-height: 32; -fx-pref-height: 32;
+    -fx-padding: 0; -fx-font-size: 16px; -fx-font-weight: 600;
+    -fx-text-fill: #29445F; -fx-background-color: -stellar-surface;
+    -fx-border-color: #D7E2EC; -fx-border-radius: 7; -fx-background-radius: 7;
+}
+.graph-tool-button:hover { -fx-background-color: #F2F7FF; -fx-border-color: #9FC1F5; -fx-text-fill: #1769E0; }
+.graph-camera-button { -fx-font-size: 15px; }
+.graph-focus-button {
+    -fx-min-height: 32; -fx-padding: 0 12 0 12; -fx-font-size: 11.5px; -fx-font-weight: 700;
+    -fx-text-fill: #29445F; -fx-background-color: -stellar-surface; -fx-border-color: #D7E2EC;
+    -fx-border-radius: 7; -fx-background-radius: 7;
+}
+.graph-focus-button:hover { -fx-background-color: #F2F7FF; -fx-border-color: #9FC1F5; }
+.graph-chip-strip { -fx-spacing: 7; -fx-alignment: center-left; -fx-padding: 5 12 7 12; }
+.graph-chip-strip .graph-signal-chip { -fx-min-width: 0; -fx-pref-height: 54; -fx-max-height: 58; }
+.graph-chip-unit { -fx-font-size: 10.5px; -fx-padding: 0 1 0 1; }
+.graph-chip-value { -fx-padding: 0 0 0 20; }
+
+/* Graph inline Signal Explorer */
+.graph-explorer-filters { -fx-padding: 0 0 2 0; }
+.graph-explorer-chip {
+    -fx-min-height: 26;
+    -fx-pref-height: 26;
+    -fx-min-width: -1;
+    -fx-padding: 2 10 2 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #35506A;
+    -fx-background-color: #F4F7FB;
+    -fx-border-color: #D5DFEA;
+    -fx-background-radius: 11;
+    -fx-border-radius: 11;
+}
+.graph-explorer-chip:selected {
+    -fx-background-color: #E7F1FF; -fx-border-color: #7EA8E8; -fx-text-fill: #1558C0;
+}
+.graph-explorer-name { -fx-font-size: 12px; -fx-font-weight: 700; -fx-text-fill: #17324D; }
+.graph-explorer-meta { -fx-font-size: 10px; -fx-text-fill: #66788A; -fx-padding: 0 0 0 26; }
+.graph-explorer-check { -fx-padding: 0; }
+.graph-explorer-visibility { -fx-min-width: 44; -fx-font-size: 10px; }
+.graph-signal-explorer .list-cell:focused {
+    -fx-background-color: #EEF5FF;
+}
+.graph-signal-panel .source-badge {
+    -fx-min-width: 36; -fx-alignment: center;
+    -fx-font-size: 9.5px; -fx-font-weight: 800;
+    -fx-padding: 1 6 1 6; -fx-background-radius: 8;
+}
+.graph-signal-panel .source-badge-dbc { -fx-text-fill: #5B3FA0; -fx-background-color: #EEE6FF; }
+.graph-signal-panel .source-badge-native { -fx-text-fill: #0B6B74; -fx-background-color: #DDF4F2; }
+
+/* Reference-parity grouped Signal Browser */
+.graph-browser-search-row { -fx-padding: 0; }
+.graph-browser-icon-button {
+    -fx-min-width: 34px; -fx-pref-width: 34px; -fx-min-height: 34px; -fx-pref-height: 34px;
+    -fx-background-color: -stellar-surface; -fx-border-color: #D7E1EE; -fx-border-radius: 7; -fx-background-radius: 7;
+    -fx-text-fill: #17345B; -fx-font-size: 15px; -fx-padding: 0;
+}
+.graph-browser-icon-button:hover { -fx-background-color: #F3F7FD; -fx-border-color: #9DB8DF; }
+.graph-category-header-row { -fx-padding: 11 8 6 8; -fx-background-color: -stellar-surface; -fx-cursor: hand; }
+.graph-category-title { -fx-text-fill: #1262D6; -fx-font-size: 10.5px; -fx-font-weight: 800; }
+.graph-category-count { -fx-text-fill: #1262D6; -fx-font-size: 10.5px; -fx-font-weight: 700; }
+.graph-category-chevron { -fx-text-fill: #1262D6; -fx-font-size: 12px; -fx-font-weight: 800; }
+.graph-browser-signal-row { -fx-min-height: 34px; -fx-pref-height: 34px; -fx-padding: 4 8 4 8; -fx-background-radius: 5; -fx-cursor: hand; }
+.graph-browser-signal-row:hover { -fx-background-color: #F6F9FE; }
+.graph-browser-signal-row:selected { -fx-background-color: #EAF3FF; }
+.graph-signal-check { -fx-min-width: 18px; -fx-pref-width: 18px; -fx-min-height: 18px; -fx-pref-height: 18px; -fx-alignment: center; -fx-border-color: #6F86A5; -fx-border-radius: 4; -fx-background-radius: 4; -fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: 900; }
+.graph-signal-check:selected { -fx-background-color: #2878F0; -fx-border-color: #2878F0; }
+
+/* Graph analysis expert pass: responsive cards, clearer controls and live details. */
+.graph-chip-strip { -fx-min-height: 66; -fx-pref-height: 66; -fx-max-height: 66; -fx-clip: true; }
+.graph-chip-strip .graph-signal-chip { -fx-min-width: 0; -fx-min-height: 52; -fx-pref-height: 52; -fx-max-height: 52; }
+.graph-chip-close { -fx-min-width: 22; -fx-pref-width: 22; -fx-min-height: 22; -fx-pref-height: 22; }
+.graph-tool-button { -fx-font-family: "Segoe UI Symbol"; -fx-font-size: 15px; }
+.graph-camera-button { -fx-font-size: 14px; }
+.graph-details-tabs .table-view { -fx-background-color: -stellar-surface; -fx-border-color: transparent; }
+.graph-details-tabs .column-header-background { -fx-background-color: #F7FAFD; }
+.graph-details-tabs .column-header { -fx-background-color: #F7FAFD; -fx-border-color: transparent transparent #E5ECF3 transparent; }
+.graph-details-tabs .table-cell { -fx-font-size: 10.5px; -fx-padding: 5 7 5 7; }
+
+
+/* Professional graph-analysis toolbar: vector icons, stable hit targets, no font-glyph fallbacks. */
+.graph-analysis-tools { -fx-padding: 0 0 0 2; }
+.graph-analysis-tools .separator:vertical { -fx-padding: 0 3 0 3; }
+.graph-tool-icon { -fx-fill: transparent; -fx-stroke: #24425F; -fx-stroke-width: 1.7; -fx-stroke-line-cap: round; -fx-stroke-line-join: round; }
+.graph-tool-button:hover .graph-tool-icon { -fx-stroke: #1769E0; }
+.graph-tool-button:pressed { -fx-background-color: #E8F1FF; -fx-border-color: #75A8F4; }
+.graph-tool-button:focused { -fx-border-color: #4D8FF7; -fx-effect: dropshadow(gaussian, rgba(44,111,214,0.18), 5, 0, 0, 0); }
+
+
+/* Graph layout mode: two choices are faster to scan than a dropdown. */
+.graph-layout-segmented {
+    -fx-background-color: #F3F7FC;
+    -fx-background-radius: 8;
+    -fx-border-color: #D7E1EC;
+    -fx-border-radius: 8;
+    -fx-padding: 2;
+}
+.graph-layout-segment {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #526579;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-min-height: 30;
+    -fx-pref-height: 30;
+    -fx-padding: 4 13 4 13;
+    -fx-cursor: hand;
+}
+.graph-layout-segment:hover { -fx-background-color: #EAF2FC; }
+.graph-layout-segment:selected {
+    -fx-background-color: -stellar-surface;
+    -fx-text-fill: #0B63CE;
+    -fx-border-color: #AFCBF0;
+    -fx-effect: dropshadow(gaussian, rgba(15,45,75,0.10), 4, 0.12, 0, 1);
+}
+.graph-layout-segment-left { -fx-background-radius: 6 0 0 6; -fx-border-radius: 6 0 0 6; }
+.graph-layout-segment-right { -fx-background-radius: 0 6 6 0; -fx-border-radius: 0 6 6 0; }
+.graph-inspector-toggle {
+  -fx-min-width: 28px;
+  -fx-pref-width: 28px;
+  -fx-min-height: 28px;
+}
+.graph-statistics-pane { -fx-padding: 4 2 8 2; }
+
+.graph-workspace-split { -fx-background-color: transparent; -fx-padding: 0; }
+.graph-main-row { -fx-background-color: transparent; }
+.graph-inspector-panel {
+    -fx-background-color: -stellar-surface;
+    -fx-padding: 10 10 10 10;
+    -fx-border-color: #DFE7EF;
+    -fx-border-width: 0 0 0 1;
+}
+.graph-inspector-header { -fx-padding: 0 0 2 0; }
+.graph-inspector-rail {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #DFE7EF transparent transparent #DFE7EF;
+    -fx-border-width: 0 0 0 1;
+    -fx-padding: 8 2 8 2;
+    -fx-min-width: 32;
+    -fx-pref-width: 32;
+    -fx-max-width: 36;
+}
+.graph-inspector-rail-button {
+    -fx-min-width: 26;
+    -fx-pref-width: 26;
+    -fx-min-height: 56;
+    -fx-pref-height: 56;
+    -fx-background-color: #F7FAFC;
+    -fx-border-color: #D5DEE8;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-cursor: hand;
+}
+.graph-inspector-rail-button:hover {
+    -fx-background-color: #EEF3F8;
+    -fx-border-color: #B7C6D4;
+}
+.graph-inspector-rail-button:focused {
+    -fx-border-color: #3D7EA6;
+}
+.graph-inspector-details { -fx-padding: 8; }
+.graph-event-marker {
+    -fx-background-color: #0E7490;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-background-radius: 9;
+    -fx-padding: 0;
+    -fx-min-width: 18;
+    -fx-min-height: 18;
+    -fx-max-width: 18;
+    -fx-max-height: 18;
+    -fx-cursor: hand;
+}
+.graph-event-marker:focused {
+    -fx-border-color: #0B4F63;
+    -fx-border-width: 2;
+    -fx-border-radius: 9;
+}
+.graph-event-note {
+    -fx-background-color: white;
+    -fx-text-fill: #163044;
+    -fx-border-color: #0E7490;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 6 8 6 8;
+    -fx-font-size: 12px;
+}
+.graph-chip-strip {
+    -fx-min-height: 48;
+    -fx-pref-height: 52;
+    -fx-max-height: 56;
+    -fx-padding: 4 12 4 12;
+    -fx-background-color: -stellar-surface;
+}
+.graph-chip-strip .graph-signal-chip {
+    -fx-min-height: 36;
+    -fx-pref-height: 40;
+    -fx-max-height: 44;
+    -fx-padding: 4 8;
+    -fx-background-color: #F7FAFC;
+    -fx-background-radius: 6;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 6;
+    -fx-alignment: center-left;
+}
+.graph-chip-value {
+    -fx-font-size: 11.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #17324D;
+    -fx-padding: 0;
+}
+.graph-file-strip {
+    -fx-padding: 6 12 4 12;
+    -fx-min-height: 36;
+}
+.graph-empty-state {
+    -fx-background-color: rgba(248,250,253,0.96);
+    -fx-padding: 32;
+    -fx-alignment: center;
+}
+
+.graph-chip-dot {
+    -fx-font-size: 11px;
+}
+.graph-chip-dot-hidden {
+    -fx-text-fill: #9AA8B5;
+    -fx-font-size: 11px;
+}
+
+.analytics-section {
+    -fx-spacing: 8;
+}
+.analytics-heading {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text;
+}
+.analytics-category-tabs {
+    -fx-alignment: center-left;
+    -fx-spacing: 0;
+    -fx-background-color: -stellar-surface-subtle;
+    -fx-background-radius: 6;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 6;
+    -fx-padding: 2;
+}
+.analytics-category-tabs .toggle-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 4;
+    -fx-border-color: transparent;
+    -fx-border-radius: 4;
+    -fx-text-fill: -stellar-text-secondary;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 6 14 6 14;
+    -fx-cursor: hand;
+}
+.analytics-category-tabs .toggle-button:selected {
+    -fx-background-color: -stellar-surface;
+    -fx-text-fill: -stellar-accent;
+    -fx-border-color: -stellar-border;
+}
+.analytics-form {
+    -fx-hgap: 16;
+    -fx-vgap: 10;
+    -fx-padding: 2 0 0 0;
+}
+.analytics-field {
+    -fx-spacing: 4;
+    -fx-min-width: 200px;
+    -fx-pref-width: 240px;
+}
+.analytics-field-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -stellar-text-secondary;
+    -fx-wrap-text: true;
+}
+.analytics-field-control {
+    -fx-min-width: 180px;
+    -fx-pref-width: 220px;
+}
+.analytics-field .combo-box > .list-cell {
+    -fx-text-overrun: clip;
+}
+.analytics-unit-input {
+    -fx-min-width: 120px;
+    -fx-pref-width: 148px;
+}
+.analytics-unit {
+    -fx-font-size: 12px;
+    -fx-text-fill: -stellar-text-secondary;
+    -fx-min-width: 2.2em;
+}
+.analytics-run-bar {
+    -fx-alignment: center-left;
+    -fx-hgap: 8;
+    -fx-vgap: 8;
+}
+.analytics-actions {
+    -fx-alignment: center-right;
+    -fx-hgap: 8;
+    -fx-vgap: 8;
+    -fx-padding: 2 0 0 0;
+}
+.analytics-results {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 12px;
+}
+.analytics-result-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: -stellar-text-secondary;
+}
+.analytics-result-value {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text;
+}
+
+.signal-panel-collapse-button {
+    -fx-min-width: 28px;
+    -fx-pref-width: 28px;
+    -fx-max-width: 28px;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-padding: 0;
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -stellar-text-secondary;
+}
+.signal-panel-rail {
+    -fx-min-width: 36px;
+    -fx-pref-width: 36px;
+    -fx-max-width: 36px;
+    -fx-alignment: TOP_CENTER;
+    -fx-padding: 8 4 8 4;
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #DCE6EE;
+    -fx-border-width: 0 1 0 0;
+}
+.signal-panel-header {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 8;
+}
+.readable-action-button {
+    -fx-min-width: -1;
+    -fx-padding: 4 10 4 10;
+}
+
+.graph-signal-panel .utility-button,
+.graph-signal-panel .compact-action-button {
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-min-height: 26px;
+    -fx-pref-height: 26px;
+    -fx-max-height: 26px;
+    -fx-min-width: -1;
+    -fx-pref-width: -1;
+    -fx-max-width: -1;
+    -fx-padding: 2 8 2 8;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+}
+
+.graph-utility-actions {
+    -fx-hgap: 6;
+    -fx-vgap: 4;
+    -fx-alignment: CENTER_LEFT;
+}

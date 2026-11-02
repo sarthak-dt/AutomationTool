@@ -1,0 +1,751 @@
+/* Application chrome: header, sidebar, status bar. */
+
+.app-root {
+    -fx-background-color: -stellar-bg;
+}
+
+.top-header,
+.top-bar {
+    -fx-background-color: -stellar-surface;
+    -fx-padding: 8 16 8 16;
+    -fx-border-color: -stellar-border;
+    -fx-border-width: 0 0 1 0;
+    -fx-alignment: CENTER_LEFT;
+    -fx-min-height: 56;
+    -fx-pref-height: 56;
+    -fx-max-height: 56;
+}
+
+.content-host {
+    -fx-background-color: #F5F7FA;
+    -fx-padding: 0;
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+}
+
+.top-title {
+    -fx-text-fill: #172B3A;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.top-subtitle {
+    -fx-text-fill: #5c6b78;
+    -fx-font-size: 12px;
+    -fx-min-width: 0;
+}
+
+.sidebar,
+.nav-pane {
+    -fx-background-color: -stellar-surface;
+    -fx-padding: 12 12 12 12;
+    -fx-pref-width: 250;
+    -fx-min-width: 250;
+    -fx-max-width: 250;
+    -fx-border-color: -stellar-border;
+    -fx-border-width: 0 1 0 0;
+    -fx-spacing: 4;
+}
+
+.sidebar.sidebar-collapsed {
+    -fx-pref-width: 72;
+    -fx-min-width: 72;
+    -fx-max-width: 72;
+    -fx-padding: 10 6 10 6;
+}
+
+.sidebar-primary,
+.sidebar-secondary {
+    -fx-spacing: 4;
+}
+
+.sidebar-separator {
+    -fx-padding: 6 4 6 4;
+    -fx-background-color: #d5dde3;
+}
+
+.sidebar-item,
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -stellar-text;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 12 0 12;
+    -fx-background-radius: 8;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8;
+    -fx-cursor: hand;
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+    -fx-min-height: 40;
+    -fx-pref-height: 40;
+    -fx-max-height: 42;
+}
+
+.sidebar-item:hover,
+.nav-button:hover {
+    -fx-background-color: -stellar-surface-subtle;
+}
+
+.sidebar-item:focused,
+.nav-button:focused {
+    -fx-border-color: #1a6bb5;
+    -fx-border-width: 1;
+}
+
+.sidebar-item-selected,
+.sidebar-item-active,
+.sidebar-item:selected,
+.nav-button:selected,
+.nav-button.active {
+    -fx-background-color: -stellar-nav-selected;
+    -fx-text-fill: -stellar-primary;
+    -fx-font-weight: 600;
+    -fx-border-color: transparent transparent transparent -stellar-primary;
+    -fx-border-width: 0 0 0 3;
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+    -fx-padding: 0 12 0 9;
+    -fx-background-radius: 8;
+}
+
+.sidebar-item-selected:focused {
+    -fx-border-width: 1;
+    -fx-border-color: -stellar-primary;
+}
+
+.sidebar-item-selected .nav-icon,
+.sidebar-item:selected .nav-icon {
+    -fx-stroke: -stellar-primary;
+}
+
+.sidebar-item:disabled,
+.nav-button:disabled,
+.sidebar-item-unavailable:disabled {
+    -fx-opacity: 1;
+    -fx-text-fill: #5c6b78;
+    -fx-cursor: default;
+    -fx-background-color: transparent;
+}
+
+.sidebar-item:disabled:hover,
+.sidebar-item-unavailable:disabled:hover {
+    -fx-background-color: transparent;
+}
+
+.sidebar-item:disabled .nav-icon,
+.sidebar-item-unavailable:disabled .nav-icon {
+    -fx-stroke: #6d7d8a;
+}
+
+.nav-icon {
+    -fx-stroke: #1b2a38;
+    -fx-fill: transparent;
+}
+
+.sidebar-collapse {
+    -fx-background-color: transparent;
+    -fx-text-fill: #3a4a56;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 10 0 10;
+    -fx-background-radius: 4;
+    -fx-border-color: transparent;
+    -fx-border-radius: 4;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+    -fx-min-height: 40;
+    -fx-pref-height: 40;
+    -fx-max-height: 42;
+}
+
+.sidebar-collapse:hover {
+    -fx-background-color: #eaf3fa;
+}
+
+.sidebar-collapse:focused {
+    -fx-border-color: #1a6bb5;
+    -fx-border-width: 1;
+}
+
+.sidebar-collapse .nav-icon {
+    -fx-stroke: #3a4a56;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #eef3f7;
+}
+
+.window-nav-button {
+    -fx-min-width: 28;
+    -fx-pref-width: 28;
+    -fx-max-width: 28;
+    -fx-min-height: 28;
+    -fx-pref-height: 28;
+    -fx-max-height: 28;
+    -fx-padding: 0;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-color: -stellar-surface-subtle;
+    -fx-text-fill: #1b2a38;
+    -fx-background-radius: 4;
+    -fx-border-color: -stellar-border-strong;
+    -fx-border-radius: 4;
+    -fx-cursor: hand;
+}
+
+.window-nav-button:hover {
+    -fx-background-color: #e3f0fa;
+}
+
+.global-processing {
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 8 0 0;
+}
+
+.app-root,
+.main-workspace,
+.content-host {
+    -fx-background-color: -stellar-bg;
+}
+
+/* --- Modern application header ------------------------------------------------ */
+.modern-top-header {
+    -fx-background-color: -stellar-surface;
+    -fx-padding: 8 16 8 16;
+    -fx-min-height: 56;
+    -fx-pref-height: 56;
+    -fx-max-height: 56;
+    -fx-border-color: transparent transparent -stellar-border transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 12;
+}
+
+.brand-mark {
+    -fx-alignment: CENTER;
+}
+
+.brand-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #10233D;
+}
+
+.header-divider {
+    -fx-background-color: #E4EAF0;
+}
+
+.project-selector {
+    -fx-padding: 0 12 0 12;
+    -fx-background-color: -stellar-surface-subtle;
+    -fx-background-radius: 6;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+    -fx-min-height: 40;
+    -fx-pref-height: 40;
+    -fx-max-height: 40;
+    -fx-min-width: 220;
+    -fx-pref-width: 300;
+    -fx-max-width: 320;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.project-selector:hover {
+    -fx-background-color: -stellar-surface-subtle;
+}
+
+.project-selector-label {
+    -fx-text-fill: #63738A;
+    -fx-font-size: 12px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.project-selector-value {
+    -fx-text-fill: -stellar-text;
+    -fx-font-weight: 500;
+    -fx-font-size: 13px;
+    -fx-text-overrun: ellipsis;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.project-selector-chevron {
+    -fx-text-fill: #42566F;
+    -fx-font-size: 12px;
+    -fx-alignment: CENTER;
+}
+
+.project-selector-affordance {
+    -fx-text-fill: #2F6FED;
+    -fx-font-size: 11.5px;
+    -fx-font-weight: 600;
+    -fx-padding: 2 6 2 6;
+    -fx-background-color: #EEF4FF;
+    -fx-background-radius: 4;
+}
+
+.header-new-project-button {
+    -fx-min-height: 32;
+    -fx-pref-height: 32;
+    -fx-max-height: 32;
+    -fx-padding: 0 12 0 12;
+    -fx-font-size: 12px;
+}
+
+.header-save-button {
+    -fx-min-height: 32;
+    -fx-pref-height: 32;
+    -fx-max-height: 32;
+    -fx-padding: 0 12 0 12;
+    -fx-font-size: 12px;
+}
+
+.header-save-button-dirty {
+    -fx-font-weight: 700;
+}
+
+.save-status-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #8a93a3;
+}
+
+.save-status-failed {
+    -fx-text-fill: #c0392b;
+}
+
+.header-retry-save-button {
+    -fx-min-height: 28;
+    -fx-pref-height: 28;
+    -fx-max-height: 28;
+    -fx-padding: 0 10 0 10;
+    -fx-font-size: 11px;
+}
+
+.header-icon-button {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #DCE4ED;
+    -fx-border-width: 1;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-text-fill: #344A61;
+}
+
+.header-icon-glyph {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+}
+
+.header-notification-glyph {
+    -fx-font-size: 22px;
+    -fx-text-fill: #42566F;
+}
+
+.workflow-status-button {
+    -fx-background-color: #F3F7F9;
+    -fx-border-color: #D7E0E9;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 0 12 0 12;
+    -fx-cursor: hand;
+    -fx-min-height: 32;
+    -fx-pref-height: 32;
+    -fx-max-height: 32;
+}
+
+.workflow-status-button:hover {
+    -fx-background-color: #E8F4F5;
+    -fx-border-color: #0B8C97;
+}
+
+.workflow-status-button-ready {
+    -fx-background-color: #E8F5E9;
+    -fx-border-color: #1e5b32;
+}
+
+.workflow-status-button-warning {
+    -fx-background-color: -stellar-warning-bg;
+    -fx-border-color: -stellar-warning;
+}
+
+.workflow-status-button-warning .workflow-status-progress {
+    -fx-text-fill: -stellar-warning;
+}
+
+.workflow-status-button-failed {
+    -fx-background-color: -stellar-danger-bg;
+    -fx-border-color: -stellar-danger;
+}
+
+.workflow-status-button-failed .workflow-status-progress {
+    -fx-text-fill: -stellar-danger;
+}
+
+.workflow-status-content {
+    -fx-alignment: CENTER_LEFT;
+}
+
+.workflow-status-progress {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #0B8C97;
+}
+
+.workflow-status-stage {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1D2E45;
+}
+
+.workflow-status-chevron {
+    -fx-font-size: 11px;
+    -fx-text-fill: #6B7B8F;
+}
+
+.workflow-status-menu {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #D7E0E9;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 6 4 6 4;
+}
+
+/* --- Sidebar ----------------------------------------------------------------- */
+.modern-sidebar {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent #E4EAF0 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+    /* Extra bottom safe-area keeps Settings/Collapse visually clear of the OS taskbar edge. */
+    -fx-padding: 14 10 18 10;
+}
+
+.sidebar-item,
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 7;
+    -fx-border-radius: 7;
+    -fx-padding: 0 12 0 12;
+    -fx-min-height: 44;
+    -fx-pref-height: 44;
+    -fx-text-fill: -stellar-text-secondary;
+    -fx-font-size: 12.5px;
+}
+
+.sidebar-item:hover,
+.nav-button:hover {
+    -fx-background-color: #F1F7F8;
+}
+
+.sidebar-item-selected,
+.sidebar-item-active,
+.sidebar-item:selected,
+.nav-button:selected,
+.nav-button.active {
+    -fx-background-color: -stellar-nav-selected;
+    -fx-text-fill: -stellar-primary;
+    -fx-font-weight: 700;
+    -fx-border-color: transparent transparent transparent -stellar-primary;
+    -fx-border-width: 0 0 0 3;
+    -fx-border-insets: 0;
+    -fx-padding: 0 12 0 9;
+    -fx-background-radius: 8;
+}
+
+.sidebar-item-selected .nav-icon,
+.sidebar-item-active .nav-icon,
+.sidebar-item:selected .nav-icon,
+.nav-button.active .nav-icon {
+    -fx-stroke: -stellar-primary;
+}
+
+.sidebar-separator {
+    -fx-background-color: #E5EBF1;
+    -fx-padding: 0;
+    -fx-pref-height: 1;
+    -fx-max-height: 1;
+    -fx-margin: 8 4 8 4;
+}
+
+.sidebar-section-label {
+    -fx-font-size: 9.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #8190A1;
+    -fx-padding: 8 0 2 10;
+}
+
+.sidebar-health-card {
+    -fx-background-color: #FBFCFE;
+    -fx-border-color: #E3E9EF;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 12;
+}
+
+.sidebar-health-title {
+    -fx-font-size: 10px;
+    -fx-text-fill: #66778B;
+}
+
+.sidebar-health-value {
+    -fx-font-size: 11.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1C8B4A;
+}
+
+.sidebar-health-caption {
+    -fx-font-size: 10px;
+    -fx-text-fill: #8190A1;
+}
+
+.sidebar-collapse {
+    -fx-background-radius: 7;
+    -fx-min-height: 38;
+}
+
+.app-status-bar {
+    -fx-padding: 0 16 0 16;
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #E4EAF0 transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-min-height: 28;
+    -fx-pref-height: 28;
+    -fx-max-height: 28;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.app-status-item {
+    -fx-font-size: 11px;
+    -fx-text-fill: #63738A;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.app-status-project {
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text-secondary;
+}
+
+.app-status-sep {
+    -fx-text-fill: #C0CAD6;
+    -fx-font-size: 11px;
+    -fx-padding: 0 4 0 4;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #F5F8FB;
+}
+
+.browser-group-header-active {
+    -fx-text-fill: -stellar-measurement;
+}
+
+/* --- Figma application chrome ------------------------------------------------ */
+.brand-lockup {
+    -fx-padding: 0 4 0 0;
+}
+
+.brand-wordmark {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -stellar-text;
+    -fx-padding: 0;
+}
+
+.brand-subtitle {
+    -fx-font-size: 9px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text-muted;
+    -fx-padding: 0;
+}
+
+.header-actions {
+    -fx-alignment: CENTER_RIGHT;
+    -fx-min-width: -1;
+}
+
+.header-search-host {
+    -fx-min-width: 0;
+    -fx-pref-width: 220;
+    -fx-max-width: 360;
+    -fx-min-height: 40;
+    -fx-pref-height: 40;
+    -fx-max-height: 40;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.header-search-field,
+.header-search-field:focused {
+    -fx-background-color: -stellar-surface-subtle;
+    -fx-background-radius: 6;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 0 12 0 36;
+    -fx-min-height: 40;
+    -fx-pref-height: 40;
+    -fx-max-height: 40;
+    -fx-font-size: 13px;
+    -fx-text-fill: -stellar-text;
+    -fx-prompt-text-fill: -stellar-text-placeholder;
+}
+
+.header-search-icon {
+    -fx-padding: 0 0 0 10;
+}
+
+.stage-selector {
+    -fx-padding: 0;
+}
+
+.stage-chip,
+.stage-chip:hover,
+.stage-chip:selected,
+.stage-chip:focused {
+    -fx-background-color: transparent;
+    -fx-text-fill: -stellar-text-secondary;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-padding: 0 6 0 6;
+    -fx-min-width: 28;
+    -fx-pref-width: 28;
+    -fx-max-width: 28;
+    -fx-min-height: 26;
+    -fx-pref-height: 26;
+    -fx-max-height: 26;
+    -fx-background-radius: 4;
+    -fx-border-color: transparent;
+    -fx-border-radius: 4;
+    -fx-cursor: hand;
+}
+
+.stage-chip:hover {
+    -fx-background-color: -stellar-surface-subtle;
+}
+
+.stage-chip:selected {
+    -fx-background-color: -stellar-nav-selected;
+    -fx-text-fill: -stellar-primary;
+}
+
+.header-icon-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-cursor: hand;
+}
+
+.header-icon-button:hover {
+    -fx-background-color: -stellar-surface-subtle;
+}
+
+.header-avatar {
+    -fx-background-color: -stellar-nav-selected;
+    -fx-background-radius: 16;
+    -fx-text-fill: -stellar-primary;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.connection-card {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 12;
+}
+
+.connection-card-title {
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text-muted;
+}
+
+.connection-card-device {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text;
+}
+
+.connection-card-meta {
+    -fx-font-size: 12px;
+    -fx-text-fill: -stellar-text-secondary;
+}
+
+.status-dot {
+    -fx-background-radius: 4;
+}
+
+.status-dot-live {
+    -fx-background-color: -stellar-success;
+}
+
+.status-dot-muted {
+    -fx-background-color: -stellar-text-muted;
+}
+
+.module-placeholder {
+    -fx-background-color: -stellar-bg;
+}
+
+.module-placeholder-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -stellar-text;
+}
+
+.module-placeholder-body {
+    -fx-font-size: 13px;
+    -fx-text-fill: -stellar-text-secondary;
+}
+
+.tooltip {
+    -fx-font-size: 12px;
+}
+
+.context-menu {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+}
+
+.project-switch-panel {
+    -fx-background-color: -stellar-bg;
+    -fx-alignment: center;
+}
+
+.project-switch-card {
+    -fx-background-color: -stellar-surface;
+    -fx-background-radius: 12;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-padding: 24 28 24 28;
+    -fx-spacing: 8;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.12), 18, 0, 0, 6);
+}
+
+.project-switch-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+    -fx-alignment: center;
+}
+
+.project-switch-status,
+.project-switch-detail {
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+    -fx-text-fill: -stellar-text-secondary;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+    -fx-alignment: center;
+}
+
+.project-switch-indicator {
+    -fx-progress-color: -stellar-primary;
+}
+

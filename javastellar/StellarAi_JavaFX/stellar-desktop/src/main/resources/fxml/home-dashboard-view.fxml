@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.stellar.platform.desktop.ui.HomeDashboardController"
+            fx:id="rootScroll"
+            styleClass="home-scroll,content-area,workspace-root"
+            fitToWidth="true"
+            fitToHeight="true"
+            minWidth="0" minHeight="0"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED">
+        <VBox fx:id="pageRoot" styleClass="home-page,workspace-root" spacing="12" minWidth="0" minHeight="0">
+
+        <VBox fx:id="kpiStack" styleClass="kpi-stack" spacing="12" minWidth="0">
+            <HBox fx:id="kpiRow" styleClass="metric-row,kpi-row" spacing="12" alignment="CENTER_LEFT" minWidth="0">
+                <HBox fx:id="kpiProjectsCard" styleClass="metric-card,kpi-card" minWidth="0" minHeight="64" HBox.hgrow="ALWAYS"/>
+                <HBox fx:id="kpiFilesCard" styleClass="metric-card,kpi-card" minWidth="0" minHeight="64" HBox.hgrow="ALWAYS"/>
+                <HBox fx:id="kpiSignalsCard" styleClass="metric-card,kpi-card" minWidth="0" minHeight="64" HBox.hgrow="ALWAYS"/>
+                <HBox fx:id="kpiDecodeCard" styleClass="metric-card,kpi-card" minWidth="0" minHeight="64" HBox.hgrow="ALWAYS"/>
+                <HBox fx:id="kpiFramesCard" styleClass="metric-card,kpi-card" minWidth="0" minHeight="64" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <HBox fx:id="kpiRowSecond" styleClass="metric-row,kpi-row" spacing="12" alignment="CENTER_LEFT"
+                  minWidth="0" managed="false" visible="false"/>
+        </VBox>
+
+        <VBox fx:id="workspaceStack" styleClass="workspace-stack" spacing="16" minWidth="0" minHeight="0"
+              VBox.vgrow="ALWAYS">
+            <HBox fx:id="workspaceMain" styleClass="workspace-main" spacing="16" alignment="TOP_LEFT" minWidth="0"
+                  minHeight="0" VBox.vgrow="ALWAYS">
+                <VBox fx:id="browserPane" styleClass="projects-panel,project-list" spacing="12" minWidth="0" minHeight="0"
+                      HBox.hgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label text="Projects" styleClass="side-panel-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT" spacing="8" styleClass="project-tabs" minWidth="0">
+                        <ToggleButton fx:id="recentTab" text="Recent Projects" mnemonicParsing="false"
+                                      styleClass="project-tab,project-tab-active"/>
+                        <ToggleButton fx:id="allTab" text="All Projects" mnemonicParsing="false"
+                                      styleClass="project-tab"/>
+                        <ToggleButton fx:id="favoritesTab" text="Favorites" mnemonicParsing="false"
+                                      styleClass="project-tab"/>
+                        <Region minWidth="8" HBox.hgrow="ALWAYS"/>
+                        <StackPane styleClass="project-search-host" minWidth="120" prefWidth="180" maxWidth="240">
+                            <TextField fx:id="projectSearchField" promptText="Search projects"
+                                       styleClass="project-search-field"/>
+                        </StackPane>
+                        <Button fx:id="refreshProjectsButton" mnemonicParsing="false" onAction="#onRefreshProjects"
+                                styleClass="icon-button,project-refresh-button"/>
+                    </HBox>
+                    <ScrollPane fx:id="tableScroll" styleClass="project-table-scroll" fitToWidth="true"
+                                hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" minHeight="0" VBox.vgrow="ALWAYS">
+                        <GridPane fx:id="projectsTable" styleClass="project-table" maxWidth="Infinity" minWidth="0"/>
+                    </ScrollPane>
+                    <VBox fx:id="projectsEmpty" spacing="4" alignment="CENTER_LEFT" styleClass="empty-state"
+                          managed="false" visible="false">
+                        <Label fx:id="projectsEmptyTitle" text="No saved projects yet." styleClass="empty-state-title"/>
+                        <Label fx:id="projectsEmptyCopy" text="Create a project to begin engineering work."
+                               styleClass="empty-state-copy" wrapText="true"/>
+                    </VBox>
+                </VBox>
+
+                <VBox fx:id="rightColumn" styleClass="home-right-column" spacing="16" minWidth="0" prefWidth="280"
+                      maxWidth="360">
+                    <VBox fx:id="quickActionsPane" styleClass="projects-panel,quick-actions-panel" spacing="8" minWidth="0"
+                          VBox.vgrow="NEVER">
+                        <Label text="Quick Actions" styleClass="side-panel-title"/>
+                        <VBox fx:id="quickActionsBox" spacing="2" minWidth="0"/>
+                    </VBox>
+                    <VBox fx:id="activityPane" styleClass="projects-panel,activity-panel,recent-activity-panel" spacing="8"
+                          minWidth="0" minHeight="0" VBox.vgrow="ALWAYS">
+                        <Label text="Recent Activity" styleClass="side-panel-title"/>
+                        <ScrollPane fx:id="activityScroll" styleClass="recent-activity-scroll" fitToWidth="true"
+                                    hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" pannable="true"
+                                    minWidth="0" minHeight="0" VBox.vgrow="ALWAYS">
+                            <VBox fx:id="activityBox" styleClass="activity-list" spacing="0" minWidth="0" fillWidth="true"/>
+                        </ScrollPane>
+                    </VBox>
+                </VBox>
+            </HBox>
+        </VBox>
+
+        <VBox fx:id="getStartedPane" styleClass="get-started" spacing="8" minWidth="0">
+            <Label text="Get Started" styleClass="workflow-section-title"/>
+            <FlowPane fx:id="workflowRow" styleClass="workflow-row" hgap="12" vgap="12" minWidth="0"
+                      maxWidth="Infinity">
+                <Button fx:id="workflowSourcesCard" mnemonicParsing="false"
+                        styleClass="workflow-card" minWidth="0" minHeight="0"/>
+                <Button fx:id="workflowDecodeCard" mnemonicParsing="false"
+                        styleClass="workflow-card" minWidth="0" minHeight="0"/>
+                <Button fx:id="workflowSignalsCard" mnemonicParsing="false"
+                        styleClass="workflow-card" minWidth="0" minHeight="0"/>
+                <Button fx:id="workflowGraphsCard" mnemonicParsing="false"
+                        styleClass="workflow-card" minWidth="0" minHeight="0"/>
+            </FlowPane>
+        </VBox>
+    </VBox>
+</ScrollPane>

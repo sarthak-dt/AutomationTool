@@ -1,0 +1,149 @@
+{
+  "neither": {
+    "http": 400,
+    "body": {
+      "schemaVersion": "1.0",
+      "status": "FAILED",
+      "applicationVersion": "1.0.4",
+      "error": {
+        "code": "INVALID_REQUEST",
+        "message": "Exactly one of projectName or filePath is required.",
+        "details": {}
+      }
+    }
+  },
+  "both": {
+    "http": 400,
+    "body": {
+      "schemaVersion": "1.0",
+      "status": "FAILED",
+      "applicationVersion": "1.0.4",
+      "error": {
+        "code": "INVALID_REQUEST",
+        "message": "Exactly one of projectName or filePath is required.",
+        "details": {}
+      }
+    }
+  },
+  "missing-file": {
+    "http": 404,
+    "body": {
+      "schemaVersion": "1.0",
+      "status": "FAILED",
+      "applicationVersion": "1.0.4",
+      "error": {
+        "code": "FILE_NOT_FOUND",
+        "message": "The measurement file does not exist or is not a file.",
+        "details": {
+          "role": "measurement"
+        }
+      }
+    }
+  },
+  "path-not-allowed": {
+    "http": 403,
+    "body": {
+      "schemaVersion": "1.0",
+      "status": "FAILED",
+      "applicationVersion": "1.0.4",
+      "error": {
+        "code": "PATH_NOT_ALLOWED",
+        "message": "The path is outside the allowed directories.",
+        "details": {
+          "role": "measurement"
+        }
+      }
+    }
+  },
+  "unsupported": {
+    "http": 415,
+    "body": {
+      "schemaVersion": "1.0",
+      "status": "FAILED",
+      "applicationVersion": "1.0.4",
+      "error": {
+        "code": "UNSUPPORTED_FORMAT",
+        "message": "The measurement format is not supported by the Java decoder.",
+        "details": {}
+      }
+    }
+  },
+  "dbc-required": {
+    "http": 422,
+    "body": {
+      "schemaVersion": "1.0",
+      "status": "FAILED",
+      "applicationVersion": "1.0.4",
+      "error": {
+        "code": "DBC_REQUIRED",
+        "message": "This measurement format requires a DBC. No engineering values were invented.",
+        "details": {}
+      }
+    }
+  },
+  "invalid-dbc": {
+    "http": 422,
+    "body": {
+      "schemaVersion": "1.0",
+      "status": "FAILED",
+      "applicationVersion": "1.0.4",
+      "error": {
+        "code": "INVALID_DBC",
+        "message": "The DBC could not be parsed.",
+        "details": {}
+      }
+    }
+  },
+  "project-missing": {
+    "http": 404,
+    "body": {
+      "schemaVersion": "1.0",
+      "status": "FAILED",
+      "applicationVersion": "1.0.4",
+      "error": {
+        "code": "PROJECT_NOT_FOUND",
+        "message": "No saved project matches that name.",
+        "details": {}
+      }
+    }
+  },
+  "signal-missing": {
+    "http": 404,
+    "body": {
+      "schemaVersion": "1.0",
+      "status": "FAILED",
+      "applicationVersion": "1.0.4",
+      "error": {
+        "code": "SIGNAL_NOT_FOUND",
+        "message": "The signal was not found in the decoded result.",
+        "details": {}
+      }
+    }
+  },
+  "cursor-expired": {
+    "http": 410,
+    "body": {
+      "schemaVersion": "1.0",
+      "status": "FAILED",
+      "applicationVersion": "1.0.4",
+      "error": {
+        "code": "CURSOR_EXPIRED",
+        "message": "The validation cursor has expired.",
+        "details": {}
+      }
+    }
+  },
+  "page-too-big": {
+    "http": 400,
+    "body": {
+      "schemaVersion": "1.0",
+      "status": "FAILED",
+      "applicationVersion": "1.0.4",
+      "error": {
+        "code": "INVALID_REQUEST",
+        "message": "pageSize must be from 1 through 10000.",
+        "details": {}
+      }
+    }
+  }
+}

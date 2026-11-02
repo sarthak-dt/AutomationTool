@@ -1,0 +1,102 @@
+/* StellarAI typography contract.
+   Segoe UI is the Windows UI face. No bundled webfont is shipped.
+   JavaFX weights: 400 regular, 500 medium, 600 semibold. */
+
+.root {
+    -stellar-font-ui: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -stellar-font-mono: "Consolas", "Courier New", monospace;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+}
+
+.stellar-mono,
+.config-mono,
+.meas-source-channel-line,
+.inventory-can-id-cell,
+.graph-live-cursor {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+}
+
+.type-page-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text;
+}
+
+.type-section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text;
+}
+
+.type-panel-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text;
+}
+
+.type-body {
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+    -fx-text-fill: -stellar-text-body;
+}
+
+.type-body-emphasis {
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -stellar-text;
+}
+
+.type-secondary {
+    -fx-font-size: 12px;
+    -fx-font-weight: 400;
+    -fx-text-fill: -stellar-text-secondary;
+}
+
+.type-metadata {
+    -fx-font-size: 12px;
+    -fx-font-weight: 400;
+    -fx-text-fill: -stellar-text-muted;
+}
+
+.type-kpi-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -stellar-text-secondary;
+}
+
+.type-kpi-value {
+    -fx-font-size: 22px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text;
+}
+
+.type-badge {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+/* Application controls use the same face and dark text as Signals.
+   The production lock is repeated at the end of stellar-desktop.css so later page rules cannot wash it out. */
+.label,
+.button,
+.tab .tab-label,
+.table-view,
+.table-view .table-cell,
+.text-field,
+.combo-box {
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+.table-view .column-header .label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text;
+}
+
+.table-view .table-cell {
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+    -fx-text-fill: -stellar-text-body;
+}

@@ -1,0 +1,90 @@
+# Maven build output
+target/
+**/target/
+
+# Local agent instructions
+AGENTS.md
+Agent.md
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs. Measurement fixtures under test resources stay trackable.
+*.log
+logs/
+!src/test/resources/**/*.log
+
+# Maven / launcher console captures
+mvn-*-out.txt
+baseline-verify.txt
+javafx-run-out.txt
+
+# Temporary
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig
+*.swp
+*~
+tmp/
+temp/
+/cache/
+.cache/
+/runtime/
+
+# Secrets / environment
+.env
+*.env
+**/map-secrets.properties
+
+# Local Decoder API launcher settings and runtime sessions. The example file stays tracked.
+/decoder-api.config
+/decoder-sessions/
+
+# Python caches
+**/__pycache__/
+*.py[cod]
+
+# Local server database
+/stellar-server/stellar-server-data/
+
+# Packaging outputs / local WiX 3.14 binaries
+dist-windows/
+release/
+tools/wix314/
+
+# Documentation and QA handoff. Not part of the release source tree.
+docs/
+
+# QA session evidence. Nothing under qa/ is release source.
+qa/
+qa/e2e-full-*/
+qa/workspace-layout/
+qa/focused-regression-*/
+qa/live-smoke-*/
+qa/pre-qa-*/
+qa/gps-mapping-layout/
+qa/data-safety/
+qa/**/screenshots/
+qa/**/captures/
+stellar-desktop/qa/
+test-evidence/
+test-output/
+
+# Generated StellarAI QA reports
+StellarAI_*Report.md
+StellarAI_*Verification.md
+StellarAI_*Assessment.md
+StellarAI_*Analysis.md
+StellarAI_*Test*.md

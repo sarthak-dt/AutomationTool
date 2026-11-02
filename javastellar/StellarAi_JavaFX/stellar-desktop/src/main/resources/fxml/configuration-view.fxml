@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import com.stellar.platform.desktop.ui.control.SearchableSignalPicker?>
+<ScrollPane fx:id="configurationScroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.stellar.platform.desktop.ui.ConfigurationController"
+            fitToWidth="true" styleClass="config-page-scroll">
+  <content>
+    <VBox fx:id="configurationRoot" spacing="18" styleClass="config-page" minWidth="0">
+      <padding><Insets top="24" right="28" bottom="28" left="28"/></padding>
+      <Label text="Configuration" styleClass="section-title"/>
+      <Label text="Application settings for this workstation. Each project keeps its own database under the Analysis Storage location."
+             styleClass="muted" wrapText="true"/>
+
+      <HBox spacing="10" alignment="CENTER_LEFT" styleClass="config-section-nav">
+        <Button text="Analysis Storage" onAction="#onFocusAnalysisStorage"
+                styleClass="config-section-chip,config-section-chip-active"/>
+        <Button fx:id="gpsSectionChip" text="GPS &amp; Route" onAction="#onFocusGpsMapping"
+                styleClass="config-section-chip"/>
+        <Button fx:id="mapSectionChip" text="Map" onAction="#onFocusMapSettings"
+                styleClass="config-section-chip"/>
+      </HBox>
+
+      <VBox fx:id="analysisStorageCard" spacing="12" styleClass="config-card">
+        <Label text="Analysis Storage" styleClass="subsection-title"/>
+        <Label text="Choose where StellarAI stores each project's database and reusable processed analysis data. Completed projects can reopen from these artifacts instead of processing their measurement files again."
+               styleClass="muted" wrapText="true"/>
+
+        <Label text="Storage location" styleClass="config-field-label"/>
+        <HBox spacing="8" alignment="CENTER_LEFT">
+          <TextField fx:id="storagePathField" HBox.hgrow="ALWAYS" styleClass="config-path-field"/>
+          <Button fx:id="browseButton" text="Browse…" onAction="#onBrowse" styleClass="secondary-button"/>
+        </HBox>
+
+        <Label text="Storage Status" styleClass="config-field-label"/>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+          <Label fx:id="statusBadge" text="Not configured" styleClass="config-status-badge,config-status-unset"/>
+        </HBox>
+        <VBox spacing="4" styleClass="config-status-lines">
+          <Label fx:id="readAccessLabel" text="Read access      —" styleClass="config-mono"/>
+          <Label fx:id="writeAccessLabel" text="Write access     —" styleClass="config-mono"/>
+          <Label fx:id="freeSpaceLabel" text="Available space  —" styleClass="config-mono"/>
+        </VBox>
+        <Label fx:id="messageLabel" text="" styleClass="muted" wrapText="true"/>
+
+        <HBox spacing="8" alignment="CENTER_LEFT">
+          <Button fx:id="testAccessButton" text="Test Access" onAction="#onTestAccess" styleClass="secondary-button"/>
+          <Region HBox.hgrow="ALWAYS"/>
+          <Button fx:id="saveButton" text="Save" onAction="#onSave" styleClass="primary-button"/>
+        </HBox>
+      </VBox>
+
+      <VBox fx:id="gpsMappingCard" spacing="12" styleClass="config-card">
+        <HBox spacing="10" alignment="CENTER_LEFT">
+          <Label text="GPS &amp; Route" styleClass="subsection-title"/>
+          <Label fx:id="gpsScopeBadge" text="" styleClass="config-gps-scope-badge"/>
+          <Region HBox.hgrow="ALWAYS"/>
+          <Label fx:id="gpsStatusBadge" text="GPS setup required" styleClass="config-status-badge,config-status-unset"/>
+        </HBox>
+        <Label text="StellarAI identifies the GPS location signals in processed data on its own. Come here only if detection could not find them, or to choose the signals yourself."
+               styleClass="muted" wrapText="true"/>
+
+        <Label fx:id="gpsNoProjectLabel"
+               text="Open a project with processed signals to review its GPS setup."
+               styleClass="config-gps-empty" wrapText="true"/>
+
+        <VBox fx:id="gpsEditor" spacing="12">
+          <HBox fx:id="gpsSourceRow" spacing="10" alignment="CENTER_LEFT">
+            <Label text="Measurement" styleClass="config-field-label"/>
+            <ComboBox fx:id="gpsSourceSelector" prefWidth="300" styleClass="config-gps-source"/>
+            <Label fx:id="gpsSourceReuseLabel" text="" styleClass="config-gps-role-status" wrapText="true"/>
+          </HBox>
+
+          <VBox fx:id="gpsSummary" spacing="8">
+            <HBox spacing="24">
+              <VBox spacing="2" HBox.hgrow="ALWAYS" minWidth="0">
+                <Label text="Latitude" styleClass="config-gps-role-label"/>
+                <Label fx:id="gpsSummaryLatitude" text="—" styleClass="config-gps-summary-value" wrapText="true"/>
+              </VBox>
+              <VBox spacing="2" HBox.hgrow="ALWAYS" minWidth="0">
+                <Label text="Longitude" styleClass="config-gps-role-label"/>
+                <Label fx:id="gpsSummaryLongitude" text="—" styleClass="config-gps-summary-value" wrapText="true"/>
+              </VBox>
+            </HBox>
+            <Label fx:id="gpsSummaryAdvanced" text="" styleClass="config-gps-role-status" wrapText="true"/>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+              <Button fx:id="gpsPreviewButton" text="Preview Route" onAction="#onGpsPreviewRoute" styleClass="primary-button"/>
+              <Button fx:id="gpsChangeButton" text="Change Mapping" onAction="#onGpsChangeMapping" styleClass="secondary-button"/>
+              <Button fx:id="gpsUseAutoButton" text="Use Automatic Detection" onAction="#onGpsUseAutomaticDetection" styleClass="secondary-button"/>
+              <Button fx:id="gpsOverrideButton" text="Use Project Override" onAction="#onGpsUseProjectOverride" styleClass="secondary-button"/>
+              <Button fx:id="gpsRevertDefaultButton" text="Revert to Default" onAction="#onGpsRevertToDefault" styleClass="secondary-button"/>
+            </HBox>
+          </VBox>
+
+          <VBox fx:id="gpsSetupRequired" spacing="8">
+            <Label text="StellarAI could not confidently identify the location signals in this measurement. Map Latitude and Longitude to draw the route."
+                   styleClass="config-gps-empty" wrapText="true"/>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+              <Button fx:id="gpsConfigureButton" text="Configure GPS" onAction="#onGpsChangeMapping" styleClass="primary-button"/>
+            </HBox>
+          </VBox>
+
+          <VBox fx:id="gpsPickerEditor" spacing="4">
+            <GridPane styleClass="config-gps-role-grid" hgap="18" vgap="4">
+              <columnConstraints>
+                <ColumnConstraints minWidth="180" prefWidth="260" percentWidth="42"/>
+                <ColumnConstraints minWidth="180" percentWidth="58" hgrow="ALWAYS"/>
+              </columnConstraints>
+
+              <HBox fx:id="gpsLatitudeBox" spacing="12" alignment="CENTER_LEFT" minWidth="0"
+                    styleClass="config-gps-role-row" GridPane.rowIndex="0" GridPane.columnIndex="0">
+                <StackPane fx:id="gpsLatitudeIcon" styleClass="config-gps-role-icon"/>
+                <VBox spacing="1" minWidth="0" HBox.hgrow="ALWAYS">
+                  <HBox spacing="4" alignment="CENTER_LEFT">
+                    <Label text="Latitude" styleClass="config-gps-role-label"/>
+                    <Label text="*" styleClass="config-gps-role-required"/>
+                  </HBox>
+                  <Label text="Vehicle latitude (decimal degrees)" styleClass="config-gps-role-hint" wrapText="true"/>
+                </VBox>
+              </HBox>
+              <VBox spacing="2" minWidth="0" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                <SearchableSignalPicker fx:id="gpsLatitudePicker"/>
+                <Label fx:id="gpsLatitudeStatus" text="Not mapped" styleClass="config-gps-role-status" wrapText="true"/>
+              </VBox>
+
+              <HBox fx:id="gpsLongitudeBox" spacing="12" alignment="CENTER_LEFT" minWidth="0"
+                    styleClass="config-gps-role-row" GridPane.rowIndex="1" GridPane.columnIndex="0">
+                <StackPane fx:id="gpsLongitudeIcon" styleClass="config-gps-role-icon"/>
+                <VBox spacing="1" minWidth="0" HBox.hgrow="ALWAYS">
+                  <HBox spacing="4" alignment="CENTER_LEFT">
+                    <Label text="Longitude" styleClass="config-gps-role-label"/>
+                    <Label text="*" styleClass="config-gps-role-required"/>
+                  </HBox>
+                  <Label text="Vehicle longitude (decimal degrees)" styleClass="config-gps-role-hint" wrapText="true"/>
+                </VBox>
+              </HBox>
+              <VBox spacing="2" minWidth="0" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                <SearchableSignalPicker fx:id="gpsLongitudePicker"/>
+                <Label fx:id="gpsLongitudeStatus" text="Not mapped" styleClass="config-gps-role-status" wrapText="true"/>
+              </VBox>
+
+              <HBox spacing="12" alignment="CENTER_LEFT" minWidth="0"
+                    styleClass="config-gps-role-row" GridPane.rowIndex="2" GridPane.columnIndex="0">
+                <StackPane fx:id="gpsAltitudeIcon" styleClass="config-gps-role-icon"/>
+                <VBox spacing="1" minWidth="0" HBox.hgrow="ALWAYS">
+                  <HBox spacing="4" alignment="CENTER_LEFT">
+                    <Label text="Altitude" styleClass="config-gps-role-label"/>
+                    <Label text="(optional)" styleClass="config-gps-role-optional"/>
+                  </HBox>
+                  <Label text="Vehicle altitude (metres)" styleClass="config-gps-role-hint" wrapText="true"/>
+                </VBox>
+              </HBox>
+              <VBox spacing="2" minWidth="0" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                <SearchableSignalPicker fx:id="gpsAltitudePicker"/>
+                <Label fx:id="gpsAltitudeStatus" text="Not mapped" styleClass="config-gps-role-status" wrapText="true"/>
+              </VBox>
+
+              <HBox spacing="12" alignment="CENTER_LEFT" minWidth="0"
+                    styleClass="config-gps-role-row" GridPane.rowIndex="3" GridPane.columnIndex="0">
+                <StackPane fx:id="gpsSpeedIcon" styleClass="config-gps-role-icon"/>
+                <VBox spacing="1" minWidth="0" HBox.hgrow="ALWAYS">
+                  <HBox spacing="4" alignment="CENTER_LEFT">
+                    <Label text="GPS Speed" styleClass="config-gps-role-label"/>
+                    <Label text="(optional)" styleClass="config-gps-role-optional"/>
+                  </HBox>
+                  <Label text="Ground speed (m/s or km/h)" styleClass="config-gps-role-hint" wrapText="true"/>
+                </VBox>
+              </HBox>
+              <VBox spacing="2" minWidth="0" GridPane.rowIndex="3" GridPane.columnIndex="1">
+                <SearchableSignalPicker fx:id="gpsSpeedPicker"/>
+                <Label fx:id="gpsSpeedStatus" text="Not mapped" styleClass="config-gps-role-status" wrapText="true"/>
+              </VBox>
+
+              <HBox spacing="12" alignment="CENTER_LEFT" minWidth="0"
+                    styleClass="config-gps-role-row" GridPane.rowIndex="4" GridPane.columnIndex="0">
+                <StackPane fx:id="gpsCourseIcon" styleClass="config-gps-role-icon"/>
+                <VBox spacing="1" minWidth="0" HBox.hgrow="ALWAYS">
+                  <HBox spacing="4" alignment="CENTER_LEFT">
+                    <Label text="Heading / Course" styleClass="config-gps-role-label"/>
+                    <Label text="(optional)" styleClass="config-gps-role-optional"/>
+                  </HBox>
+                  <Label text="Vehicle heading (degrees)" styleClass="config-gps-role-hint" wrapText="true"/>
+                </VBox>
+              </HBox>
+              <VBox spacing="2" minWidth="0" GridPane.rowIndex="4" GridPane.columnIndex="1">
+                <SearchableSignalPicker fx:id="gpsCoursePicker"/>
+                <Label fx:id="gpsCourseStatus" text="Not mapped" styleClass="config-gps-role-status" wrapText="true"/>
+              </VBox>
+            </GridPane>
+
+            <Separator styleClass="config-gps-editor-divider"/>
+
+            <HBox spacing="8" alignment="CENTER_LEFT" styleClass="config-gps-editor-actions">
+              <Button fx:id="gpsAutoDetectButton" text="Fill From Detection" onAction="#onGpsAutoDetect"
+                      styleClass="secondary-button" contentDisplay="LEFT" graphicTextGap="8"/>
+              <Button fx:id="gpsSaveDefaultButton" text="Save as Product Default" onAction="#onGpsSaveAsDefault"
+                      styleClass="secondary-button"/>
+              <Region HBox.hgrow="ALWAYS"/>
+              <Button fx:id="gpsCancelButton" text="Cancel" onAction="#onGpsCancelEditing" styleClass="secondary-button"/>
+              <Button fx:id="gpsSaveButton" text="Save Mapping" onAction="#onGpsSaveMapping" styleClass="primary-button"/>
+            </HBox>
+          </VBox>
+
+          <Label fx:id="gpsMessageLabel" text="" styleClass="muted" wrapText="true"/>
+        </VBox>
+      </VBox>
+
+      <VBox fx:id="mapSettingsCard" spacing="12" styleClass="config-card">
+        <Label text="Map" styleClass="subsection-title"/>
+        <Label text="Basemap language and source for this workstation. These settings apply to every project. GPS signal mapping is configured separately above."
+               styleClass="muted" wrapText="true"/>
+
+        <Label text="Map Language" styleClass="config-field-label"/>
+        <ComboBox fx:id="mapLanguageSelector" prefWidth="280"/>
+
+        <Label text="Map Source" styleClass="config-field-label"/>
+        <ComboBox fx:id="mapProviderSelector" prefWidth="320"/>
+
+        <CheckBox fx:id="mapAllowStandardFallbackCheck" text="Allow standard map fallback"
+                  selected="true"/>
+        <Label text="When no English map source is configured, show OpenStreetMap labels instead of a blank map. Turn this off for a strict English-only policy."
+               styleClass="muted" wrapText="true"/>
+
+        <Label text="Boundary Profile" styleClass="config-field-label"/>
+        <ComboBox fx:id="mapBoundarySelector" prefWidth="280"/>
+        <Label fx:id="mapBoundaryMessage" text="" styleClass="muted" wrapText="true"/>
+
+        <Label text="Server URL" styleClass="config-field-label"/>
+        <TextField fx:id="mapEnglishTileUrlField" promptText="http://tiles.example/styles/stellar-en/{z}/{x}/{y}.png"/>
+
+        <Label text="Attribution" styleClass="config-field-label"/>
+        <TextField fx:id="mapAttributionField" promptText="© OpenMapTiles © OpenStreetMap contributors"/>
+
+        <Label text="Max Zoom" styleClass="config-field-label"/>
+        <TextField fx:id="mapMaxZoomField" prefWidth="80" promptText="19"/>
+
+        <VBox fx:id="mapTilerFields" spacing="8">
+          <Label text="English map ID" styleClass="config-field-label"/>
+          <TextField fx:id="mapEnglishMapIdField" promptText="MapTiler map ID already set to English"/>
+          <Label fx:id="mapKeyStatusLabel" text="" styleClass="config-mono" wrapText="true"/>
+        </VBox>
+
+        <Label fx:id="mapSettingsMessage" text="" styleClass="muted" wrapText="true"/>
+
+        <HBox spacing="8" alignment="CENTER_LEFT">
+          <Button fx:id="mapTestSourceButton" text="Test Map Source" onAction="#onTestMapSource"
+                  styleClass="secondary-button"/>
+          <Region HBox.hgrow="ALWAYS"/>
+          <Button fx:id="mapSettingsSaveButton" text="Save Map Settings" onAction="#onSaveMapSettings"
+                  styleClass="primary-button"/>
+        </HBox>
+      </VBox>
+
+      <VBox spacing="12" styleClass="config-card">
+        <Label text="About / Support" styleClass="subsection-title"/>
+        <Label fx:id="aboutVersionLabel" text="" styleClass="muted" wrapText="true"/>
+        <Label text="A Diagnostics Support Bundle includes version, schema, logs, processing errors and worker health. It never includes raw MF4, DBC, waveform samples, or the project database."
+               styleClass="muted" wrapText="true"/>
+        <HBox spacing="8">
+          <Button text="About StellarAI" onAction="#onAbout" styleClass="secondary-button"/>
+          <Button text="Generate Support Bundle" onAction="#onSupportBundle" styleClass="secondary-button"/>
+        </HBox>
+        <Label fx:id="supportMessageLabel" text="" styleClass="muted" wrapText="true"/>
+      </VBox>
+    </VBox>
+  </content>
+</ScrollPane>

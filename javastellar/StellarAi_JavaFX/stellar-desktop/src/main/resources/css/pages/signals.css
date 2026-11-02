@@ -1,0 +1,1978 @@
+/* Signals workstation. */
+
+.signals-page {
+    -fx-background-color: #F5F7FA;
+    -fx-padding: 6 12 8 12;
+    -fx-spacing: 8;
+}
+
+.signals-workbench {
+    -fx-spacing: 8;
+    -fx-alignment: TOP_LEFT;
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+}
+
+.signals-context-bar-focus {
+    -fx-padding: 4 10 4 10;
+    -fx-min-height: 44;
+    -fx-pref-height: 46;
+    -fx-max-height: 48;
+}
+
+
+.context-item {
+    -fx-padding: 0 10 0 10;
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 8;
+}
+
+.context-separator {
+    -fx-background-color: #E6EBF1;
+    -fx-min-width: 1;
+    -fx-pref-width: 1;
+    -fx-max-width: 1;
+    -fx-min-height: 28;
+    -fx-pref-height: 36;
+    -fx-max-height: 36;
+}
+
+.context-label,
+.signals-context-chip-label {
+    -fx-font-size: 10.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #718297;
+}
+
+.context-value,
+.signals-context-chip-value {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: #142A3A;
+    -fx-font-weight: bold;
+    -fx-text-overrun: ellipsis;
+}
+
+.context-icon {
+    -fx-alignment: CENTER;
+}
+
+.icon-text-button {
+    -fx-graphic-text-gap: 8;
+    -fx-alignment: CENTER;
+    -fx-content-display: LEFT;
+    -fx-min-height: 36;
+    -fx-pref-height: 36;
+}
+
+.search-field-shell {
+    -fx-background-color: -stellar-surface;
+    -fx-background-radius: 6;
+    -fx-border-color: #D5DFEA;
+    -fx-border-radius: 6;
+    -fx-padding: 0;
+    -fx-min-height: 36;
+    -fx-pref-height: 36;
+    -fx-max-height: 36;
+}
+
+.search-field-shell-focused {
+    -fx-border-color: -stellar-info;
+}
+
+.search-field-shell .search-field-inner,
+.search-field-shell .text-field {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 6 54 6 12;
+    -fx-min-height: 34;
+    -fx-pref-height: 34;
+}
+
+.filter-button {
+    -fx-min-height: 34;
+    -fx-pref-height: 34;
+    -fx-padding: 6 10 6 10;
+    -fx-font-size: 12px;
+    -fx-graphic-text-gap: 6;
+}
+
+.segment-button {
+    -fx-min-height: 32;
+    -fx-pref-height: 32;
+    -fx-padding: 4 12 4 12;
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #D5DFEA;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-font-size: 12px;
+    -fx-font-weight: normal;
+    -fx-text-fill: #5E7184;
+}
+
+.segment-button:selected,
+.segment-button-selected {
+    -fx-background-color: -stellar-accent-soft;
+    -fx-border-color: -stellar-info;
+    -fx-text-fill: #142A3A;
+    -fx-font-weight: bold;
+}
+
+.workspace-summary-card-secondary,
+.summary-secondary {
+    -fx-font-size: 11px;
+    -fx-text-fill: #5E7184;
+    -fx-font-weight: normal;
+}
+
+.summary-icon {
+    -fx-padding: 1 0 0 0;
+}
+
+.pagination-button {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #D5DFEA;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+.pagination-button:hover {
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: -stellar-info;
+}
+
+.signals-context-item-block {
+    -fx-padding: 0 12 0 0;
+    -fx-border-color: transparent #E7ECF2 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.signals-context-item-block:last-child {
+    -fx-border-width: 0;
+}
+
+.signals-context-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-text-fill: #1b2a38;
+}
+
+.signals-mode-badge,
+.badge-local,
+.local-badge {
+    -fx-background-color: #E7F6EC;
+    -fx-text-fill: #238443;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: bold;
+    -fx-padding: 3 8 3 8;
+    -fx-background-radius: 5;
+    -fx-border-color: transparent;
+    -fx-border-radius: 5;
+    -fx-max-width: 72;
+}
+
+.signals-context-metric {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3a4a56;
+    -fx-padding: 0 4 0 0;
+}
+
+.signals-context-metrics {
+    -fx-spacing: 8;
+}
+
+.signals-context-chip {
+    -fx-background-color: #f5f8fa;
+    -fx-background-radius: 4;
+    -fx-border-color: #e1e8ee;
+    -fx-border-radius: 4;
+    -fx-padding: 6 10 6 10;
+    -fx-min-width: 120;
+}
+
+.signals-context-chip-label {
+    -fx-font-size: 10.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #708295;
+    -fx-letter-spacing: 0.5;
+}
+
+.signals-context-chip-value {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: #172B3A;
+    -fx-font-weight: bold;
+    -fx-text-overrun: ellipsis;
+}
+
+.signals-context-item {
+    -fx-font-size: 12px;
+    -fx-text-fill: #3a4a56;
+}
+
+.signals-split-pane {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.search-row {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 8;
+}
+
+.pagination-bar {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 8;
+}
+
+.signals-split-section {
+    -fx-min-height: 0;
+    -fx-min-width: 0;
+    -fx-padding: 0 4 0 0;
+}
+
+.selected-signal-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1b2a38;
+}
+
+.selected-signal-summary {
+    -fx-font-size: 12px;
+    -fx-text-fill: #3a4a56;
+    -fx-padding: 0 0 2 0;
+}
+
+.signal-browser-pane {
+    -fx-background-color: -stellar-surface;
+    -fx-background-radius: 8;
+    -fx-border-color: -stellar-border-strong;
+    -fx-border-radius: 8;
+    -fx-min-width: 285;
+    -fx-pref-width: 300;
+    -fx-max-width: 315;
+    -fx-padding: 12;
+}
+
+.signal-browser-pane .table-view {
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+}
+
+.signal-browser-pane .table-row-cell {
+    -fx-cell-size: 30px;
+}
+
+.signal-browser-pane .column-header {
+    -fx-size: 34px;
+}
+
+.filter-row {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 6;
+}
+
+.star-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 2 0 2;
+    -fx-cursor: hand;
+    -fx-font-size: 13px;
+    -fx-text-fill: #c4a000;
+    -fx-content-display: GRAPHIC_ONLY;
+}
+
+.filter-tools-row {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 6;
+}
+
+.signal-browser-pane .table-view .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-max-height: 0;
+    -fx-pref-height: 0;
+    -fx-min-height: 0;
+    -fx-padding: 0;
+}
+
+
+
+.workspace-summary-bar {
+    -fx-padding: 0;
+    -fx-hgap: 6;
+    -fx-vgap: 6;
+    -fx-alignment: CENTER_LEFT;
+    -fx-min-height: 56;
+    -fx-pref-height: 58;
+    -fx-max-height: 122;
+}
+
+.workspace-summary-card {
+    -fx-background-color: -stellar-surface;
+    -fx-background-radius: 6;
+    -fx-border-color: -stellar-border-strong;
+    -fx-border-radius: 6;
+    -fx-padding: 8 10 8 10;
+    -fx-min-width: 0;
+    -fx-pref-height: 56;
+    -fx-min-height: 56;
+    -fx-max-height: 56;
+    -fx-spacing: 0;
+}
+
+.workspace-summary-card-label {
+    -fx-font-size: 9.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #708295;
+    -fx-text-overrun: clip;
+}
+
+.workspace-summary-card-value {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #172B3A;
+    -fx-wrap-text: false;
+}
+
+.workspace-summary-card-value-accent {
+    -fx-text-fill: -stellar-info;
+}
+
+.workspace-status-strip {
+    -fx-padding: 0 2 0 2;
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 8;
+    -fx-min-height: 26;
+    -fx-pref-height: 28;
+    -fx-max-height: 30;
+    -fx-background-color: transparent;
+}
+
+.workspace-status-item {
+    -fx-font-size: 11.5px;
+    -fx-text-fill: #3A4A56;
+    -fx-font-weight: bold;
+}
+
+.workspace-status-item-accent {
+    -fx-text-fill: -stellar-info;
+}
+
+.workspace-status-dot {
+    -fx-text-fill: #A0ADB8;
+    -fx-font-size: 11px;
+    -fx-padding: 0 2 0 2;
+}
+
+.workspace-paging-strip {
+    -fx-padding: 0;
+    -fx-alignment: CENTER_LEFT;
+    -fx-min-height: 26;
+    -fx-pref-height: 28;
+    -fx-max-height: 30;
+}
+
+.workspace-range-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #3a4a56;
+    -fx-font-weight: bold;
+}
+
+.workspace-page-label {
+    -fx-font-size: 11.5px;
+    -fx-text-fill: #1b2a38;
+    -fx-padding: 0 4 0 4;
+    -fx-min-width: 42;
+    -fx-alignment: CENTER;
+}
+
+.workspace-table-footer {
+    -fx-padding: 2 0 0 0;
+    -fx-border-color: #E7ECF2 transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-min-height: 22;
+    -fx-pref-height: 24;
+    -fx-max-height: 26;
+}
+
+.workspace-table-footer .label,
+.workspace-table-footer .muted {
+    -fx-font-size: 10.5px;
+    -fx-text-fill: #708295;
+}
+
+.analysis-toolbar {
+    -fx-hgap: 6;
+    -fx-vgap: 4;
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: #E7ECF2 transparent #E7ECF2 transparent;
+    -fx-border-width: 1 0 1 0;
+    -fx-border-radius: 0;
+    -fx-padding: 2 0 2 0;
+    -fx-min-height: 34;
+    -fx-pref-height: 36;
+    -fx-max-height: 76;
+}
+
+.signals-workbench-host {
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+}
+
+.signals-focus-frame {
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+    -fx-padding: 0;
+}
+
+.signals-workbench-focus {
+    -fx-spacing: 0;
+}
+
+.signals-workbench-focus .active-signal-workspace {
+    -fx-effect: null;
+}
+
+.focus-mode-drawer {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border-strong;
+    -fx-effect: dropshadow(gaussian, rgba(23,43,58,0.12), 12, 0, 0, 1);
+}
+
+.focus-palette-drawer {
+    -fx-border-width: 0 1 0 0;
+}
+
+.focus-details-drawer {
+    -fx-border-width: 0 0 0 1;
+}
+
+.focus-drawer-header {
+    -fx-background-color: #F7FAFC;
+    -fx-border-color: transparent transparent #E7ECF2 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.focus-drawer-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #172B3A;
+}
+
+.focus-edge-button {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border-strong;
+    -fx-background-radius: 0 4 4 0;
+    -fx-border-radius: 0 4 4 0;
+    -fx-font-weight: bold;
+    -fx-text-fill: -stellar-info;
+    -fx-padding: 0;
+    -fx-min-width: 28px;
+    -fx-pref-width: 28px;
+    -fx-max-width: 28px;
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+}
+
+.focus-edge-right {
+    -fx-background-radius: 4 0 0 4;
+    -fx-border-radius: 4 0 0 4;
+}
+
+.workspace-focus-mode {
+    -fx-border-color: -stellar-info;
+    -fx-border-width: 1;
+}
+
+.analysis-toolbar-group {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 4;
+    -fx-padding: 0;
+}
+
+.analysis-toolbar-divider {
+    -fx-background-color: -stellar-border-strong;
+    -fx-min-width: 1;
+    -fx-pref-width: 1;
+    -fx-max-width: 1;
+}
+
+.signal-browser-footer {
+    -fx-padding: 6 0 0 0;
+    -fx-border-color: #e1e8ee transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+.signal-chip-channel {
+    -fx-text-fill: #5c6b78;
+    -fx-font-size: 11px;
+}
+
+.workspace-empty-card {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 6;
+    -fx-border-color: #d5dde3;
+    -fx-border-radius: 6;
+    -fx-padding: 28 32 28 32;
+    -fx-effect: dropshadow(gaussian, rgba(27,42,56,0.05), 10, 0, 0, 1);
+}
+
+.workspace-empty-context {
+    -fx-background-color: -stellar-surface;
+    -fx-background-radius: 4;
+    -fx-border-color: #e1e8ee;
+    -fx-border-radius: 4;
+    -fx-padding: 10 12 10 12;
+    -fx-spacing: 3;
+}
+
+.inspector-empty-card {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 4;
+    -fx-border-color: #e1e8ee;
+    -fx-border-radius: 4;
+    -fx-padding: 16 12 16 12;
+}
+
+.signal-browser-pane .table-row-cell:selected {
+    -fx-background-color: #d6e8f6;
+    -fx-table-cell-border-color: transparent;
+}
+
+.signal-browser-pane .table-row-cell:selected .text {
+    -fx-fill: #0d4f86;
+}
+
+
+.active-signal-workspace {
+    -fx-background-color: -stellar-surface;
+    -fx-background-radius: 8;
+    -fx-border-color: -stellar-border-strong;
+    -fx-border-radius: 8;
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+    -fx-padding: 10;
+    -fx-spacing: 4;
+}
+
+.chip-scroll {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-min-height: 34;
+    -fx-pref-height: 36;
+    -fx-max-height: 50;
+}
+
+.chip-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.chip-scroll > .scroll-bar:horizontal {
+    -fx-opacity: 0.85;
+}
+
+.chip-bar {
+    -fx-padding: 0;
+    -fx-spacing: 8;
+}
+
+/* Row 1 of the Active Signal Workspace: title left, primary commands right. */
+.workspace-command-row {
+    -fx-alignment: CENTER_LEFT;
+    -fx-min-height: 28;
+}
+
+.workspace-command-bar {
+    -fx-alignment: CENTER_RIGHT;
+    -fx-spacing: 6;
+}
+
+.analyze-action-host {
+    -fx-alignment: CENTER;
+}
+
+.analyze-action {
+    -fx-cursor: hand;
+}
+
+.analyze-action:disabled {
+    -fx-opacity: 0.55;
+    -fx-cursor: default;
+}
+
+.signal-chip-more {
+    -fx-min-width: 72;
+    -fx-pref-height: 34;
+    -fx-max-height: 34;
+}
+
+.selected-signals-popover {
+    -fx-background-color: -stellar-surface;
+    -fx-background-radius: 8;
+    -fx-border-color: -stellar-border-strong;
+    -fx-border-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.18), 12, 0.2, 0, 4);
+}
+
+.signal-chip {
+    -fx-background-color: -stellar-surface;
+    -fx-background-radius: 6;
+    -fx-border-color: -stellar-border-strong;
+    -fx-border-radius: 6;
+    -fx-padding: 4 8 4 8;
+    -fx-alignment: CENTER_LEFT;
+    -fx-cursor: hand;
+    -fx-min-height: 34;
+    -fx-pref-height: 34;
+    -fx-max-height: 34;
+}
+
+.signal-chip-focused,
+.signal-chip-selected {
+    -fx-background-color: #EAF3FC;
+    -fx-border-color: -stellar-info;
+}
+
+.signal-chip-name {
+    -fx-font-weight: bold;
+    -fx-font-size: 12.5px;
+    -fx-text-fill: #172B3A;
+}
+
+.signal-chip-unit {
+    -fx-text-fill: -stellar-text-muted;
+    -fx-font-size: 11px;
+}
+
+.signal-chip-channel {
+    -fx-text-fill: -stellar-text-muted;
+    -fx-font-size: 11px;
+}
+
+.chip-remove {
+    -fx-background-color: transparent;
+    -fx-padding: 0 2 0 2;
+    -fx-min-width: 18;
+    -fx-pref-width: 18;
+    -fx-cursor: hand;
+    -fx-text-fill: #5c6b78;
+    -fx-font-size: 13px;
+}
+
+.drop-target-active {
+    -fx-border-color: #1a6bb5;
+    -fx-border-width: 2;
+    -fx-background-color: #f3f8fc;
+}
+
+
+.workspace-meta-row {
+    -fx-padding: 0 0 2 0;
+}
+
+.workspace-status {
+    -fx-font-size: 11px;
+    -fx-text-fill: #6a7a88;
+}
+
+.signal-chip-unit {
+    -fx-text-fill: #5c6b78;
+    -fx-font-size: 11px;
+}
+
+.missing-value {
+    -fx-text-fill: #9aa6b2;
+}
+
+.numeric-value {
+    -fx-alignment: CENTER-RIGHT;
+}
+
+.focused-signal-column {
+    -fx-background-color: rgba(26, 107, 181, 0.06);
+}
+
+.workspace-table .table-row-cell {
+    -fx-cell-size: 28px;
+}
+
+.workspace-table .column-header {
+    -fx-size: 32px;
+}
+
+.workspace-table .table-cell {
+    -fx-font-size: 12px;
+    -fx-padding: 2 8 2 8;
+}
+
+.workspace-table .table-row-cell:odd {
+    -fx-background-color: #f7fafc;
+}
+
+.workspace-table .column-header-background {
+    -fx-background-color: #eef3f7;
+}
+
+.workspace-table .column-header .label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #1b2a38;
+}
+
+.favorites-toggle {
+    -fx-min-width: 0;
+}
+
+
+.signal-inspector-pane {
+    -fx-background-color: -stellar-surface;
+    -fx-background-radius: 8;
+    -fx-border-color: -stellar-border-strong;
+    -fx-border-radius: 8;
+    -fx-min-width: 265;
+    -fx-pref-width: 280;
+    -fx-max-width: 295;
+    -fx-padding: 12;
+}
+
+.inspector-header {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #708295;
+    -fx-letter-spacing: 0.6;
+}
+
+.inspector-signal-name {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #172B3A;
+    -fx-wrap-text: false;
+    -fx-text-overrun: ellipsis;
+}
+
+.inspector-section-title {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #172B3A;
+    -fx-padding: 0 0 6 0;
+    -fx-border-color: transparent transparent #E7ECF2 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.inspector-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #708295;
+}
+
+.inspector-value {
+    -fx-font-size: 12px;
+    -fx-text-fill: #172B3A;
+}
+
+.inspector-copy {
+    -fx-padding: 0;
+    -fx-font-size: 12px;
+    -fx-min-width: 28;
+    -fx-pref-width: 28;
+    -fx-min-height: 24;
+    -fx-pref-height: 24;
+}
+
+.inspector-collapse {
+    -fx-min-width: 24;
+    -fx-pref-width: 24;
+    -fx-padding: 2 0 2 0;
+}
+
+.inspector-scroll {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.inspector-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.inspector-section {
+    -fx-padding: 0 0 2 0;
+}
+
+
+.workspace-toolbar {
+    -fx-spacing: 8;
+    -fx-padding: 2 0 4 0;
+    -fx-min-height: 36;
+}
+
+.workspace-jump-grid {
+    -fx-padding: 0;
+    -fx-min-height: 0;
+}
+
+.workspace-context-row,
+.workspace-display-row {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 8;
+}
+
+.chip-scroll {
+    -fx-min-height: 34;
+    -fx-max-height: 50;
+}
+
+.signal-chip {
+    -fx-min-height: 34;
+    -fx-max-height: 34;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.source-inventory-pane .tree-table-view .tree-table-row-cell.source-inventory-signal-row {
+    -fx-background-color: #f3f7fa;
+}
+
+.source-inventory-pane .tree-table-view .tree-table-row-cell.source-inventory-signal-row .text {
+    -fx-fill: #3a4a58;
+    -fx-font-size: 11px;
+}
+
+.signals-update-banner {
+    -fx-background-color: #f3f7fb;
+    -fx-border-color: #c5d4e2;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 8 12 8 12;
+}
+.signals-mode-badge, .badge-local, .local-badge {
+    -fx-background-color: #E7F6EC;
+    -fx-text-fill: #238443;
+}
+
+.project-files-workspace-nav {
+    -fx-min-height: 38;
+    -fx-pref-height: 40;
+    -fx-spacing: 6;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.project-files-workspace-tab {
+    -fx-min-height: 36;
+    -fx-pref-height: 38;
+    -fx-padding: 6 14 6 14;
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #D5DFEA;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-font-size: 12px;
+    -fx-font-weight: normal;
+    -fx-text-fill: #3d4654;
+    -fx-opacity: 1.0;
+}
+
+.project-files-workspace-tab:hover {
+    -fx-background-color: #F4F8FC;
+    -fx-border-color: #B7C9DC;
+}
+
+.project-files-workspace-tab:selected,
+.project-files-workspace-tab-active {
+    -fx-background-color: -stellar-accent-soft;
+    -fx-border-color: -stellar-info;
+    -fx-text-fill: #142A3A;
+    -fx-font-weight: bold;
+}
+
+.project-files-workspace-host {
+    -fx-min-height: 0;
+    /*
+     * Keep the workspace surface flush with the Project Files chrome.  Individual
+     * engineering bodies own their internal gutters; applying another 8px host
+     * inset made the mode/search white bands start to the right of the breadcrumb band.
+     */
+    -fx-padding: 0 0 8 0;
+}
+.source-inventory-signal-detail {
+    -fx-border-color: #d7dde5;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 6 0 0 0;
+}
+.inventory-signal-table {
+    -fx-font-size: 11px;
+}
+.inventory-signal-search {
+    -fx-font-size: 12px;
+}
+.inventory-signal-list {
+    -fx-font-size: 12px;
+}
+.inventory-signal-list .column-header-background .label {
+    -fx-font-size: 11px;
+    -fx-padding: 4 4 4 4;
+}
+.inventory-signal-list .table-row-cell {
+    -fx-cell-size: 28px;
+}
+.inventory-signal-meta-name {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+.inventory-signal-meta-body {
+    -fx-font-size: 11px;
+}
+
+.project-files-workspace-nav {
+    -fx-padding: 2 0 0 0;
+}
+
+.project-files-workspace-tab {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #DCE4EC;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-padding: 7 14 7 14;
+    -fx-min-height: 36;
+    -fx-text-fill: #42566F;
+}
+
+.project-files-workspace-tab:selected,
+.project-files-workspace-tab-active {
+    -fx-background-color: #EDF8F8;
+    -fx-border-color: #1696A0;
+    -fx-text-fill: -stellar-measurement;
+    -fx-font-weight: 700;
+}
+
+.project-files-workspace-host {
+    -fx-background-color: transparent;
+}
+
+.can-inventory-table,
+.inventory-signal-list {
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+}
+
+.can-inventory-table .column-header-background,
+.inventory-signal-list .column-header-background {
+    -fx-background-color: #F5F8FB;
+}
+
+.can-inventory-table .table-row-cell,
+.inventory-signal-list .table-row-cell {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent transparent #EFF3F6 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.can-inventory-table .table-row-cell:selected,
+.inventory-signal-list .table-row-cell:selected {
+    -fx-background-color: #E8F5F6;
+}
+
+/* --- Signals workstation ---------------------------------------------------- */
+.signals-page {
+    -fx-padding: 10 12 12 12;
+    -fx-spacing: 8;
+}
+
+.signal-browser-pane,
+.active-signal-workspace-pane,
+.signal-inspector-pane {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.signal-browser-pane {
+    -fx-padding: 12;
+}
+
+.signal-inspector-pane {
+    -fx-padding: 12;
+}
+
+.signal-browser-pane .table-row-cell,
+.workspace-table .table-row-cell {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent transparent #EFF3F6 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.signal-browser-pane .table-row-cell:selected,
+.workspace-table .table-row-cell:selected {
+    -fx-background-color: #E7F5F6;
+}
+
+.signal-chip {
+    -fx-background-color: #F7FAFC;
+    -fx-border-color: #DDE6ED;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+}
+
+.signal-chip-focused {
+    -fx-background-color: #EDF8F8;
+    -fx-border-color: #0B8C97;
+}
+
+/* DBC is definition-purple everywhere; MF4/native is measurement-teal. */
+.signals-page .badge-dbc,
+.signals-page .dbc-badge,
+.signals-page .source-badge-dbc,
+.source-inventory-root .badge-dbc,
+.dbc-mapping-root .badge-dbc {
+    -fx-background-color: #F0E8FF;
+    -fx-text-fill: -stellar-definition;
+    -fx-border-color: #DDCBFA;
+}
+
+.signals-page .badge-native,
+.signals-page .native-badge,
+.signals-page .source-badge-native {
+    -fx-background-color: #E2F6F7;
+    -fx-text-fill: -stellar-measurement;
+    -fx-border-color: #BFE6E8;
+}
+
+.signals-mode-badge,
+.badge-local,
+.local-badge {
+    -fx-background-color: -stellar-success-bg;
+    -fx-text-fill: -stellar-success;
+}
+
+.search-field,
+.text-field,
+.combo-box,
+.search-field-shell {
+    -fx-border-color: #D8E1E9;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-background-color: -stellar-surface;
+}
+
+.search-field:focused,
+.text-field:focused,
+.combo-box:focused,
+.search-field-shell-focused {
+    -fx-border-color: -stellar-accent;
+}
+
+.project-files-workspace-nav {
+    -fx-padding: 0;
+    -fx-spacing: 2;
+    -fx-min-height: 34;
+    -fx-pref-height: 36;
+    -fx-max-height: 38;
+}
+
+.project-files-workspace-tab {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent transparent transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 6 12 8 12;
+    -fx-text-fill: #5B6B7C;
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.project-files-workspace-tab:hover {
+    -fx-background-color: rgba(15, 138, 150, 0.06);
+    -fx-text-fill: #0B5F68;
+}
+
+.project-files-workspace-tab:selected,
+.project-files-workspace-tab-active {
+    -fx-background-color: rgba(15, 138, 150, 0.08);
+    -fx-border-color: transparent transparent #0F8A96 transparent;
+    -fx-text-fill: #0B5F68;
+    -fx-font-weight: 700;
+}
+
+/* Signals follows the same compact 3-pane workstation proportions as the target. */
+.signals-page .signal-browser-pane {
+    -fx-min-width: 270;
+    -fx-pref-width: 285;
+    -fx-max-width: 310;
+}
+.signals-page .signal-inspector-pane {
+    -fx-min-width: 285;
+    -fx-pref-width: 305;
+    -fx-max-width: 335;
+}
+.signals-page .active-signal-workspace-pane {
+    -fx-min-width: 640;
+}
+.signals-page .primary-button {
+    -fx-background-color: #078A96;
+}
+
+.context-item-measurement {
+    -fx-background-color: #F1FAFA;
+    -fx-background-radius: 6;
+}
+.context-item-definition {
+    -fx-background-color: #F8F4FF;
+    -fx-background-radius: 6;
+}
+.context-item-definition .context-value {
+    -fx-text-fill: -stellar-definition;
+}
+.context-item-measurement .context-value {
+    -fx-text-fill: -stellar-measurement;
+}
+.view-signals-button {
+    -fx-border-color: #0B8C97;
+    -fx-text-fill: -stellar-measurement;
+    -fx-font-weight: 600;
+}
+
+/* === Signals page enterprise polish (UI-only) ================================ */
+.signals-page .signals-context-bar {
+    -fx-spacing: 8;
+    -fx-padding: 8 10 8 10;
+}
+
+.signals-page .context-item-card {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 10 8 10;
+    -fx-effect: dropshadow(gaussian, rgba(20, 42, 58, 0.04), 8, 0, 0, 1);
+}
+
+.signals-page .context-item-measurement {
+    -fx-background-color: #F1FAFA;
+    -fx-border-color: #CDE8EA;
+}
+
+.signals-page .context-item-definition {
+    -fx-background-color: #F8F4FF;
+    -fx-border-color: #E2D6FA;
+    -fx-min-width: 140;
+    -fx-max-width: 360;
+}
+
+.signals-page .context-item-definition .context-value {
+    -fx-wrap-text: false;
+}
+
+.signal-browser-pane {
+    -fx-min-width: 300;
+    -fx-pref-width: 310;
+    -fx-max-width: 320;
+    -fx-padding: 12;
+    -fx-effect: dropshadow(gaussian, rgba(20, 42, 58, 0.04), 10, 0, 0, 1);
+}
+
+.signal-browser-count {
+    -fx-font-size: 11.5px;
+    -fx-alignment: CENTER_RIGHT;
+}
+
+.browser-signal-name {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #172B3A;
+}
+
+.browser-signal-meta {
+    -fx-font-size: 10.5px;
+    -fx-text-fill: #708295;
+}
+
+.signal-inspector-pane {
+    -fx-min-width: 320;
+    -fx-pref-width: 330;
+    -fx-max-width: 340;
+    -fx-effect: dropshadow(gaussian, rgba(20, 42, 58, 0.04), 10, 0, 0, 1);
+}
+
+.inspector-header {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #172B3A;
+    -fx-letter-spacing: 0;
+}
+
+.inspector-meta-line {
+    -fx-font-size: 11.5px;
+    -fx-text-fill: -stellar-text-muted;
+}
+
+.inspector-tab-row {
+    -fx-spacing: 2;
+    -fx-padding: 0 0 4 0;
+    -fx-border-color: transparent transparent #E7ECF2 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.inspector-tab {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-padding: 6 8 8 8;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #708295;
+    -fx-cursor: hand;
+}
+
+.inspector-tab:selected {
+    -fx-text-fill: -stellar-measurement;
+    -fx-border-color: transparent transparent #078A96 transparent;
+    -fx-border-width: 0 0 2 0;
+}
+
+.inspector-info-card {
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #E7ECF2;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+}
+
+.inspector-favorite-button {
+    -fx-min-height: 36;
+    -fx-pref-height: 36;
+}
+
+.workspace-column-header {
+    -fx-alignment: CENTER;
+    -fx-spacing: 1;
+    -fx-padding: 2 0 2 0;
+}
+
+.workspace-column-header-name {
+    -fx-font-size: 11.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #172B3A;
+}
+
+.workspace-column-header-meta {
+    -fx-font-size: 10px;
+    -fx-text-fill: #708295;
+}
+
+.workspace-column-header-badge {
+    -fx-font-size: 9.5px;
+    -fx-padding: 1 5 1 5;
+    -fx-min-width: 28;
+}
+
+.workspace-table .column-header {
+    -fx-size: 44px;
+}
+
+.workspace-footer-metric {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3A4A56;
+}
+
+.workspace-toolbar-actions {
+    -fx-spacing: 4;
+}
+
+.workspace-toolbar-icon {
+    -fx-min-width: 30;
+    -fx-pref-width: 30;
+    -fx-max-width: 30;
+    -fx-min-height: 30;
+    -fx-pref-height: 30;
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #D5DFEA;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.active-signal-workspace {
+    -fx-effect: dropshadow(gaussian, rgba(20, 42, 58, 0.04), 10, 0, 0, 1);
+}
+
+.signals-page .signal-chip {
+    -fx-min-height: 36;
+    -fx-pref-height: 36;
+    -fx-max-height: 36;
+    -fx-padding: 4 10 4 10;
+}
+
+/* === Analytical table grid (Signals workspace) ============================== */
+.workspace-table {
+    -fx-fixed-cell-size: 39;
+}
+
+.workspace-table .column-header-background {
+    -fx-background-color: #F7F9FB;
+}
+
+.workspace-table .column-header,
+.workspace-table .filler {
+    -fx-background-color: #F7F9FB;
+    -fx-size: 44px;
+    -fx-border-color: transparent #E5EBF1 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.workspace-table .column-header .label,
+.workspace-plain-header {
+    -fx-text-fill: -stellar-text;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-alignment: CENTER;
+}
+
+.workspace-table .table-row-cell {
+    -fx-cell-size: 39px;
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent transparent #EEF2F6 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.workspace-table .table-row-cell:odd {
+    -fx-background-color: #FBFCFD;
+}
+
+.workspace-table .table-row-cell:selected {
+    -fx-background-color: #F3F8F9;
+    -fx-table-cell-border-color: transparent;
+}
+
+.workspace-table .table-cell {
+    -fx-padding: 4 10 4 10;
+    -fx-font-size: 13px;
+    -fx-border-color: transparent #E5EBF1 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.workspace-timestamp-cell {
+    -fx-alignment: CENTER-LEFT;
+}
+
+.workspace-delta-cell,
+.workspace-signal-cell,
+.numeric-value {
+    -fx-alignment: CENTER-RIGHT;
+}
+
+.workspace-column-header {
+    -fx-alignment: CENTER;
+    -fx-spacing: 2;
+    -fx-padding: 4 4 4 4;
+}
+
+.workspace-column-header-name {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -stellar-text;
+    -fx-alignment: CENTER;
+}
+
+.workspace-column-header-meta,
+.workspace-column-header-unit {
+    -fx-font-size: 11px;
+    -fx-font-weight: normal;
+    -fx-text-fill: -stellar-text-secondary;
+    -fx-alignment: CENTER;
+}
+
+.focused-signal-column {
+    -fx-background-color: rgba(7, 138, 150, 0.04);
+}
+
+.workspace-table-footer {
+    -fx-padding: 4 2 2 2;
+    -fx-spacing: 10;
+    -fx-min-height: 30;
+    -fx-pref-height: 30;
+    -fx-max-height: 34;
+    -fx-border-color: #E7ECF2 transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+.workspace-footer-metric {
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #3A4A56;
+}
+
+/* === Decision Workspace ===================================================== */
+.decision-workspace-root {
+    -fx-background-color: #F6F8FB;
+}
+
+.decision-workspace-summary {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.decision-workspace-summary-title {
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #5B6B7C;
+}
+
+.channel-quick-chip-active {
+    -fx-border-color: #3B82F6;
+    -fx-border-width: 1.5;
+    -fx-background-color: #EAF2FF;
+}
+
+.channel-quick-chip-name {
+    -fx-font-size: 11.5px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #24364B;
+}
+
+.channel-quick-chip-ids {
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #355064;
+}
+
+.channel-quick-chip-dbc {
+    -fx-font-size: 11px;
+    -fx-text-fill: #667EEA;
+}
+
+.channel-signal-explorer {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.decision-signal-table {
+    -fx-background-color: transparent;
+}
+
+.signal-source-mf4 {
+    -fx-text-fill: #197C91;
+    -fx-font-weight: 800;
+}
+
+.signal-source-dbc {
+    -fx-text-fill: #667EEA;
+    -fx-font-weight: 800;
+}
+
+.signal-row-native {
+    -fx-text-fill: #197C91;
+}
+
+.signal-row-dbc {
+    -fx-text-fill: #667EEA;
+}
+
+.decision-inspector-drawer {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border transparent transparent -stellar-border;
+}
+
+.decision-inspector-header {
+    -fx-background-color: #F6F8FB;
+    -fx-border-color: transparent transparent -stellar-border transparent;
+}
+
+.decision-inspector-tab-active {
+    -fx-background-color: #EAF2FF;
+    -fx-border-color: #3B82F6;
+    -fx-text-fill: -stellar-accent-hover;
+}
+
+.decision-inspector-close {
+    -fx-font-weight: 800;
+}
+
+.signal-row-mapped {
+    -fx-text-fill: #1B7A3A;
+}
+
+.signal-row-unmapped {
+    -fx-text-fill: #B86A00;
+}
+
+/* v9: compact, discoverable clipboard action; toolbar reflows before overlap. */
+.workspace-copy-table-button {
+    -fx-min-width: 104;
+    -fx-pref-width: 104;
+    -fx-max-width: 104;
+    -fx-min-height: 30;
+    -fx-pref-height: 30;
+    -fx-max-height: 30;
+    -fx-padding: 4 9 4 9;
+    -fx-font-size: 11px;
+}
+
+.detailed-mapping-mode .channel-quick-chip-active {
+    -fx-background-color: #F3F7FF;
+    -fx-border-color: #3B82F6;
+    -fx-border-width: 1.5;
+}
+
+.detailed-mapping-mode .channel-quick-chip-name,
+.detailed-mapping-mode .channel-quick-chip-ids,
+.detailed-mapping-mode .channel-quick-chip-dbc,
+.detailed-mapping-mode .dbc-selector-name,
+.detailed-mapping-mode .dbc-selector-coverage,
+.detailed-mapping-mode .dbc-selector-title {
+    -fx-font-size: 12px;
+}
+
+.detailed-mapping-mode .decision-inspector-drawer {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.detailed-mapping-mode .decision-inspector-header {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent transparent #E6EBF1 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 8 10 8 10;
+}
+
+.detailed-mapping-mode .decision-inspector-tab {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #D9E3ED;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 700;
+}
+
+.detailed-mapping-mode .decision-inspector-tab-active {
+    -fx-background-color: #F2F6FF;
+    -fx-border-color: #3B82F6;
+    -fx-text-fill: -stellar-accent;
+}
+
+.detailed-mapping-mode .inventory-study-signal-list,
+.detailed-mapping-mode .inventory-signal-list {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #E3E9EF;
+    -fx-border-width: 1;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-font-size: 12px;
+}
+
+.signal-panel-collapse-button {
+    -fx-min-width: 28px;
+    -fx-pref-width: 28px;
+    -fx-max-width: 28px;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-padding: 0;
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -stellar-text-secondary;
+}
+.signal-panel-rail {
+    -fx-min-width: 36px;
+    -fx-pref-width: 36px;
+    -fx-max-width: 36px;
+    -fx-alignment: TOP_CENTER;
+    -fx-padding: 8 4 8 4;
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #DCE6EE;
+    -fx-border-width: 0 1 0 0;
+}
+.browser-bulk-actions,
+.browser-secondary-controls {
+    -fx-alignment: CENTER_LEFT;
+    -fx-hgap: 6;
+    -fx-vgap: 6;
+}
+.signal-panel-header {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 8;
+}
+.readable-action-button {
+    -fx-min-width: -1;
+    -fx-padding: 4 10 4 10;
+}
+
+.signal-browser-pane {
+    -fx-spacing: 6;
+}
+
+.signal-browser-pane .browser-secondary-controls,
+.signal-browser-pane .browser-bulk-actions {
+    -fx-hgap: 4;
+    -fx-vgap: 4;
+}
+
+.signal-browser-pane .browser-compact-control {
+    -fx-min-height: 26px;
+    -fx-pref-height: 26px;
+    -fx-max-height: 26px;
+    -fx-padding: 2 8 2 8;
+    -fx-font-size: 11px;
+    -fx-graphic-text-gap: 4;
+}
+
+.workspace-chip-strip {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.workspace-chip-strip > .viewport {
+    -fx-background-color: transparent;
+}
+
+.workspace-footer-timing {
+    -fx-alignment: center-left;
+    -fx-spacing: 8;
+    -fx-padding: 0 0 2 0;
+}
+
+.active-signal-workspace .workspace-toolbar .button,
+.active-signal-workspace .workspace-toolbar-actions .button,
+.active-signal-workspace .workspace-command-row .button {
+    -fx-min-width: -1;
+}
+
+/* Signals workstation: one compact hierarchy for the context strip, browser, and table. */
+.signals-page {
+    -fx-background-color: #F4F6F8;
+    -fx-padding: 8;
+    -fx-spacing: 8;
+}
+
+.signals-context-bar {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-padding: 6 8 6 8;
+    -fx-spacing: 8;
+}
+
+.signals-context-bar .context-item-card {
+    -fx-background-color: #F7F9FB;
+    -fx-background-radius: 6;
+    -fx-border-color: #E6EDF4;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 4 8 4 8;
+}
+
+.signals-context-bar .context-value,
+.signals-context-bar .signals-context-chip-value {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.signals-context-bar .button {
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-max-height: 28px;
+    -fx-font-size: 12px;
+    -fx-padding: 2 10 2 10;
+}
+
+.signals-page .signal-browser-pane,
+.signals-page .active-signal-workspace,
+.signals-page .signal-inspector-pane {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+}
+
+.signal-browser-pane .browser-chrome {
+    -fx-spacing: 8;
+}
+
+.signal-browser-pane .browser-filter-panel {
+    -fx-spacing: 6;
+    -fx-padding: 2 8 2 8;
+    -fx-background-color: #F7F9FB;
+    -fx-background-radius: 6;
+    -fx-border-color: #E6EDF4;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+}
+
+.signal-browser-pane .search-field-shell {
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-max-height: 28px;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+}
+
+.signal-browser-pane .search-field-shell .search-field-inner,
+.signal-browser-pane .search-field-shell .text-field {
+    -fx-min-height: 26px;
+    -fx-pref-height: 26px;
+    -fx-padding: 2 48 2 10;
+    -fx-font-size: 12px;
+}
+
+.signal-browser-pane .browser-filter-combo,
+.signal-browser-pane .combo-box {
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-max-height: 28px;
+    -fx-font-size: 12px;
+}
+
+.signal-browser-pane .browser-compact-action {
+    -fx-min-width: 28px;
+    -fx-pref-width: 28px;
+    -fx-max-width: 28px;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-max-height: 28px;
+    -fx-padding: 2;
+}
+
+.signal-browser-pane .browser-health-card {
+    -fx-padding: 6 8 6 8;
+    -fx-background-radius: 6;
+    -fx-border-color: #E6EDF4;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+}
+
+.active-signal-workspace .workspace-command-row .button,
+.active-signal-workspace .workspace-toolbar .button {
+    -fx-font-size: 12px;
+    -fx-padding: 2 8 2 8;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-max-height: 28px;
+}
+
+.active-signal-workspace .workspace-table-host {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E6EDF4;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.signals-context-bar .context-measurement-card {
+    -fx-cursor: hand;
+}
+
+.signals-context-bar .context-measurement-card:hover {
+    -fx-border-color: #1F6FEB;
+}
+
+.signal-browser-pane .browser-filter-badge {
+    -fx-background-color: #1F6FEB;
+    -fx-text-fill: white;
+    -fx-font-size: 9px;
+    -fx-font-weight: 700;
+    -fx-padding: 0 4 0 4;
+    -fx-background-radius: 8;
+    -fx-min-height: 14;
+    -fx-pref-height: 14;
+    -fx-alignment: center;
+    -fx-translate-x: 4;
+    -fx-translate-y: -4;
+}
+
+.browser-filters-popover {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-padding: 10 12 12 12;
+    -fx-effect: dropshadow(gaussian, rgba(20, 42, 58, 0.12), 12, 0, 0, 4);
+}
+
+.browser-filters-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #142A3A;
+}
+
+.browser-filters-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #3D4F63;
+}
+
+.browser-filters-popover .combo-box,
+.browser-filters-popover .button,
+.browser-filters-popover .toggle-button,
+.browser-filters-popover .text-field {
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-max-height: 28px;
+    -fx-font-size: 12px;
+}
+
+.signals-context-bar {
+    -fx-alignment: center-left;
+    -fx-spacing: 8;
+}
+
+.signals-context-actions {
+    -fx-alignment: center-right;
+    -fx-spacing: 8;
+}
+
+.signals-context-actions .button,
+.signals-context-actions .signals-context-action {
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-max-height: 28px;
+    -fx-font-size: 12px;
+    -fx-padding: 2 12 2 12;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+}
+
+.signals-toolbar-separator {
+    -fx-min-width: 1;
+    -fx-pref-width: 1;
+    -fx-max-width: 1;
+    -fx-background-color: #E2E8F0;
+}
+
+.signals-page .workspace-chip-strip {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-min-height: 46;
+    -fx-pref-height: 46;
+    -fx-max-height: 46;
+}
+
+.signals-page .signal-chip-strip {
+    -fx-alignment: center-left;
+    -fx-spacing: 4;
+    -fx-min-height: 46;
+    -fx-pref-height: 46;
+    -fx-max-height: 46;
+}
+
+.signals-page .signal-chip-scroll-button {
+    -fx-min-width: 28;
+    -fx-pref-width: 28;
+    -fx-max-width: 28;
+    -fx-min-height: 28;
+    -fx-pref-height: 28;
+    -fx-max-height: 28;
+    -fx-padding: 2;
+}
+
+.signals-page .workspace-chip-strip .signal-chip {
+    -fx-min-width: 160;
+    -fx-pref-width: 200;
+    -fx-max-width: 240;
+    -fx-min-height: 28;
+    -fx-pref-height: 28;
+    -fx-max-height: 28;
+    -fx-padding: 2 6 2 8;
+    -fx-spacing: 6;
+    -fx-alignment: center-left;
+}
+
+.signals-page .workspace-chip-strip .signal-chip-name {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-max-width: 100px;
+}
+
+.signals-page .workspace-chip-strip .chip-remove {
+    -fx-min-width: 18;
+    -fx-pref-width: 18;
+    -fx-max-width: 18;
+    -fx-padding: 0;
+}
+
+.workspace-chip-strip {
+    -fx-min-height: 46;
+    -fx-pref-height: 46;
+    -fx-max-height: 46;
+}
+
+.signals-page .signal-browser-pane {
+    -fx-min-width: 320;
+    -fx-pref-width: 330;
+    -fx-max-width: 350;
+}
+
+.signals-page .signal-inspector-pane.inspector-collapsed {
+    -fx-min-width: 28;
+    -fx-pref-width: 28;
+    -fx-max-width: 28;
+    -fx-padding: 8 4 8 4;
+}
+
+.active-signal-workspace .workspace-utility-row {
+    -fx-alignment: center-right;
+    -fx-spacing: 4;
+    -fx-min-height: 36;
+    -fx-pref-height: 36;
+    -fx-max-height: 36;
+    -fx-padding: 0;
+}
+
+.active-signal-workspace .workspace-utility-row .button {
+    -fx-font-size: 12px;
+    -fx-padding: 2 8 2 8;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-max-height: 28px;
+}
+
+.active-signal-workspace .workspace-toolbar.analysis-toolbar {
+    -fx-spacing: 3;
+    -fx-alignment: center-left;
+    -fx-min-height: 36;
+    -fx-pref-height: 36;
+    -fx-max-height: 40;
+    -fx-padding: 0;
+    -fx-border-width: 0;
+}
+
+.active-signal-workspace .workspace-navigation-fallback {
+    -fx-alignment: center-left;
+    -fx-spacing: 4;
+    -fx-min-height: 36;
+    -fx-pref-height: 36;
+    -fx-max-height: 36;
+    -fx-padding: 0;
+}
+
+.browser-row-check,
+.browser-header-check {
+    -fx-padding: 0;
+}
+
+.browser-row-check .box,
+.browser-header-check .box {
+    -fx-pref-width: 14px;
+    -fx-pref-height: 14px;
+    -fx-min-width: 14px;
+    -fx-min-height: 14px;
+}
+
+.signals-page .workspace-chip-strip .signal-chip-name {
+    -fx-text-fill: -stellar-text;
+}

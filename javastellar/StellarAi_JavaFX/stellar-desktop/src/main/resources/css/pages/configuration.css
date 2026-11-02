@@ -1,0 +1,164 @@
+/* Configuration page. */
+
+/* —— Configuration / Analysis Storage —— */
+.config-page-scroll {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+.config-page {
+    -fx-background-color: transparent;
+}
+.config-section-nav {
+    -fx-padding: 0 0 4 0;
+}
+.config-section-chip {
+    -fx-background-color: #EEF3F8;
+    -fx-text-fill: #3A5168;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-border-color: #D5DEE8;
+    -fx-padding: 6 12;
+    -fx-font-weight: 700;
+}
+.config-section-chip-active {
+    -fx-background-color: #E8F1FB;
+    -fx-text-fill: #1B4F86;
+    -fx-border-color: #B7CFE8;
+}
+.config-card {
+    -fx-background-color: -stellar-surface;
+    -fx-background-radius: 10;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 10;
+    -fx-padding: 18 20 18 20;
+    -fx-effect: dropshadow(gaussian, rgba(19,38,58,0.05), 10, 0.1, 0, 2);
+}
+.config-field-label {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #17324D;
+}
+.config-path-field {
+    -fx-pref-height: 34;
+}
+.config-status-badge {
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-padding: 4 10;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+}
+.config-status-valid {
+    -fx-background-color: #E8F7EE;
+    -fx-text-fill: #1B6B3A;
+    -fx-border-color: #B7E0C4;
+}
+.config-status-invalid {
+    -fx-background-color: #FDEBEC;
+    -fx-text-fill: #9B2C2C;
+    -fx-border-color: #F0C2C2;
+}
+.config-status-unset {
+    -fx-background-color: #F4F6F9;
+    -fx-text-fill: #5A6F84;
+    -fx-border-color: #D5DEE8;
+}
+.config-mono {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 12.5px;
+    -fx-text-fill: #243B53;
+}
+
+/* —— Configuration / GPS & Map —— */
+.config-gps-empty {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: -stellar-text-secondary;
+}
+.config-gps-source {
+    -fx-pref-height: 30;
+}
+.config-gps-group-caption {
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -stellar-text-muted;
+}
+.config-gps-role-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -stellar-text;
+}
+/* One row per GPS role: identity on the left, signal selector on the right. */
+.config-gps-role-grid {
+    -fx-padding: 4 0 4 0;
+}
+.config-gps-role-row {
+    -fx-padding: 9 0 9 0;
+}
+.config-gps-role-icon {
+    -fx-min-width: 30;
+    -fx-pref-width: 30;
+    -fx-max-width: 30;
+    -fx-min-height: 30;
+    -fx-pref-height: 30;
+    -fx-max-height: 30;
+    -fx-background-color: #F1F5F9;
+    -fx-background-radius: 999;
+    -fx-border-color: #E1E8F0;
+    -fx-border-radius: 999;
+}
+.config-gps-role-required {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -stellar-danger;
+}
+.config-gps-role-optional {
+    -fx-font-size: 11px;
+    -fx-text-fill: -stellar-text-muted;
+}
+.config-gps-role-hint {
+    -fx-font-size: 11px;
+    -fx-text-fill: -stellar-text-muted;
+}
+.config-gps-editor-divider {
+    -fx-padding: 6 0 2 0;
+}
+.config-gps-editor-actions {
+    -fx-padding: 6 0 0 0;
+}
+.config-gps-role-status {
+    -fx-font-size: 10.5px;
+    -fx-text-fill: -stellar-text-muted;
+}
+.config-gps-role-status-warning {
+    -fx-text-fill: -stellar-warning;
+}
+.config-gps-role-status-missing {
+    -fx-text-fill: -stellar-danger;
+}
+/* Resolved signal name in the compact summary: an engineering identifier, not prose. */
+.config-gps-summary-value {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 12px;
+    -fx-text-fill: -stellar-text;
+}
+.config-gps-scope-badge {
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1B4F86;
+    -fx-background-color: #E8F1FB;
+    -fx-background-radius: 999;
+    -fx-border-color: #B7CFE8;
+    -fx-border-radius: 999;
+    -fx-padding: 3 10;
+}
+.config-gps-advanced > .title {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-background-color: transparent;
+    -fx-padding: 4 0 4 0;
+}
+.config-gps-advanced > .content {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 6 0 0 0;
+}

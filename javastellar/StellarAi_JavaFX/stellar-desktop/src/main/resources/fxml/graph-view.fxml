@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import com.stellar.platform.desktop.ui.graph.AutomotiveSignalCanvas?>
+<?import com.stellar.platform.desktop.ui.graph.EChartsAnalyticsPane?>
+<?import com.stellar.platform.desktop.ui.graph.EngineeringAnalysisPane?>
+<?import com.stellar.platform.desktop.ui.graph.map.MapRoutePane?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.stellar.platform.desktop.ui.GraphController" styleClass="graph-page" minWidth="0" minHeight="0">
+  <top><HBox fx:id="graphToolbar" spacing="6" alignment="CENTER_LEFT" styleClass="graph-toolbar" minHeight="40">
+    <Label text="Graphs" styleClass="section-title"/>
+    <HBox fx:id="graphLayoutModes" spacing="0" alignment="CENTER" styleClass="graph-layout-segmented">
+      <ToggleButton fx:id="overlayLayoutButton" text="Overlay" styleClass="graph-layout-segment,graph-layout-segment-left"><tooltip><Tooltip text="Overlay · compare signals on the same time axis. Units are not auto-normalized."/></tooltip></ToggleButton>
+      <ToggleButton fx:id="stackedLayoutButton" text="Stacked" styleClass="graph-layout-segment,graph-layout-segment-right"><tooltip><Tooltip text="Stacked · separate tracks with independent Y scales — recommended for mixed units"/></tooltip></ToggleButton>
+    </HBox>
+    <HBox fx:id="graphPrimaryTools" spacing="4" alignment="CENTER" styleClass="graph-analysis-tools">
+      <Button fx:id="panLeftButton" accessibleText="Back" onAction="#onPanLeft" styleClass="graph-tool-button"><tooltip><Tooltip text="Back · move earlier in time"/></tooltip></Button>
+      <Button fx:id="panRightButton" accessibleText="Forward" onAction="#onPanRight" styleClass="graph-tool-button"><tooltip><Tooltip text="Forward · move later in time"/></tooltip></Button>
+      <Region styleClass="graph-tool-gap" minWidth="8" prefWidth="8" maxWidth="8"/>
+      <Button fx:id="zoomInButton" accessibleText="Zoom In" onAction="#onZoomIn" styleClass="graph-tool-button"><tooltip><Tooltip text="Zoom in around viewport centre"/></tooltip></Button>
+      <Button fx:id="zoomOutButton" accessibleText="Zoom Out" onAction="#onZoomOut" styleClass="graph-tool-button"><tooltip><Tooltip text="Zoom out around viewport centre"/></tooltip></Button>
+      <Button fx:id="fitButton" accessibleText="Fit" onAction="#onFit" styleClass="graph-tool-button"><tooltip><Tooltip text="Fit · visible traces' available time extent"/></tooltip></Button>
+      <Region styleClass="graph-tool-gap" minWidth="8" prefWidth="8" maxWidth="8"/>
+      <Button fx:id="resetViewButton" text="Reset View" accessibleText="Reset View" onAction="#onResetView" styleClass="graph-tool-button"><tooltip><Tooltip text="Reset View · restore this investigation's default viewport. Does not remove traces."/></tooltip></Button>
+    </HBox>
+    <HBox fx:id="mapRouteTools" spacing="4" alignment="CENTER" styleClass="graph-analysis-tools" visible="false" managed="false">
+      <Button fx:id="mapFitRouteButton" text="Fit Route" onAction="#onMapFitRoute" styleClass="secondary-button,compact-button">
+        <tooltip><Tooltip text="Fit the map viewport to the GPS route"/></tooltip>
+      </Button>
+      <ToggleButton fx:id="mapSelectSegmentButton" text="Select Segment" onAction="#onMapSelectSegment" styleClass="secondary-button,compact-button">
+        <tooltip><Tooltip text="First click sets A, second click sets B. Clicks snap to the nearest GPS sample."/></tooltip>
+      </ToggleButton>
+      <Button fx:id="mapClearSegmentButton" text="Clear Segment" onAction="#onMapClearSegment" styleClass="secondary-button,compact-button">
+        <tooltip><Tooltip text="Return the analysis interval to Start → End (full drive)"/></tooltip>
+      </Button>
+    </HBox>
+    <Button fx:id="addEventButton" text="Add Event" accessibleText="Add Event" onAction="#onAddEvent" styleClass="graph-tool-button">
+      <graphic><Label text="+" style="-fx-text-fill: #0E7490; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 0 2 0 0;"/></graphic>
+      <tooltip><Tooltip text="Add Event · click a waveform sample, then save that sample as a point event. Shift+click sets Cursor A. Ctrl+click sets Cursor B."/></tooltip>
+    </Button>
+    <Button fx:id="focusGraphButton" text="Full Screen" accessibleText="Full Screen" onAction="#onToggleFocusGraph" styleClass="graph-tool-button">
+      <tooltip><Tooltip text="Full Screen · hide Signals, Inspector and project chrome. Esc exits."/></tooltip>
+    </Button>
+    <Label fx:id="rangeLabel" text="—" styleClass="muted"/>
+    <Region HBox.hgrow="ALWAYS"/>
+    <HBox fx:id="graphSecondaryTools" spacing="6" alignment="CENTER_LEFT">
+      <Button text="Create Investigation" onAction="#onCreateInvestigation" styleClass="secondary-button,compact-button"/>
+      <Button text="Add View" onAction="#onAddViewToEvidence" styleClass="secondary-button,compact-button"/>
+      <Button text="Capture" onAction="#onCaptureInvestigationSnapshot" styleClass="secondary-button,compact-button"/>
+      <HBox fx:id="trackDensityBox" spacing="6" alignment="CENTER_LEFT"><Label text="Track height" styleClass="muted"/><ComboBox fx:id="trackDensity" onAction="#onTrackDensityChanged" prefWidth="130"/></HBox>
+      <Button fx:id="clearViewButton" text="Clear View" onAction="#onClearSelection" styleClass="secondary-button,compact-button"><tooltip><Tooltip text="Clear View · remove analysis traces and release graph memory. Catalog stays intact."/></tooltip></Button>
+    </HBox>
+    <MenuButton fx:id="toolbarMoreButton" text="More" accessibleText="More" styleClass="graph-tool-button,graph-more-button">
+      <tooltip><Tooltip text="More · investigation and layout actions"/></tooltip>
+    </MenuButton>
+  </HBox></top>
+  <center>
+    <!-- Inspector is a sibling column (not a SplitPane item) so collapse returns width to the graph. -->
+    <HBox fx:id="graphMainRow" spacing="0" minWidth="0" minHeight="0" styleClass="graph-main-row">
+      <SplitPane fx:id="graphWorkspaceSplit" dividerPositions="0.28" HBox.hgrow="ALWAYS" styleClass="graph-workspace-split" minWidth="0" minHeight="0">
+        <VBox fx:id="signalPanel" spacing="6" minWidth="300" prefWidth="340" maxWidth="480" styleClass="graph-signal-panel">
+          <HBox fx:id="signalPanelHeader" alignment="CENTER_LEFT" spacing="8" styleClass="signal-panel-header">
+            <Label fx:id="signalPanelTitle" text="Signals to Plot" styleClass="section-title" minWidth="-Infinity"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="collapseSignalPanelButton" text="&#8249;" onAction="#onToggleSignalPanel" styleClass="secondary-button,compact-button,signal-panel-collapse-button">
+              <tooltip><Tooltip text="Collapse signals"/></tooltip>
+            </Button>
+          </HBox>
+          <TextField fx:id="signalSearch" promptText="Search signals..." onKeyReleased="#onSearchChanged" styleClass="graph-search"/>
+          <FlowPane fx:id="explorerFilterRow" hgap="4" vgap="4" prefWrapLength="260" minWidth="0" prefWidth="260" maxWidth="Infinity" minHeight="28" prefHeight="28" maxHeight="60" alignment="CENTER_LEFT" styleClass="graph-filter-scroll,graph-explorer-filters">
+                <ToggleButton fx:id="filterAllButton" text="All" onAction="#onExplorerFilterAll" styleClass="graph-explorer-chip"/>
+                <ToggleButton fx:id="filterRecommendedButton" text="Recommended" onAction="#onExplorerFilterRecommended" styleClass="graph-explorer-chip" visible="false" managed="false"/>
+                <ToggleButton fx:id="filterSelectedButton" text="Selected" onAction="#onExplorerFilterSelected" styleClass="graph-explorer-chip"/>
+                <ToggleButton fx:id="filterDbcButton" text="DBC" onAction="#onExplorerFilterDbc" styleClass="graph-explorer-chip"/>
+                <ToggleButton fx:id="filterNativeButton" text="Native" onAction="#onExplorerFilterNative" styleClass="graph-explorer-chip" visible="false" managed="false"/>
+                <ToggleButton fx:id="filterFavoritesButton" text="Favorites" onAction="#onExplorerFilterFavorites" styleClass="graph-explorer-chip" visible="false" managed="false"/>
+          </FlowPane>
+          <VBox spacing="4" fillWidth="true" styleClass="graph-explorer-actions">
+            <Label fx:id="visibleCountLabel" text="0 selected · 0 visible / 0 signals" styleClass="graph-explorer-count" wrapText="true" textOverrun="CLIP" minWidth="0" prefWidth="0" maxWidth="Infinity"/>
+            <Label fx:id="selectionLabel" text="0 selected / 0 signals" managed="false" visible="false"/>
+            <FlowPane hgap="4" vgap="4" prefWrapLength="260" minWidth="0" prefWidth="260" maxWidth="Infinity" alignment="CENTER_LEFT" styleClass="graph-explorer-menu-row">
+            <MenuButton fx:id="selectionActionsButton" text="Select" styleClass="secondary-button,compact-button,graph-overflow-menu">
+              <tooltip><Tooltip text="Select or deselect the signals in the current filter. Clear All removes analysis traces. This does not change visibility."/></tooltip>
+              <items>
+                <MenuItem text="Select All" onAction="#onSelectAllFiltered"/>
+                <MenuItem text="Deselect All" onAction="#onDeselectAllFiltered"/>
+                <SeparatorMenuItem/>
+                <MenuItem text="Clear All" onAction="#onClearSelection"/>
+              </items>
+            </MenuButton>
+            <MenuButton fx:id="visibilityActionsButton" text="Show" styleClass="secondary-button,compact-button,graph-overflow-menu">
+              <tooltip><Tooltip text="Show or hide plotted signals. This does not change which signals are selected."/></tooltip>
+              <items>
+                <MenuItem text="Show All" onAction="#onShowAll"/>
+                <MenuItem text="Hide All" onAction="#onHideAll"/>
+              </items>
+            </MenuButton>
+            <MenuButton fx:id="orderActionsButton" text="Order" styleClass="secondary-button,compact-button,graph-overflow-menu">
+              <tooltip><Tooltip text="Reorder the selected signal. Alt+Up and Alt+Down do the same."/></tooltip>
+              <items>
+                <MenuItem fx:id="moveUpItem" text="Move Up" onAction="#onMoveUp"/>
+                <MenuItem fx:id="moveDownItem" text="Move Down" onAction="#onMoveDown"/>
+              </items>
+            </MenuButton>
+            </FlowPane>
+          </VBox>
+          <ListView fx:id="signalList" VBox.vgrow="ALWAYS" minWidth="0" styleClass="graph-signal-explorer"/>
+          <Label text="Checkbox adds a signal. Hide conceals its graph. Unchecking does not delete the catalog signal." styleClass="graph-hint" wrapText="true" textOverrun="CLIP" minWidth="0" prefWidth="0" maxWidth="Infinity" minHeight="16" maxHeight="52">
+            <tooltip><Tooltip text="Checkbox adds a signal to this analysis. Hide only conceals its graph. Unchecking does not delete the catalog signal."/></tooltip>
+          </Label>
+        </VBox>
+        <VBox spacing="0" minWidth="0" minHeight="0" styleClass="graph-canvas-panel" HBox.hgrow="ALWAYS">
+          <HBox fx:id="graphFileStrip" spacing="8" alignment="CENTER_LEFT" styleClass="graph-file-strip">
+            <Label text="Active Measurement" styleClass="muted,graph-file-label"/>
+            <ComboBox fx:id="measurementCombo" minWidth="160" prefWidth="260" maxWidth="320" styleClass="graph-file-name,graph-measurement-combo"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Current viewport" styleClass="graph-range-pill"><tooltip><Tooltip text="Current viewport"/></tooltip></Label>
+            <Button fx:id="snapshotButton" onAction="#onSnapshot" styleClass="graph-tool-button,graph-camera-button"><tooltip><Tooltip text="Capture Snapshot"/></tooltip></Button>
+          </HBox>
+          <HBox fx:id="selectedSignalCards" spacing="6" alignment="CENTER_LEFT" styleClass="graph-chip-strip" minHeight="32" prefHeight="32" maxHeight="32"/>
+          <StackPane minWidth="0" minHeight="0" VBox.vgrow="ALWAYS">
+            <TabPane fx:id="analysisTabs" tabClosingPolicy="UNAVAILABLE" minWidth="0" minHeight="0" maxHeight="Infinity" styleClass="graph-analysis-tabs"><tabs>
+              <Tab text="Waveforms"><content><VBox minWidth="0" minHeight="0">
+                <HBox fx:id="fileFocusBar" spacing="8" alignment="CENTER_LEFT" styleClass="graph-interaction-bar" visible="false" managed="false">
+                  <Label fx:id="timelineGroupLabel" text="" styleClass="graph-live-cursor"/>
+                  <Button fx:id="utcGroupButton" text="Verified UTC" onAction="#onShowUtcGroup" styleClass="secondary-button,compact-button"><tooltip><Tooltip text="Overview of recordings with a verified UTC clock"/></tooltip></Button>
+                  <Button fx:id="unknownGroupButton" text="Unknown Order" onAction="#onShowUnknownGroup" styleClass="secondary-button,compact-button"><tooltip><Tooltip text="Overview of recordings without a verified clock. Slot order is not elapsed time."/></tooltip></Button>
+                  <ToggleButton fx:id="fileFocusToggle" text="File Focus" styleClass="secondary-button,compact-button" onAction="#onToggleFileFocus"><tooltip><Tooltip text="Optional single-file view. Previous and Next stay inside this tool."/></tooltip></ToggleButton>
+                  <Button fx:id="previousFileButton" text="Previous File" onAction="#onPreviousFile" visible="false" managed="false" styleClass="secondary-button,compact-button"><tooltip><Tooltip text="Show the previous measurement in this signal"/></tooltip></Button>
+                  <Button fx:id="nextFileButton" text="Next File" onAction="#onNextFile" visible="false" managed="false" styleClass="secondary-button,compact-button"><tooltip><Tooltip text="Show the next measurement in this signal"/></tooltip></Button>
+                  <Label fx:id="fileFocusLabel" text="" styleClass="graph-live-cursor"/>
+                </HBox>
+                <ScrollPane fx:id="waveformScroll" fitToWidth="true" fitToHeight="false" pannable="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="graph-track-scroll" VBox.vgrow="ALWAYS"><content><AutomotiveSignalCanvas fx:id="graphCanvas" minWidth="0" minHeight="360"/></content></ScrollPane>
+                <HBox spacing="6" alignment="CENTER_LEFT" styleClass="graph-interaction-bar,graph-cursor-bar">
+                  <Label fx:id="liveCursorLabel" text="Pointer: Hover waveform for values" styleClass="graph-live-cursor" minWidth="40" maxWidth="160" textOverrun="ELLIPSIS"/>
+                  <Label fx:id="selectedTimeLabel" text="Selected time: —" styleClass="graph-selected-time" minWidth="40" maxWidth="140" textOverrun="ELLIPSIS"/>
+                  <Region HBox.hgrow="ALWAYS" minWidth="4"/>
+                  <Button text="Cursor A" onAction="#onCursorA" styleClass="secondary-button,compact-button">
+                    <tooltip><Tooltip text="Cursor A · nearest plotted sample at the centre of the view. Shift+click sets Cursor A on the sample under the pointer."/></tooltip>
+                  </Button>
+                  <Label fx:id="cursorALabel" text="A: —" minWidth="28" maxWidth="120" textOverrun="ELLIPSIS"/>
+                  <Button text="Cursor B" onAction="#onCursorB" styleClass="secondary-button,compact-button">
+                    <tooltip><Tooltip text="Cursor B · nearest plotted sample at the centre of the view. Ctrl+click sets Cursor B on the sample under the pointer."/></tooltip>
+                  </Button>
+                  <Label fx:id="cursorBLabel" text="B: —" minWidth="28" maxWidth="120" textOverrun="ELLIPSIS"/>
+                  <Label fx:id="deltaLabel" text="Δ: —" styleClass="graph-delta" minWidth="28" maxWidth="120" textOverrun="ELLIPSIS"/>
+                  <Button text="Clear" onAction="#onClearCursors" styleClass="secondary-button,compact-button">
+                    <tooltip><Tooltip text="Clear Cursor A and Cursor B. Saved point events stay on the waveform."/></tooltip>
+                  </Button>
+                </HBox>
+              </VBox></content></Tab>
+              <Tab text="Analytics"><content><EChartsAnalyticsPane fx:id="analyticsPane" minWidth="0" minHeight="260"/></content></Tab>
+              <Tab text="Engineering"><content><EngineeringAnalysisPane fx:id="engineeringPane" minWidth="0" minHeight="260"/></content></Tab>
+              <Tab text="Map Route"><content><MapRoutePane fx:id="mapRoutePane" minWidth="0" minHeight="0" maxHeight="Infinity"/></content></Tab>
+            </tabs></TabPane>
+            <VBox fx:id="emptyStateBox" alignment="CENTER" spacing="12" styleClass="graph-empty-state" visible="false" managed="false">
+              <Label fx:id="graphEmptyTitle" text="Graphs &amp; Analysis" styleClass="section-title"/>
+              <Label fx:id="graphEmptyBody" text="No signals plotted yet." styleClass="muted" wrapText="true"/>
+              <Label fx:id="graphEmptyHint" text="Select one or more signals to start visual analysis." styleClass="muted" wrapText="true"/>
+              <Button fx:id="addSignalsToGraphButton" text="Add Signals to Graph" onAction="#onAddSignalsToGraph" styleClass="primary-button"/>
+            </VBox>
+          </StackPane>
+          <HBox alignment="CENTER_LEFT" styleClass="graph-status-bar">
+            <Label fx:id="statusLabel" text="No signals plotted yet." styleClass="graph-status" wrapText="false" textOverrun="ELLIPSIS" HBox.hgrow="ALWAYS"/>
+          </HBox>
+        </VBox>
+      </SplitPane>
+
+      <!-- Narrow reveal rail when Inspector is collapsed (presentation only). -->
+      <VBox fx:id="inspectorRail" alignment="TOP_CENTER" spacing="0" minWidth="32" prefWidth="32" maxWidth="36"
+            visible="false" managed="false" styleClass="graph-inspector-rail">
+        <Button fx:id="inspectorRailButton" text="&lt;" onAction="#onToggleInspector"
+                styleClass="graph-inspector-rail-button">
+          <tooltip><Tooltip text="Show Inspector"/></tooltip>
+        </Button>
+      </VBox>
+
+      <VBox fx:id="inspectorPanel" spacing="6" minWidth="240" prefWidth="272" maxWidth="380" minHeight="0" styleClass="graph-inspector-panel">
+        <HBox alignment="CENTER_LEFT" spacing="8" styleClass="graph-inspector-header">
+          <Label text="Inspector" styleClass="section-title"/>
+          <Region HBox.hgrow="ALWAYS"/>
+          <Button fx:id="inspectorHeaderToggleButton" text="&gt;" onAction="#onToggleInspector"
+                  styleClass="secondary-button,compact-button,graph-inspector-toggle">
+            <tooltip><Tooltip text="Hide Inspector"/></tooltip>
+          </Button>
+        </HBox>
+        <TabPane fx:id="inspectorTabs" tabClosingPolicy="UNAVAILABLE" styleClass="graph-details-tabs" VBox.vgrow="ALWAYS"><tabs>
+          <Tab text="Details"><content><ScrollPane fitToWidth="true"><content><VBox fx:id="detailsInspector" spacing="8" styleClass="graph-inspector-details"><Label text="Select an active signal to inspect metadata." styleClass="muted" wrapText="true"/></VBox></content></ScrollPane></content></Tab>
+          <Tab text="Statistics"><content><ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED"><content>
+            <VBox spacing="10" styleClass="graph-statistics-pane">
+              <Label text="Signal Summary" styleClass="subsection-title"/>
+              <Label text="Viewport statistics for selected signals. Formatting is presentation-only." styleClass="muted" wrapText="true"/>
+              <TableView fx:id="summaryStatsTable" minHeight="120" prefHeight="160"><columns>
+                <TableColumn fx:id="summarySignalColumn" text="Signal" prefWidth="140"/>
+                <TableColumn fx:id="summaryUnitColumn" text="Unit" prefWidth="56"/>
+                <TableColumn fx:id="summarySamplesColumn" text="Samples" prefWidth="72"/>
+                <TableColumn fx:id="summaryMinColumn" text="Min" prefWidth="72"/>
+                <TableColumn fx:id="summaryMaxColumn" text="Max" prefWidth="72"/>
+                <TableColumn fx:id="summaryMeanColumn" text="Mean" prefWidth="72"/>
+                <TableColumn fx:id="summaryRmsColumn" text="RMS" prefWidth="72"/>
+              </columns></TableView>
+              <Label text="Cursor Comparison" styleClass="subsection-title"/>
+              <TableView fx:id="cursorCompareTable" minHeight="100" prefHeight="140"><columns>
+                <TableColumn fx:id="compareSignalColumn" text="Signal" prefWidth="120"/>
+                <TableColumn fx:id="compareATimeColumn" text="A Time" prefWidth="88"/>
+                <TableColumn fx:id="compareAValueColumn" text="A Value" prefWidth="80"/>
+                <TableColumn fx:id="compareBTimeColumn" text="B Time" prefWidth="88"/>
+                <TableColumn fx:id="compareBValueColumn" text="B Value" prefWidth="80"/>
+                <TableColumn fx:id="compareDeltaTimeColumn" text="Δt" prefWidth="72"/>
+                <TableColumn fx:id="compareDeltaValueColumn" text="Δ Value" prefWidth="80"/>
+              </columns></TableView>
+            </VBox>
+          </content></ScrollPane></content></Tab>
+          <Tab text="Events"><content>
+            <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+              <content>
+            <VBox spacing="8" styleClass="graph-events-pane" minHeight="0">
+              <Label text="Investigation events" styleClass="subsection-title"/>
+              <Label text="Saved events for this graph. Click a row to jump there. Add Event stays in the top toolbar." styleClass="muted" wrapText="true"/>
+              <VBox fx:id="eventActionBox" spacing="6" fillWidth="true" minWidth="0">
+                <FlowPane fx:id="eventActionRow" hgap="6" vgap="6" prefWrapLength="220" minWidth="0">
+                  <Button fx:id="editEventButton" text="Edit" onAction="#onEditEvent" disable="true" minWidth="-Infinity" styleClass="secondary-button,compact-button">
+                    <tooltip><Tooltip text="Edit the selected event"/></tooltip>
+                  </Button>
+                  <Button fx:id="zoomEventButton" text="Zoom" onAction="#onZoomToEvent" disable="true" minWidth="-Infinity" styleClass="secondary-button,compact-button">
+                    <tooltip><Tooltip text="Zoom to the selected event"/></tooltip>
+                  </Button>
+                  <Button fx:id="linkSnapshotButton" text="Link Snapshot" onAction="#onLinkSnapshot" disable="true" minWidth="-Infinity" styleClass="secondary-button,compact-button">
+                    <tooltip><Tooltip text="Link a snapshot to the selected event"/></tooltip>
+                  </Button>
+                  <Button fx:id="gpsEventButton" text="GPS" onAction="#onGpsEvent" disable="true" minWidth="-Infinity" styleClass="secondary-button,compact-button">
+                    <tooltip><Tooltip text="GPS evidence for the selected event"/></tooltip>
+                  </Button>
+                  <Button fx:id="deleteEventButton" text="Delete" onAction="#onDeleteEvent" disable="true" minWidth="-Infinity" styleClass="secondary-button,compact-button">
+                    <tooltip><Tooltip text="Delete the selected event"/></tooltip>
+                  </Button>
+                </FlowPane>
+                <MenuButton fx:id="eventActionMore" text="More" visible="false" managed="false" styleClass="secondary-button,compact-button">
+                  <tooltip><Tooltip text="More event actions"/></tooltip>
+                </MenuButton>
+              </VBox>
+              <ListView fx:id="eventsList" VBox.vgrow="ALWAYS" minHeight="80" styleClass="graph-events-list"/>
+              <Label fx:id="eventsEmptyLabel" text="No events yet. Click a sample, then use Add Event in the toolbar." styleClass="muted" wrapText="true"/>
+            </VBox>
+              </content>
+            </ScrollPane>
+          </content></Tab>
+          <Tab text="Notes"><content>
+            <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+              <content>
+                <VBox spacing="6" minHeight="0"><Label text="Investigation notes persist with the project. They never modify measurement samples." styleClass="muted" wrapText="true"/><TextArea fx:id="notesArea" promptText="Add engineering context…" wrapText="true" VBox.vgrow="ALWAYS" minHeight="80"/></VBox>
+              </content>
+            </ScrollPane>
+          </content></Tab>
+        </tabs></TabPane>
+      </VBox>
+    </HBox>
+  </center>
+</BorderPane>

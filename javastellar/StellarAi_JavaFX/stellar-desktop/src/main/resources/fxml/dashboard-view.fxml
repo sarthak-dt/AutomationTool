@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.stellar.platform.desktop.ui.DashboardController"
+            fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+            styleClass="dashboard-scroll" minWidth="0" minHeight="0">
+    <content>
+        <VBox spacing="12" styleClass="dashboard-page" fillWidth="true" minWidth="0">
+
+            <!-- Welcome + search: two-column row, vertically centered -->
+            <HBox spacing="16" alignment="CENTER" minWidth="0" styleClass="dashboard-hero">
+                <VBox spacing="4" minWidth="160" HBox.hgrow="NEVER" alignment="CENTER_LEFT">
+                    <Label fx:id="welcomeTitleLabel" text="Welcome back" styleClass="dashboard-welcome-title"/>
+                    <Label fx:id="welcomeSubtitleLabel" text="Parse. Decode. Analyze. Extract Insights."
+                           styleClass="dashboard-welcome-subtitle"/>
+                </VBox>
+                <Region minWidth="8" HBox.hgrow="ALWAYS"/>
+                <StackPane minWidth="200" prefWidth="420" maxWidth="560" styleClass="dashboard-search-host"
+                           alignment="CENTER_LEFT">
+                    <TextField fx:id="globalSearchField" promptText="Search projects, files, signals…"
+                               styleClass="dashboard-search-field" maxWidth="Infinity"/>
+                    <Label text="⌕" styleClass="dashboard-search-icon" StackPane.alignment="CENTER_LEFT"
+                           mouseTransparent="true"/>
+                </StackPane>
+            </HBox>
+
+            <HBox fx:id="analysisStorageBanner" spacing="10" alignment="CENTER_LEFT"
+                  styleClass="dashboard-storage-banner" managed="false" visible="false">
+                <Label text="Analysis storage" styleClass="dashboard-storage-label"/>
+                <Label fx:id="analysisStorageStatusLabel" text="Not configured" styleClass="dashboard-storage-status"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="configureStorageButton" text="Configure" onAction="#onConfigureStorage"
+                        styleClass="secondary-button,compact-button"/>
+            </HBox>
+
+            <!-- Five equal-height KPI cards -->
+            <HBox fx:id="kpiRow" spacing="8" minWidth="0" alignment="TOP_CENTER" styleClass="dashboard-kpi-row">
+                <VBox spacing="4" styleClass="dashboard-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" minHeight="100">
+                    <HBox spacing="8" alignment="CENTER_LEFT" minHeight="24">
+                        <Label text="▣" styleClass="dashboard-kpi-icon,kpi-icon-projects"/>
+                        <Label text="Total Projects" styleClass="dashboard-kpi-label"/>
+                    </HBox>
+                    <Label fx:id="kpiProjectsValue" text="0" styleClass="dashboard-kpi-value"/>
+                    <Label fx:id="kpiProjectsHint" text="Persisted" styleClass="dashboard-kpi-hint"
+                           wrapText="false" textOverrun="ELLIPSIS" maxWidth="Infinity"/>
+                </VBox>
+                <VBox spacing="4" styleClass="dashboard-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" minHeight="100">
+                    <HBox spacing="8" alignment="CENTER_LEFT" minHeight="24">
+                        <Label text="▤" styleClass="dashboard-kpi-icon,kpi-icon-files"/>
+                        <Label text="Measurement Files" styleClass="dashboard-kpi-label"/>
+                    </HBox>
+                    <Label fx:id="kpiFilesValue" text="0" styleClass="dashboard-kpi-value,measurement-accent"/>
+                    <Label fx:id="kpiFilesHint" text="Across projects" styleClass="dashboard-kpi-hint"
+                           wrapText="false" textOverrun="ELLIPSIS" maxWidth="Infinity"/>
+                </VBox>
+                <VBox spacing="4" styleClass="dashboard-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" minHeight="100">
+                    <HBox spacing="8" alignment="CENTER_LEFT" minHeight="24">
+                        <Label text="∿" styleClass="dashboard-kpi-icon,kpi-icon-signals"/>
+                        <Label text="Signals Across All Projects" styleClass="dashboard-kpi-label"/>
+                    </HBox>
+                    <Label fx:id="kpiSignalsValue" text="0" styleClass="dashboard-kpi-value,ready-accent"/>
+                    <Label fx:id="kpiSignalsHint" text="Unique indexed signals across all saved projects" styleClass="dashboard-kpi-hint"
+                           wrapText="false" textOverrun="ELLIPSIS" maxWidth="Infinity"/>
+                </VBox>
+                <VBox spacing="4" styleClass="dashboard-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" minHeight="100">
+                    <HBox spacing="8" alignment="CENTER_LEFT" minHeight="24">
+                        <Label text="✓" styleClass="dashboard-kpi-icon,kpi-icon-decode"/>
+                        <Label text="Processing Success" styleClass="dashboard-kpi-label"/>
+                    </HBox>
+                    <Label fx:id="kpiDecodeValue" text="0" styleClass="dashboard-kpi-value,mapping-accent"/>
+                    <Label fx:id="kpiDecodeHint" text="Completed runs" styleClass="dashboard-kpi-hint"
+                           wrapText="false" textOverrun="ELLIPSIS" maxWidth="Infinity"/>
+                </VBox>
+                <VBox spacing="4" styleClass="dashboard-kpi-card" HBox.hgrow="ALWAYS" maxWidth="Infinity" minHeight="100">
+                    <HBox spacing="8" alignment="CENTER_LEFT" minHeight="24">
+                        <Label text="⇄" styleClass="dashboard-kpi-icon,kpi-icon-frames"/>
+                        <Label text="CAN Frames" styleClass="dashboard-kpi-label"/>
+                    </HBox>
+                    <Label fx:id="kpiFramesValue" text="0" styleClass="dashboard-kpi-value"/>
+                    <Label fx:id="kpiFramesHint" text="From inventories" styleClass="dashboard-kpi-hint"
+                           wrapText="false" textOverrun="ELLIPSIS" maxWidth="Infinity"/>
+                </VBox>
+            </HBox>
+
+            <!-- Main + right rail -->
+            <HBox spacing="12" alignment="TOP_LEFT" minWidth="0" styleClass="dashboard-body">
+                <VBox spacing="12" minWidth="0" HBox.hgrow="ALWAYS" styleClass="dashboard-main-column">
+
+                    <!-- Recent Projects table -->
+                    <VBox spacing="8" styleClass="modern-card,dashboard-recent-card" minWidth="0">
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label text="Recent Projects" styleClass="modern-card-title"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="viewAllProjectsButton" text="View all projects →" onAction="#onViewAllProjects"
+                                    styleClass="link-button" mnemonicParsing="false"/>
+                        </HBox>
+
+                        <GridPane fx:id="recentProjectsTable" styleClass="dashboard-projects-table"
+                                  maxWidth="Infinity" minWidth="0"/>
+                        <VBox fx:id="recentProjectsEmpty" spacing="8" alignment="CENTER" styleClass="dashboard-recent-empty"
+                              managed="false" visible="false">
+                            <Label fx:id="recentProjectsEmptyTitle" text="No saved projects yet." styleClass="dashboard-empty-title"/>
+                            <Label fx:id="recentProjectsEmptyCopy" text="Create a project to begin engineering work."
+                                   styleClass="modern-card-caption" wrapText="true"/>
+                        </VBox>
+
+                    </VBox>
+
+                    <!-- Projects Home has exactly one job: create a project or resume one. -->
+                    <VBox spacing="8" styleClass="modern-card,dashboard-start-section" minWidth="0">
+                        <Label text="Start New Project" styleClass="modern-card-title"/>
+                        <HBox spacing="8" minWidth="0" alignment="TOP_CENTER" styleClass="dashboard-start-row">
+                            <VBox spacing="8" styleClass="dashboard-start-tile" HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                                  onMouseClicked="#onNewProject">
+                                <Label text="＋" styleClass="dashboard-start-tile-icon,start-icon-new"/>
+                                <Label text="New Automotive Project" styleClass="dashboard-start-tile-title"/>
+                                <Label text="Create a workspace and go straight to Sources."
+                                       styleClass="dashboard-start-tile-caption" wrapText="true"
+                                       maxWidth="Infinity"/>
+                                <Region VBox.vgrow="ALWAYS" minHeight="8"/>
+                                <Label text="Start Project →" styleClass="dashboard-start-tile-link"/>
+                            </VBox>
+                            <VBox spacing="8" styleClass="dashboard-supported-types" minWidth="140" prefWidth="156" maxWidth="168">
+                                <Label text="Supported File Types" styleClass="dashboard-supported-title"/>
+                                <Label text="Measurements" styleClass="dashboard-supported-group"/>
+                                <Label text="MF4  ·  ASC  ·  BLF  ·  DAT  ·  LOG" styleClass="dashboard-supported-item"/>
+                                <Label text="Definitions" styleClass="dashboard-supported-group"/>
+                                <Label text="DBC" styleClass="dashboard-supported-item"/>
+                                <Region VBox.vgrow="ALWAYS" minHeight="4"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </VBox>
+
+                <!-- Right rail -->
+                <VBox spacing="12" minWidth="260" prefWidth="300" maxWidth="340" styleClass="dashboard-right-rail">
+
+                    <VBox fx:id="journeyCard" spacing="8" styleClass="modern-card,dashboard-journey-card" minWidth="0">
+                        <Label text="Active Project" styleClass="modern-card-title"/>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <Label fx:id="journeyAvatar" text="▣" styleClass="dashboard-journey-avatar"/>
+                            <VBox spacing="4" minWidth="0" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
+                                <Label fx:id="journeyProjectLabel" text="No active project" styleClass="dashboard-journey-project"/>
+                                <Label fx:id="journeyMetaLabel" text="Create or open a project to resume."
+                                       styleClass="modern-card-caption" wrapText="true"/>
+                            </VBox>
+                        </HBox>
+                        <Label fx:id="journeyStatusBadge" text="Setup" styleClass="badge,badge-idle"/>
+                        <Button fx:id="resumeWorkspaceButton" text="Add Sources" onAction="#onResumeWorkspace"
+                                styleClass="primary-button,dashboard-journey-action" maxWidth="Infinity"
+                                mnemonicParsing="false"/>
+                    </VBox>
+
+                    <VBox spacing="8" styleClass="modern-card,dashboard-activity-card" minWidth="0">
+                        <Label text="Recent Activity" styleClass="modern-card-title"/>
+                        <VBox fx:id="recentActivityBox" spacing="0"/>
+                    </VBox>
+                </VBox>
+            </HBox>
+
+            <!-- Hidden legacy ids for compatibility -->
+            <VBox managed="false" visible="false">
+                <Label fx:id="projectTitleLabel"/>
+                <Label fx:id="projectStatusBadge"/>
+                <Label fx:id="projectMetaLabel"/>
+                <Label fx:id="processingStatusLabel"/>
+                <Label fx:id="lastRunLabel"/>
+                <Label fx:id="measurementMetricLabel"/>
+                <Label fx:id="measurementMetricSubLabel"/>
+                <Label fx:id="definitionMetricLabel"/>
+                <Label fx:id="inventoryMetricLabel"/>
+                <Label fx:id="inventoryMetricSubLabel"/>
+                <Label fx:id="mappedMetricLabel"/>
+                <Label fx:id="mappedMetricSubLabel"/>
+                <Label fx:id="readyMetricLabel"/>
+                <Label fx:id="attentionMetricLabel"/>
+                <Label fx:id="savedProjectsMetricLabel"/>
+                <Label fx:id="globalFilesMetricLabel"/>
+                <Label fx:id="globalFilesMetricSubLabel"/>
+                <Label fx:id="globalDefsMetricLabel"/>
+                <Label fx:id="globalSignalsMetricLabel"/>
+                <Label fx:id="recentProjectsCountLabel"/>
+                <Label fx:id="activeProjectNameLabel"/>
+                <VBox fx:id="activeProjectHealthBox"/>
+                <Button fx:id="headerNewProjectButton"/>
+                <VBox fx:id="latestRunBox"/>
+                <VBox fx:id="selectedSourcesBox"/>
+                <Label fx:id="projectLabel"/>
+                <Label fx:id="measurementLabel"/>
+                <Label fx:id="dbcLabel"/>
+                <Label fx:id="statusLabel"/>
+                <Label fx:id="summaryLabel"/>
+            </VBox>
+        </VBox>
+    </content>
+</ScrollPane>

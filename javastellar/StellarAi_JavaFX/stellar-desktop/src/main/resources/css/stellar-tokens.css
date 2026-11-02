@@ -1,0 +1,53 @@
+/* StellarAI design tokens — Figma Automotive Platform (canonical).
+   Looked-up colors only. Hex values live here; product CSS consumes the names. */
+
+.root {
+    -stellar-bg: #F5F6F8;
+    -stellar-surface: #FFFFFF;
+    -stellar-surface-subtle: #F0F3F7;
+
+    -stellar-border: #DDE1E9;
+    -stellar-border-strong: #C8CDD8;
+
+    -stellar-text: #0F172A;
+    -stellar-text-body: #1E293B;
+    -stellar-text-secondary: #334155;
+    -stellar-text-muted: #475569;
+    -stellar-text-placeholder: #8A94A6;
+
+    -stellar-accent: #0F6CBD;
+    -stellar-accent-hover: #0C5AA3;
+    -stellar-accent-soft: #E8F0FB;
+
+    -stellar-primary: #0F6CBD;
+    -stellar-primary-hover: #0C5AA3;
+    -stellar-light-blue: #F0F7FF;
+    -stellar-nav-selected: #E8F0FB;
+
+    -stellar-measurement: #0891B2;
+    -stellar-definition: #7C3AED;
+    -stellar-purple: #7C3AED;
+    -stellar-cyan: #0891B2;
+
+    -stellar-success: #059669;
+    -stellar-success-bg: #DCFCE7;
+
+    -stellar-warning: #B25A00;
+    -stellar-warning-bg: #FFF0DF;
+
+    -stellar-danger: #A12622;
+    -stellar-danger-bg: #FEE2E2;
+
+    -stellar-info: #0F6CBD;
+    -stellar-info-bg: #F0F7FF;
+
+    /* Modena bridges */
+    -fx-base: -stellar-bg;
+    -fx-background: -stellar-bg;
+    -fx-background-color: -stellar-bg;
+    -fx-text-fill: -stellar-text;
+    -fx-accent: -stellar-accent;
+    -fx-focus-color: -stellar-accent;
+    -fx-faint-focus-color: #0F6CBD33;
+    -fx-default-button: -stellar-accent;
+}

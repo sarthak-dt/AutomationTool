@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.stellar.platform.desktop.ui.InvestigationController"
+            styleClass="investigation-page,config-page" minWidth="0" minHeight="0">
+  <top>
+    <FlowPane hgap="8" vgap="8" alignment="CENTER_LEFT" styleClass="graph-toolbar">
+      <padding><Insets top="10" right="16" bottom="10" left="16"/></padding>
+      <Label text="Investigations" styleClass="section-title"/>
+      <Button text="New Investigation" onAction="#onNew" styleClass="primary-button,compact-button"/>
+      <Button text="From Graph View" onAction="#onFromGraph" styleClass="secondary-button,compact-button"/>
+      <Button text="Duplicate" onAction="#onDuplicate" styleClass="secondary-button,compact-button"/>
+      <Button text="Delete" onAction="#onDelete" styleClass="secondary-button,compact-button"/>
+      <Separator orientation="VERTICAL"/>
+      <Button text="Open Graph Analysis" onAction="#onOpenGraph" styleClass="secondary-button,compact-button"/>
+      <Button fx:id="previewReportButton" text="Preview HTML" onAction="#onPreviewHtml" disable="true" styleClass="secondary-button,compact-button"/>
+      <Button fx:id="generateReportButton" text="Generate HTML Report" onAction="#onGenerateReport" disable="true" styleClass="secondary-button,compact-button"/>
+      <Button fx:id="generatePdfButton" text="Generate PDF Report" onAction="#onGeneratePdfReport" disable="true" styleClass="secondary-button,compact-button"/>
+      <Button fx:id="exportPackageButton" text="Export Package" onAction="#onExportPackage" disable="true" styleClass="secondary-button,compact-button"/>
+    </FlowPane>
+  </top>
+  <center>
+    <SplitPane fx:id="mainSplit" dividerPositions="0.24,0.68" minHeight="0" minWidth="0" styleClass="graph-workspace-split">
+      <VBox spacing="8" styleClass="graph-signal-panel" minWidth="220">
+        <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+        <Label text="Investigations" styleClass="subsection-title"/>
+        <TextField fx:id="searchField" promptText="Search by name or notes" onKeyReleased="#onSearchChanged"/>
+        <HBox spacing="6">
+          <ComboBox fx:id="statusFilter" prefWidth="120"/>
+          <ComboBox fx:id="sortBox" prefWidth="120"/>
+        </HBox>
+        <Label fx:id="listSummary" text="" styleClass="muted"/>
+        <ListView fx:id="investigationList" VBox.vgrow="ALWAYS"/>
+        <VBox fx:id="emptyListBox" spacing="6" styleClass="empty-state" visible="false" managed="false">
+          <Label text="No investigations yet" styleClass="empty-state-title"/>
+          <Label text="Create an investigation from the current Graph view." styleClass="empty-state-body" wrapText="true"/>
+        </VBox>
+      </VBox>
+      <VBox spacing="8" minWidth="0">
+        <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+        <Label text="Evidence" styleClass="subsection-title"/>
+        <Label fx:id="healthLabel" text="" styleClass="muted" wrapText="true"/>
+        <HBox spacing="6">
+          <Button text="Move Up" onAction="#onMoveUp" styleClass="secondary-button,compact-button"/>
+          <Button text="Move Down" onAction="#onMoveDown" styleClass="secondary-button,compact-button"/>
+          <Button text="Remove" onAction="#onRemoveEvidence" styleClass="secondary-button,compact-button"/>
+        </HBox>
+        <ListView fx:id="evidenceList" prefHeight="120" minHeight="72"/>
+        <VBox fx:id="emptyEvidenceBox" spacing="6" styleClass="empty-state" visible="false" managed="false">
+          <Label text="No evidence selected" styleClass="empty-state-title"/>
+          <Label text="Add findings, analysis results, annotations, or graph snapshots."
+                 styleClass="empty-state-body" wrapText="true"/>
+        </VBox>
+        <TabPane fx:id="detailTabs" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+          <Tab text="Report">
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="8">
+              <padding><Insets top="8" right="8" bottom="8" left="8"/></padding>
+              <TitledPane text="Report details" expanded="true">
+                <VBox spacing="6">
+                  <Label text="Title and description are the investigation name and description." styleClass="muted" wrapText="true"/>
+                  <Label text="Report template" styleClass="muted"/>
+                  <ComboBox fx:id="templateBox" prefWidth="240"/>
+                  <TextField fx:id="authorField" promptText="Author (optional — not inferred)"/>
+                  <Label fx:id="reportSelectionSummary" text="" styleClass="muted" wrapText="true"/>
+                </VBox>
+              </TitledPane>
+              <TitledPane text="Selected signals" expanded="true">
+                <VBox spacing="6">
+                  <Label text="Report signals stay independent of the Signal Workspace." styleClass="muted" wrapText="true"/>
+                  <ListView fx:id="reportSignalList" prefHeight="88"/>
+                  <FlowPane hgap="6" vgap="6">
+                    <Button text="Add Signal" onAction="#onAddReportSignal" styleClass="secondary-button,compact-button"/>
+                    <Button text="Remove" onAction="#onRemoveReportSignal" styleClass="secondary-button,compact-button"/>
+                    <Button text="Up" onAction="#onMoveReportSignalUp" styleClass="secondary-button,compact-button"/>
+                    <Button text="Down" onAction="#onMoveReportSignalDown" styleClass="secondary-button,compact-button"/>
+                  </FlowPane>
+                </VBox>
+              </TitledPane>
+              <TitledPane text="Graph events" expanded="true">
+                <VBox spacing="6">
+                  <Label text="Include adds a report link. The bookmark is not recreated or deleted." styleClass="muted" wrapText="true"/>
+                  <ListView fx:id="engineerEventList" prefHeight="96"/>
+                  <FlowPane hgap="6" vgap="6">
+                    <Button text="Define Event" onAction="#onDefineEvent" styleClass="secondary-button,compact-button"/>
+                    <Button text="Edit Event" onAction="#onEditEngineerEvent" styleClass="secondary-button,compact-button"/>
+                    <Button text="Include in Report" onAction="#onIncludeEngineerEvent" styleClass="secondary-button,compact-button"/>
+                    <Button text="Remove from Report" onAction="#onExcludeEngineerEvent" styleClass="secondary-button,compact-button"/>
+                    <Button text="Evaluate" onAction="#onEvaluateEvent" styleClass="secondary-button,compact-button"/>
+                  </FlowPane>
+                  <Label text="Include a saved annotation as an event. The annotation itself is not changed." styleClass="muted" wrapText="true"/>
+                  <HBox spacing="6">
+                    <ComboBox fx:id="annotationPicker" prefWidth="220"/>
+                    <Button text="Include Event" onAction="#onIncludeEvent" styleClass="secondary-button,compact-button"/>
+                  </HBox>
+                </VBox>
+              </TitledPane>
+              <TitledPane text="Snapshots" expanded="false">
+                <VBox spacing="6">
+                  <Label text="Saved snapshot files stay the evidence. Include and order them in the evidence list. A snapshot is embedded once in Graph Evidence, and it is not described as showing a signal it does not contain." wrapText="true" styleClass="muted"/>
+                </VBox>
+              </TitledPane>
+              <TitledPane text="GPS evidence" expanded="true">
+                <VBox spacing="6">
+                  <Label fx:id="gpsEvidenceLabel" text="" styleClass="muted" wrapText="true"/>
+                  <Label text="Event GPS status is the saved match. No route image is created when none is attached." wrapText="true" styleClass="muted"/>
+                </VBox>
+              </TitledPane>
+              <TitledPane text="Engineer observations" expanded="true">
+                <VBox spacing="6">
+                  <Label text="User-authored. Not a diagnostic finding." styleClass="muted" wrapText="true"/>
+                  <TextField fx:id="observationTitle" promptText="Title (optional)"/>
+                  <TextArea fx:id="observationNote" promptText="User-authored note. Not a diagnostic finding." prefRowCount="3"/>
+                  <HBox spacing="6">
+                    <Button text="Add Observation" onAction="#onAddObservation" styleClass="secondary-button,compact-button"/>
+                  </HBox>
+                  <ListView fx:id="observationList" prefHeight="72"/>
+                </VBox>
+              </TitledPane>
+              <TitledPane text="KPIs and findings" expanded="false">
+                <VBox spacing="6">
+                  <Label fx:id="kpiConfigLabel" text="KPI settings (exact signal names)" styleClass="muted" visible="false" managed="false"/>
+                  <TextArea fx:id="kpiConfigField" promptText="gap=1&#10;move=1&#10;rpmRun=500&#10;rpmAbove=4000&#10;wot=90&#10;active=1&#10;speed=ExactSpeedName&#10;rpm=ExactRpmName&#10;accel=ExactPedalName&#10;brake=ExactBrakeName&#10;coolant=ExactCoolantName&#10;trans=ExactTransOilName&#10;thermo=CH01_FRONT_BUMPER_GRILL_AMBIENT&#10;abs=ExactAbsName&#10;esp=ExactEspName&#10;tcs=ExactTcsName&#10;cruise=ExactCruiseName&#10;gnss=ExactGnssSpeedName" prefRowCount="5" wrapText="true" visible="false" managed="false"/>
+                </VBox>
+              </TitledPane>
+              <TitledPane text="Section visibility" expanded="true">
+                <VBox spacing="6">
+                  <Label text="Visibility uses the existing section mask. Sections print in the template order." styleClass="muted" wrapText="true"/>
+                  <FlowPane fx:id="classicSections" hgap="10" vgap="6">
+                <CheckBox fx:id="secProject" text="Project Summary"/>
+                <CheckBox fx:id="secSources" text="Sources"/>
+                <CheckBox fx:id="secSignals" text="Signal Summary"/>
+                <CheckBox fx:id="secAnalysis" text="Analysis"/>
+                <CheckBox fx:id="secDiagnostics" text="Diagnostics"/>
+                <CheckBox fx:id="secFrequency" text="Frequency Analysis"/>
+                <CheckBox fx:id="secGraphs" text="Graph Evidence"/>
+                <CheckBox fx:id="secWarnings" text="Warnings"/>
+                <CheckBox fx:id="secAppendix" text="Appendix"/>
+                <CheckBox fx:id="secPaths" text="Include absolute paths"/>
+              </FlowPane>
+              <FlowPane fx:id="v2Sections" hgap="10" vgap="6" visible="false" managed="false">
+                <CheckBox fx:id="v2Cover" text="Cover Page"/>
+                <CheckBox fx:id="v2Summary" text="Executive Summary"/>
+                <CheckBox fx:id="v2Overview" text="Measurement and Session Overview"/>
+                <CheckBox fx:id="v2Signals" text="Signal Analysis"/>
+                <CheckBox fx:id="v2Graphs" text="Graph Evidence"/>
+                <CheckBox fx:id="v2Route" text="GPS Route Evidence"/>
+                <CheckBox fx:id="v2Observations" text="Observations and Findings"/>
+                <CheckBox fx:id="v2Conclusions" text="Engineering Conclusions"/>
+                <CheckBox fx:id="v2Assumptions" text="Assumptions and Limitations"/>
+                <CheckBox fx:id="v2Sources" text="Source File Appendix"/>
+                <CheckBox fx:id="v2Appendix" text="Signal / DBC Appendix"/>
+                <CheckBox fx:id="v2Kpis" text="Engineering KPIs"/>
+              </FlowPane>
+                  <Label text="Preview and export use the toolbar. HTML and PDF are built from this selection." styleClass="muted" wrapText="true"/>
+                  <Label fx:id="reportStatus" text="" styleClass="muted" wrapText="true"/>
+                </VBox>
+              </TitledPane>
+            </VBox>
+            </ScrollPane>
+          </Tab>
+          <Tab text="History">
+            <VBox spacing="6">
+              <padding><Insets top="8" right="8" bottom="8" left="8"/></padding>
+              <ListView fx:id="reportHistory" VBox.vgrow="ALWAYS"/>
+              <HBox spacing="6">
+                <Button text="Open" onAction="#onOpenReport" styleClass="secondary-button,compact-button"/>
+                <MenuButton text="More" styleClass="secondary-button,compact-button">
+                  <items>
+                    <MenuItem text="Rename" onAction="#onRenameReport"/>
+                    <MenuItem text="Delete" onAction="#onDeleteReport"/>
+                    <MenuItem text="Reveal" onAction="#onRevealReport"/>
+                    <MenuItem text="Regenerate" onAction="#onGenerateReport"/>
+                  </items>
+                </MenuButton>
+              </HBox>
+            </VBox>
+          </Tab>
+        </TabPane>
+      </VBox>
+      <VBox spacing="8" minWidth="240" styleClass="graph-signal-panel">
+        <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+        <Label text="Investigation details" styleClass="subsection-title"/>
+        <Label text="Name" styleClass="config-field-label"/>
+        <TextField fx:id="nameField"/>
+        <Label text="Description" styleClass="config-field-label"/>
+        <TextArea fx:id="descriptionField" prefRowCount="3"/>
+        <Label text="Status" styleClass="config-field-label"/>
+        <ComboBox fx:id="statusBox"/>
+        <Label fx:id="rangeLabel" text="Range: —" styleClass="muted" wrapText="true"/>
+        <Button text="Set Current View as Investigation Range" onAction="#onSetRangeFromGraph"
+                styleClass="secondary-button,compact-button"/>
+        <Label text="Engineering Conclusion" styleClass="config-field-label"/>
+        <Label text="User-authored. Not an automated diagnosis." styleClass="muted" wrapText="true"/>
+        <TextArea fx:id="conclusionField" prefRowCount="6" VBox.vgrow="ALWAYS"/>
+        <Button text="Save Investigation" onAction="#onSaveDetails" styleClass="primary-button"/>
+        <Label fx:id="statusLabel" text="" styleClass="muted" wrapText="true"/>
+      </VBox>
+    </SplitPane>
+  </center>
+</BorderPane>

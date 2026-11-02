@@ -1,0 +1,2768 @@
+/* Sources, Decode, inventory, DBC mapping, decision workspace. */
+
+.source-badge,
+.badge-dbc,
+.dbc-badge,
+.badge-native,
+.native-badge {
+    -fx-padding: 2 7 2 7;
+    -fx-background-radius: 5;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: bold;
+    -fx-min-width: 36;
+    -fx-alignment: CENTER;
+}
+
+.source-badge-dbc,
+.badge-dbc,
+.dbc-badge {
+    -fx-background-color: #E7F6EC;
+    -fx-text-fill: #238443;
+    -fx-border-color: transparent;
+}
+
+.source-badge-native,
+.badge-native,
+.native-badge {
+    -fx-background-color: #EEF1F4;
+    -fx-text-fill: -stellar-text-muted;
+}
+
+.source-filter-bar {
+    -fx-spacing: 4;
+}
+
+.source-filter-toggle {
+    -fx-background-color: -stellar-surface;
+    -fx-text-fill: #142A3A;
+    -fx-background-radius: 6;
+    -fx-padding: 6 10 6 10;
+    -fx-min-height: 34;
+    -fx-pref-height: 34;
+    -fx-cursor: hand;
+    -fx-border-color: #D5DFEA;
+    -fx-border-radius: 6;
+    -fx-text-overrun: clip;
+    -fx-font-size: 12px;
+}
+
+.source-filter-toggle:selected {
+    -fx-background-color: -stellar-accent-soft;
+    -fx-text-fill: -stellar-info;
+    -fx-font-weight: bold;
+    -fx-border-color: -stellar-info;
+}
+
+
+.project-files-scroll {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.project-files-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.source-inventory-pane {
+    -fx-background-color: -stellar-surface;
+    -fx-background-radius: 4;
+    -fx-border-color: #d5dde3;
+    -fx-border-radius: 4;
+    -fx-padding: 10 12 10 12;
+}
+
+.source-inventory-match-card {
+    -fx-background-color: #f7f9fb;
+    -fx-background-radius: 3;
+    -fx-border-color: #e2e8ee;
+    -fx-border-radius: 3;
+    -fx-padding: 8 10 8 10;
+}
+
+.source-inventory-filter-bar {
+    -fx-spacing: 6;
+}
+
+.source-inventory-filter-bar .combo-box {
+    -fx-pref-height: 28;
+}
+
+.source-inventory-filter-bar .button {
+    -fx-pref-height: 28;
+}
+
+.channel-coverage-bar {
+    -fx-accent: #3d7ea6;
+    -fx-pref-height: 8;
+}
+
+
+.project-files-page {
+    -fx-background-color: transparent;
+}
+
+
+
+
+/* === DBC / LOCAL / NATIVE BADGE CONTRACT (cascade last) === */
+.source-badge-dbc, .badge-dbc, .dbc-badge {
+    -fx-background-color: #E7F6EC;
+    -fx-text-fill: #238443;
+}
+.source-badge-native, .badge-native, .native-badge {
+    -fx-background-color: #EEF1F4;
+    -fx-text-fill: -stellar-text-muted;
+}
+
+
+/* MF-2 Project Files input workspace */
+.project-input-summary {
+    -fx-padding: 8 0 4 0;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.project-summary-metric {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #172B3A;
+}
+
+.project-source-list-header {
+    -fx-padding: 4 0 0 0;
+}
+
+.project-source-table {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border-strong;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.project-source-table .table-row-cell {
+    -fx-cell-size: 34;
+}
+
+.measurement-source-inventory-list {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border-strong;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.measurement-source-inventory-list .list-cell {
+    -fx-padding: 2 8 2 8;
+    -fx-background-color: transparent;
+    -fx-text-fill: #172B3A;
+    -fx-background-radius: 4;
+}
+
+.measurement-source-inventory-list .list-cell:filled:hover {
+    -fx-background-color: #EEF2F6;
+    -fx-text-fill: #172B3A;
+}
+
+.measurement-source-inventory-list .list-cell:filled:selected,
+.measurement-source-inventory-list .list-cell:filled:selected:focused,
+.measurement-source-inventory-list .list-cell:filled:selected:hover {
+    -fx-background-color: -stellar-info, #EAF3FF;
+    -fx-background-insets: 0, 0 0 0 3;
+    -fx-background-radius: 4, 0 4 4 0;
+    -fx-text-fill: #172B3A;
+}
+
+.measurement-source-inventory-list .list-cell:filled:selected .label,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .label,
+.measurement-source-inventory-list .list-cell:filled:selected .text,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .text {
+    -fx-text-fill: #172B3A;
+}
+
+.measurement-source-inventory-list .list-cell:filled:selected .meas-source-name,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .meas-source-name,
+.measurement-source-inventory-list .list-cell:filled:selected .meas-source-summary,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .meas-source-summary,
+.measurement-source-inventory-list .list-cell:filled:selected .meas-source-expand,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .meas-source-expand,
+.measurement-source-inventory-list .list-cell:filled:selected .meas-source-channel-line,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .meas-source-channel-line {
+    -fx-text-fill: #475569;
+}
+
+.measurement-source-inventory-list .list-cell:filled:selected .meas-source-alias,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .meas-source-alias {
+    -fx-text-fill: #172B3A;
+}
+
+.measurement-source-inventory-list .list-cell:filled:selected .meas-source-status.status-ready,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .meas-source-status.status-ready {
+    -fx-text-fill: #0B7A3E;
+}
+
+.measurement-source-inventory-list .list-cell:filled:selected .meas-source-status.status-indexing,
+.measurement-source-inventory-list .list-cell:filled:selected .meas-source-status.status-waiting,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .meas-source-status.status-indexing,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .meas-source-status.status-waiting {
+    -fx-text-fill: -stellar-text-muted;
+}
+
+.measurement-source-inventory-list .list-cell:filled:selected .meas-source-status.status-failed,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .meas-source-status.status-failed {
+    -fx-text-fill: -stellar-danger;
+}
+
+.measurement-source-inventory-list .list-cell:filled:selected .meas-source-status.status-added,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .meas-source-status.status-added {
+    -fx-text-fill: -stellar-info;
+}
+
+.meas-source-alias {
+    -fx-pref-width: 0;
+    -fx-max-width: 0;
+    -fx-opacity: 0;
+}
+
+.meas-source-row-header {
+    -fx-alignment: center-left;
+}
+
+.meas-source-expand {
+    -fx-font-size: 11px;
+    -fx-text-fill: -stellar-text-muted;
+    -fx-min-width: 14;
+}
+
+.source-file-name,
+.meas-source-name {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #1D344B;
+}
+
+.meas-source-summary {
+    -fx-font-size: 11px;
+    -fx-text-fill: -stellar-text-muted;
+}
+
+.meas-source-status {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 2 8 2 8;
+    -fx-background-radius: 10;
+}
+
+.meas-source-status.status-ready {
+    -fx-text-fill: #0B7A3E;
+    -fx-background-color: #E6F6EC;
+}
+
+.meas-source-status.status-indexing,
+.meas-source-status.status-waiting {
+    -fx-text-fill: -stellar-text-muted;
+    -fx-background-color: #EEF2F6;
+}
+
+.meas-source-status.status-failed {
+    -fx-text-fill: -stellar-danger;
+    -fx-background-color: -stellar-danger-bg;
+}
+
+.meas-source-status.status-added {
+    -fx-text-fill: -stellar-info;
+    -fx-background-color: -stellar-info-bg;
+}
+
+.meas-source-channel-line {
+    -fx-font-size: 11px;
+    -fx-text-fill: #172B3A;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+}
+
+.project-inventory-summary {
+    -fx-text-fill: -stellar-info;
+}
+
+.dbc-mapping-pane,
+.dbc-mapping-root {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border-strong;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.dbc-mapping-toolbar {
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 2 0 4 0;
+    -fx-spacing: 8;
+}
+
+.dbc-mapping-toolbar .label {
+    -fx-text-fill: -stellar-text-muted;
+    -fx-font-size: 11px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.dbc-mapping-toolbar .check-box {
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 4 0 4;
+}
+
+.source-mapping-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+.source-mapping-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+.source-mapping-list {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.source-mapping-list .list-cell {
+    -fx-padding: 0 0 7 0;
+    -fx-background-color: transparent;
+}
+
+.source-mapping-list .list-cell:filled:selected .source-mapping-group,
+.source-mapping-list .list-cell:focused .source-mapping-group {
+    -fx-border-color: #9BB8D4;
+}
+
+.source-mapping-list .list-cell:filled:selected,
+.source-mapping-list .list-cell:filled:hover {
+    -fx-background-color: transparent;
+}
+
+.source-mapping-group {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border-strong;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.source-mapping-header {
+    -fx-padding: 2 0 4 0;
+}
+
+.source-alias {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #172B3A;
+}
+
+.source-distinguishing-name {
+    -fx-font-size: 12px;
+    -fx-text-fill: -stellar-info;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+}
+
+.source-mapping-state-summary {
+    -fx-font-size: 11px;
+    -fx-text-fill: #33485A;
+}
+
+.channel-mapping-table {
+    -fx-padding: 4 0 0 0;
+}
+
+.channel-mapping-col-header {
+    -fx-font-size: 10px;
+    -fx-text-fill: -stellar-text-muted;
+    -fx-padding: 0 0 2 0;
+}
+
+.channel-mapping-row {
+    -fx-padding: 2 0 2 0;
+    -fx-border-color: transparent transparent #EEF2F6 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.channel-mapping-actions {
+    -fx-alignment: CENTER_LEFT;
+}
+
+.mapping-state-badge {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 2 6 2 6;
+    -fx-background-radius: 4;
+    -fx-text-overrun: clip;
+    -fx-min-width: 110;
+    -fx-pref-width: 120;
+    -fx-max-width: 140;
+    -fx-alignment: CENTER_LEFT;
+    -fx-border-width: 0;
+}
+
+.mapping-state-badge.state-recommended {
+    -fx-text-fill: -stellar-info;
+    -fx-background-color: -stellar-info-bg;
+}
+
+.mapping-state-badge.state-confirmed {
+    -fx-text-fill: #0B7A3E;
+    -fx-background-color: #E6F6EC;
+}
+
+.mapping-state-badge.state-manual {
+    -fx-text-fill: #7A4E0B;
+    -fx-background-color: #FFF4E5;
+}
+
+.mapping-state-badge.state-ambiguous {
+    -fx-text-fill: #8A5A00;
+    -fx-background-color: #FFF8E8;
+}
+
+.mapping-state-badge.state-no-match {
+    -fx-text-fill: -stellar-text-muted;
+    -fx-background-color: #EEF2F6;
+}
+
+.mapping-state-badge.state-unmapped {
+    -fx-text-fill: -stellar-text-muted;
+    -fx-background-color: #EEF2F6;
+}
+
+.mapping-state-badge.state-na {
+    -fx-text-fill: #8A97A3;
+    -fx-background-color: #F4F6F8;
+}
+
+.coverage-bar {
+    -fx-padding: 0;
+}
+
+
+/* ---- Project Files exclusive workspaces ---- */
+.project-files-chrome {
+    -fx-padding: 10 14 8 14;
+    -fx-background-color: transparent;
+}
+
+.project-files-sources-toolbar {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 8;
+}
+
+/* ---- Source Inventory workspace (Phase 1 multi-source) ---- */
+.source-inventory-root {
+    -fx-padding: 4 8 4 8;
+    -fx-min-height: 0;
+    -fx-background-color: #eef1f4;
+}
+
+.project-files-inputs-scroll,
+.project-files-sources-scroll {
+    -fx-background-color: transparent;
+}
+
+.project-files-secondary-scroll {
+    -fx-background-color: transparent;
+}
+
+.source-inventory-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;
+}
+
+.source-inventory-summary {
+    -fx-font-size: 12px;
+    -fx-text-fill: #5b6470;
+}
+
+.source-inventory-toolbar {
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 4 0 2 0;
+    -fx-spacing: 8;
+}
+
+.source-inventory-result-count {
+    -fx-font-size: 11.5px;
+    -fx-text-fill: #5b6470;
+}
+
+.source-inventory-navigator {
+    -fx-background-color: transparent;
+    -fx-padding: 0 6 0 0;
+}
+
+.source-inventory-detail {
+    -fx-padding: 0 0 0 4;
+}
+
+.source-inventory-status-badge {
+    -fx-padding: 2 8 2 8;
+    -fx-background-radius: 10;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: bold;
+}
+
+.source-inventory-tree {
+    -fx-background-color: transparent;
+    -fx-border-color: #d7dde5;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.source-inventory-tree .tree-cell {
+    -fx-font-size: 12px;
+    -fx-padding: 5 8 5 4;
+    -fx-background-color: transparent;
+    -fx-text-fill: #172B3A;
+    -fx-background-radius: 4;
+}
+
+.source-inventory-tree .tree-cell:filled:hover {
+    -fx-background-color: #EEF2F6;
+    -fx-text-fill: #172B3A;
+}
+
+.source-inventory-tree .tree-cell.source-inventory-source {
+    -fx-padding: 6 8 6 4;
+}
+
+.source-inventory-alias,
+.source-inventory-channel-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #172B3A;
+    -fx-min-width: 70;
+}
+
+.source-inventory-channel-label {
+    -fx-font-size: 12px;
+    -fx-min-width: 0;
+}
+
+.source-inventory-filename {
+    -fx-font-size: 12px;
+    -fx-text-fill: #3d4654;
+    -fx-padding: 1 0 0 0;
+}
+
+.source-inventory-source-meta,
+.source-inventory-channel-meta {
+    -fx-font-size: 10.5px;
+    -fx-text-fill: -stellar-text-muted;
+}
+
+.source-inventory-channel-meta {
+    -fx-font-size: 12px;
+}
+
+.source-inventory-channel-row {
+    -fx-spacing: 8;
+}
+
+/*
+ * Light-theme selection: Modena defaults selected tree text to white.
+ * Keep backgrounds light and force nested labels to stay dark/readable.
+ */
+.source-inventory-tree .tree-cell:filled:selected,
+.source-inventory-tree .tree-cell:filled:selected:focused,
+.source-inventory-tree .tree-cell:filled:selected:hover,
+.source-inventory-tree .tree-cell.source-inventory-selected {
+    -fx-background-color: -stellar-info, #EAF3FF;
+    -fx-background-insets: 0, 0 0 0 3;
+    -fx-background-radius: 4, 0 4 4 0;
+    -fx-text-fill: #172B3A;
+}
+
+/* Focused selection: slightly stronger fill; accent bar unchanged. */
+.source-inventory-tree:focused > .virtual-flow > .clipped-container > .sheet > .tree-cell:filled:selected,
+.source-inventory-tree .tree-cell:filled:selected:focused {
+    -fx-background-color: -stellar-info, #DCEBFF;
+    -fx-background-insets: 0, 0 0 0 3;
+    -fx-background-radius: 4, 0 4 4 0;
+}
+
+.source-inventory-tree .tree-cell:filled:selected .label,
+.source-inventory-tree .tree-cell:filled:selected:focused .label,
+.source-inventory-tree .tree-cell:filled:selected:hover .label,
+.source-inventory-tree .tree-cell.source-inventory-selected .label,
+.source-inventory-tree .tree-cell:filled:selected .text,
+.source-inventory-tree .tree-cell:filled:selected:focused .text,
+.source-inventory-tree .tree-cell.source-inventory-selected .text {
+    -fx-text-fill: #172B3A;
+}
+
+.source-inventory-tree .tree-cell:filled:selected .muted,
+.source-inventory-tree .tree-cell:filled:selected:focused .muted,
+.source-inventory-tree .tree-cell:filled:selected .source-inventory-filename,
+.source-inventory-tree .tree-cell:filled:selected:focused .source-inventory-filename,
+.source-inventory-tree .tree-cell:filled:selected .source-inventory-source-meta,
+.source-inventory-tree .tree-cell:filled:selected:focused .source-inventory-source-meta,
+.source-inventory-tree .tree-cell:filled:selected .source-inventory-channel-meta,
+.source-inventory-tree .tree-cell:filled:selected:focused .source-inventory-channel-meta,
+.source-inventory-tree .tree-cell:filled:selected .meas-source-expand,
+.source-inventory-tree .tree-cell.source-inventory-selected .muted,
+.source-inventory-tree .tree-cell.source-inventory-selected .source-inventory-filename,
+.source-inventory-tree .tree-cell.source-inventory-selected .source-inventory-source-meta,
+.source-inventory-tree .tree-cell.source-inventory-selected .source-inventory-channel-meta {
+    -fx-text-fill: #475569;
+}
+
+.source-inventory-tree .tree-cell:filled:hover .label,
+.source-inventory-tree .tree-cell:filled:hover .text {
+    -fx-text-fill: #172B3A;
+}
+
+.source-inventory-tree .tree-cell:filled:hover .muted,
+.source-inventory-tree .tree-cell:filled:hover .source-inventory-filename,
+.source-inventory-tree .tree-cell:filled:hover .source-inventory-source-meta,
+.source-inventory-tree .tree-cell:filled:hover .source-inventory-channel-meta {
+    -fx-text-fill: -stellar-text-muted;
+}
+
+/* Preserve status badge colours under selection (do not inherit navy). */
+.source-inventory-tree .tree-cell:filled:selected .inventory-status-ready,
+.source-inventory-tree .tree-cell:filled:selected:focused .inventory-status-ready,
+.source-inventory-tree .tree-cell.source-inventory-selected .inventory-status-ready,
+.source-inventory-tree .tree-cell:filled:selected .badge-ready,
+.source-inventory-tree .tree-cell.source-inventory-selected .badge-ready {
+    -fx-text-fill: #1e5b32;
+}
+
+.source-inventory-tree .tree-cell:filled:selected .inventory-status-warning,
+.source-inventory-tree .tree-cell:filled:selected:focused .inventory-status-warning,
+.source-inventory-tree .tree-cell.source-inventory-selected .inventory-status-warning,
+.source-inventory-tree .tree-cell:filled:selected .badge-unsupported,
+.source-inventory-tree .tree-cell.source-inventory-selected .badge-unsupported {
+    -fx-text-fill: #8a5a12;
+}
+
+.source-inventory-tree .tree-cell:filled:selected .badge-running,
+.source-inventory-tree .tree-cell:filled:selected:focused .badge-running,
+.source-inventory-tree .tree-cell.source-inventory-selected .badge-running {
+    -fx-text-fill: -stellar-info;
+}
+
+.source-inventory-scope-header {
+    -fx-padding: 0 0 4 0;
+}
+
+.source-inventory-scope-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.source-inventory-scope-summary {
+    -fx-font-size: 12px;
+    -fx-text-fill: #3d4654;
+}
+
+.source-inventory-union-hint {
+    -fx-font-size: 10.5px;
+}
+
+.can-inventory-table {
+    -fx-font-size: 12px;
+    -fx-border-color: #d7dde5;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.can-inventory-table .column-header-background {
+    -fx-background-color: #f3f6fa;
+}
+
+.can-inventory-table .table-row-cell {
+    -fx-cell-size: 34px;
+}
+
+.inventory-status-ready {
+    -fx-text-fill: #1e5b32;
+}
+
+.inventory-status-warning {
+    -fx-text-fill: #8a5a12;
+}
+
+.source-inventory-split {
+    -fx-padding: 0;
+}
+
+
+/* Source Inventory Phase 2 — DBC enrichment */
+.inventory-match-badge {
+    -fx-padding: 1 5 1 5;
+    -fx-background-radius: 4;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+.inventory-match-badge.match-matched {
+    -fx-background-color: #e5f3ea;
+    -fx-text-fill: #1f6b3a;
+}
+.inventory-match-badge.match-unmatched {
+    -fx-background-color: #f8efe3;
+    -fx-text-fill: #8a5a12;
+}
+.inventory-match-badge.match-no-dbc {
+    -fx-background-color: #eef1f4;
+    -fx-text-fill: #5c6672;
+}
+.inventory-match-badge.match-ambiguous {
+    -fx-background-color: #f7f0d8;
+    -fx-text-fill: #7a5b00;
+}
+.source-inventory-dbc-context {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #243447;
+}
+.source-inventory-coverage {
+    -fx-font-size: 11px;
+}
+.source-inventory-detail-title {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+
+/* Source Inventory master-detail inspector */
+.source-inventory-details {
+    -fx-background-color: #fbfcfd;
+    -fx-border-color: #d7dde5;
+    -fx-border-width: 0 0 0 1;
+    -fx-padding: 6 10 6 10;
+}
+.inventory-details-header {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1b2a38;
+}
+.inventory-details-section-title {
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #5c6672;
+    -fx-padding: 0 0 1 0;
+}
+.inventory-details-key {
+    -fx-font-size: 11px;
+    -fx-text-fill: #5c6672;
+}
+.inventory-details-value {
+    -fx-font-size: 12px;
+    -fx-text-fill: #1b2a38;
+}
+.inventory-can-id {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+.inventory-match-badge {
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+.inventory-details-meta-line {
+    -fx-font-size: 11.5px;
+}
+.inventory-details-empty {
+    -fx-font-size: 12px;
+}
+.inventory-unmatched-hint {
+    -fx-font-size: 11.5px;
+    -fx-padding: 4 0 0 0;
+}
+.inventory-study-bar {
+    -fx-padding: 2 0 2 0;
+}
+.inventory-study-action {
+    -fx-font-size: 11px;
+    -fx-padding: 2 8 2 8;
+}
+.inventory-study-count {
+    -fx-font-size: 11.5px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #1b4f7a;
+}
+.inventory-study-check {
+    -fx-padding: 0;
+}
+.inventory-quick-filter {
+    -fx-background-color: #eef1f4;
+    -fx-text-fill: #3d4654;
+    -fx-background-radius: 4;
+    -fx-padding: 2 8 2 8;
+    -fx-font-size: 11px;
+    -fx-cursor: hand;
+}
+.inventory-quick-filter:selected,
+.inventory-quick-filter-active {
+    -fx-background-color: #d9e8f7;
+    -fx-text-fill: #1b4f7a;
+    -fx-font-weight: 600;
+}
+
+.inventory-mode-tab {
+    -fx-background-radius: 3;
+    -fx-padding: 2 8 2 8;
+    -fx-font-size: 11px;
+}
+.inventory-mode-tab-active {
+    -fx-font-weight: bold;
+}
+
+/* Semantic source badges: measurement = teal, definition = purple. */
+.source-badge-native,
+.badge-native,
+.native-badge,
+.measurement-badge,
+.measurement-mini-badge {
+    -fx-background-color: #E2F6F7;
+    -fx-text-fill: -stellar-measurement;
+    -fx-border-color: #BFE6E8;
+}
+
+.source-badge-dbc,
+.badge-dbc,
+.dbc-badge,
+.definition-badge,
+.definition-mini-badge {
+    -fx-background-color: #F0E8FF;
+    -fx-text-fill: -stellar-definition;
+    -fx-border-color: #DDCBFA;
+}
+
+.badge-ready,
+.inventory-status-ready,
+.meas-source-status.status-ready {
+    -fx-background-color: -stellar-success-bg;
+    -fx-text-fill: -stellar-success;
+}
+
+.badge-unsupported,
+.inventory-status-warning {
+    -fx-background-color: -stellar-warning-bg;
+    -fx-text-fill: -stellar-warning;
+}
+
+.measurement-action,
+.inventory-action {
+    -fx-background-color: #F2FBFB;
+    -fx-border-color: #CFEAEC;
+    -fx-text-fill: -stellar-measurement;
+}
+
+/* --- Project Files / source workspaces -------------------------------------- */
+.project-files-page {
+    -fx-padding: 10 14 14 14;
+}
+
+.project-files-chrome {
+    -fx-padding: 0 0 10 0;
+    -fx-spacing: 6;
+}
+
+.project-files-chrome .section-header {
+    -fx-font-size: 15px;
+    -fx-text-fill: #172B43;
+}
+
+.project-files-sources-scroll,
+.project-files-sources-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.project-files-sources {
+    -fx-padding: 4 0 12 0;
+}
+
+.project-files-sources-toolbar {
+    -fx-padding: 2 0 6 0;
+}
+
+.measurement-source-inventory-list,
+.project-source-table {
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-background-color: -stellar-surface;
+}
+
+.measurement-source-inventory-list .list-cell {
+    -fx-padding: 8 10 8 10;
+}
+
+.measurement-source-inventory-list .list-cell:filled:selected,
+.measurement-source-inventory-list .list-cell:filled:selected:focused,
+.measurement-source-inventory-list .list-cell:filled:selected:hover {
+    -fx-background-color: #EAF7F7;
+    -fx-border-color: transparent transparent transparent #0A94A0;
+    -fx-border-width: 0 0 0 3;
+    -fx-text-fill: #162B43;
+}
+
+/* --- Source Inventory -------------------------------------------------------- */
+.source-inventory-root {
+    -fx-background-color: -stellar-bg;
+    -fx-padding: 0;
+}
+
+.source-inventory-header {
+    -fx-padding: 8 10 10 10;
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8 8 0 0;
+    -fx-background-radius: 8 8 0 0;
+}
+
+.source-inventory-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #172B43;
+}
+
+.source-inventory-toolbar {
+    -fx-padding: 0 10 10 10;
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent -stellar-border -stellar-border -stellar-border;
+    -fx-border-width: 0 1 1 1;
+}
+
+.source-inventory-split {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-width: 0 1 1 1;
+    -fx-border-radius: 0 0 8 8;
+    -fx-background-radius: 0 0 8 8;
+}
+
+.source-inventory-navigator {
+    -fx-background-color: #FBFCFE;
+    -fx-border-color: transparent #E7ECF1 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+    -fx-padding: 0;
+}
+
+.source-inventory-tree {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.source-inventory-tree .tree-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 7 8 7 8;
+    -fx-text-fill: #263A50;
+}
+
+.source-inventory-tree .tree-cell:filled:hover {
+    -fx-background-color: #F0F6F7;
+}
+
+.source-inventory-tree .tree-cell:filled:selected,
+.source-inventory-tree .tree-cell:filled:selected:focused,
+.source-inventory-tree .tree-cell:filled:selected:hover,
+.source-inventory-tree .tree-cell.source-inventory-selected {
+    -fx-background-color: #E6F5F5;
+    -fx-border-color: transparent transparent transparent #0A949E;
+    -fx-border-width: 0 0 0 3;
+}
+
+.source-inventory-alias {
+    -fx-font-weight: 700;
+    -fx-text-fill: #18314A;
+}
+
+.source-inventory-filename {
+    -fx-text-fill: #2469B5;
+}
+
+.source-inventory-detail {
+    -fx-background-color: -stellar-surface;
+    -fx-padding: 10 12 10 12;
+}
+
+.source-inventory-details {
+    -fx-background-color: #FBFCFE;
+    -fx-border-color: #E3E9EF;
+    -fx-border-width: 0 0 0 1;
+    -fx-padding: 10 12 10 12;
+}
+
+.inventory-details-header {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+.inventory-match-badge.match-matched {
+    -fx-background-color: #E6F6EA;
+    -fx-text-fill: -stellar-success;
+}
+
+.inventory-match-badge.match-unmatched {
+    -fx-background-color: -stellar-warning-bg;
+    -fx-text-fill: -stellar-warning;
+}
+
+.inventory-quick-filter:selected,
+.inventory-quick-filter-active {
+    -fx-background-color: #E4F5F5;
+    -fx-text-fill: -stellar-measurement;
+}
+
+/* --- DBC Mapping ------------------------------------------------------------- */
+.dbc-mapping-pane,
+.dbc-mapping-root {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.dbc-mapping-root {
+    -fx-padding: 10 12 12 12;
+}
+
+.source-mapping-group {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #E2E8EF;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 10 8 10;
+}
+
+.source-mapping-header {
+    -fx-padding: 2 0 6 0;
+}
+
+.source-alias {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #172B43;
+}
+
+.source-distinguishing-name {
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-text-fill: #2569B6;
+    -fx-font-size: 11.5px;
+}
+
+.channel-mapping-row {
+    -fx-padding: 6 2 6 2;
+    -fx-border-color: transparent transparent #EDF1F4 transparent;
+}
+
+.mapping-badge-recommended,
+.mapping-state-recommended,
+.badge-recommended {
+    -fx-background-color: #E7F0FF;
+    -fx-text-fill: #1E64B5;
+}
+
+.mapping-badge-confirmed,
+.mapping-state-confirmed,
+.badge-confirmed {
+    -fx-background-color: #E6F6EA;
+    -fx-text-fill: -stellar-success;
+}
+
+.mapping-badge-manual,
+.mapping-state-manual,
+.badge-manual {
+    -fx-background-color: #F0E8FF;
+    -fx-text-fill: -stellar-definition;
+}
+
+.source-bulk-confirm,
+.dbc-mapping-root .primary-button {
+    -fx-background-color: #078A96;
+    -fx-text-fill: #FFFFFF;
+}
+
+/* Modern Project Files workspace tabs: compact desktop tabs, not page buttons. */
+.project-files-chrome {
+    -fx-background-color: -stellar-surface;
+    -fx-padding: 8 12 6 12;
+    -fx-spacing: 4;
+    -fx-border-color: transparent transparent #E5EBF1 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-min-height: 0;
+    /*
+     * Sources has three managed chrome rows (breadcrumb, workspace tab, decode-mode strip).
+     * 82px clipped the mode strip outside the BorderPane top region: it rendered visually over
+     * the Sources toolbar but was outside the parent's hit-test bounds, so Auto/Custom could
+     * not be clicked. 136px is only a ceiling; when the mode strip is unmanaged in decode
+     * workspaces the chrome still collapses back to its compact ~82px computed height.
+     */
+    -fx-max-height: 136;
+}
+
+.project-files-header-row {
+    -fx-min-height: 28;
+    -fx-pref-height: 28;
+    -fx-max-height: 32;
+}
+
+.project-files-breadcrumb-parent {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #6B7C8C;
+}
+
+.project-files-breadcrumb-sep {
+    -fx-font-size: 12px;
+    -fx-text-fill: #9AA8B6;
+}
+
+.project-files-breadcrumb-active {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #142A3A;
+}
+
+.project-summary-metric {
+    -fx-font-size: 11.5px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #5B6B7C;
+}
+
+.source-inventory-header {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent transparent #E5EBF1 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 8 12 8 12;
+    -fx-min-height: 0;
+}
+
+/* Semantic source-role colors. These are role driven; filenames/extensions are not. */
+.measurement-source-badge,
+.measurement-mini-badge,
+.source-type-measurement {
+    -fx-background-color: #E2F6F7;
+    -fx-text-fill: -stellar-measurement;
+    -fx-border-color: #BFE5E8;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+.definition-source-badge,
+.definition-mini-badge,
+.source-type-definition {
+    -fx-background-color: #F0E8FF;
+    -fx-text-fill: -stellar-definition;
+    -fx-border-color: #DDCBFA;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+.measurement-sources-panel {
+    -fx-border-color: #D6EAEC;
+}
+.definition-sources-panel {
+    -fx-border-color: #E4D8F8;
+}
+.definition-source-table .table-row-cell:selected {
+    -fx-background-color: #F2ECFC;
+}
+.definition-source-table .table-cell {
+    -fx-text-overrun: ellipsis;
+    -fx-padding: 4 8 4 8;
+}
+.measurement-source-inventory-list {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #E2E8EF;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+}
+.meas-source-row,
+.source-row {
+    -fx-padding: 1 4 1 4;
+}
+.meas-source-row-header {
+    -fx-min-height: 28;
+}
+.meas-source-alias {
+    -fx-pref-width: 0;
+    -fx-max-width: 0;
+    -fx-opacity: 0;
+}
+.source-file-name,
+.meas-source-name {
+    -fx-text-fill: #1D344B;
+    -fx-font-weight: 600;
+    -fx-font-size: 12.5px;
+}
+.source-meta,
+.meas-source-summary {
+    -fx-text-fill: #6E8093;
+    -fx-font-size: 11px;
+}
+.source-status.status-ready,
+.status-ready {
+    -fx-text-fill: #0B7A3E;
+    -fx-background-color: #E6F6EC;
+}
+.source-status.status-processed,
+.status-processed {
+    -fx-text-fill: #0B7A3E;
+    -fx-background-color: #E6F6EC;
+}
+.source-status.status-processing,
+.status-processing {
+    -fx-text-fill: -stellar-text-muted;
+    -fx-background-color: #EEF2F6;
+}
+.source-status.status-failed,
+.status-failed {
+    -fx-text-fill: -stellar-danger;
+    -fx-background-color: -stellar-danger-bg;
+}
+
+.inventory-filter-caption {
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #5B6B7C;
+}
+
+.inventory-filter-field {
+    -fx-spacing: 3;
+}
+
+.inventory-metric-badge {
+    -fx-font-size: 11.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #0B5F68;
+    -fx-background-color: #E8F6F7;
+    -fx-background-radius: 6;
+    -fx-padding: 4 10 4 10;
+}
+
+.inventory-scope-metrics {
+    -fx-spacing: 8;
+    -fx-padding: 2 0 2 0;
+}
+
+.inventory-quick-scope-bar {
+    -fx-spacing: 4;
+    -fx-padding: 2 0 4 0;
+}
+
+.inventory-quick-scope {
+    -fx-min-height: 34;
+    -fx-pref-height: 36;
+    -fx-max-height: 40;
+}
+
+.inventory-context-actions {
+    -fx-spacing: 8;
+}
+
+.can-inventory-table {
+    -fx-fixed-cell-size: 39;
+}
+
+.source-inventory-toolbar {
+    -fx-spacing: 12;
+    -fx-alignment: BOTTOM_LEFT;
+}
+
+
+/* === Source Inventory workstation redesign (2-pane + drawer) ================ */
+.source-inventory-root {
+    -fx-padding: 0;
+    -fx-background-color: #F4F6F8;
+}
+
+.source-inventory-header {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent transparent #E5EBF1 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-min-height: 48;
+}
+
+.source-inventory-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #142A3A;
+}
+
+.source-inventory-summary {
+    -fx-font-size: 11.5px;
+    -fx-text-fill: #6B7C8C;
+}
+
+.source-inventory-toolbar {
+    -fx-spacing: 10;
+    -fx-padding: 0;
+}
+
+.source-inventory-nav-title {
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #6B7C8C;
+}
+
+.source-inventory-navigator {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent #E5EBF1 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.source-inventory-tree {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.source-inventory-tree .tree-cell {
+    -fx-padding: 6 8 6 6;
+    -fx-background-color: transparent;
+}
+
+.source-inventory-tree .tree-cell:filled:selected,
+.source-inventory-tree .tree-cell.source-inventory-selected,
+.source-inventory-tree .tree-cell.selected-channel {
+    -fx-background-color: #EDF5FF;
+    -fx-border-color: transparent transparent transparent #3B82F6;
+    -fx-border-width: 0 0 0 3;
+}
+
+.source-inventory-tree .tree-cell.source-inventory-source,
+.source-inventory-tree .tree-cell.measurement-source {
+    -fx-border-color: transparent transparent transparent #B8DEE5;
+    -fx-border-width: 0 0 0 2;
+    -fx-padding: 8 8 8 6;
+}
+
+.source-inventory-alias {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #142A3A;
+}
+
+.source-inventory-filename,
+.source-inventory-source-meta {
+    -fx-font-size: 11px;
+    -fx-text-fill: #708295;
+}
+
+.source-inventory-channel-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #1B2A38;
+}
+
+.source-inventory-detail,
+.source-inventory-surface {
+    -fx-background-color: -stellar-surface;
+    -fx-padding: 8 12 8 12;
+}
+
+.source-inventory-scope-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #142A3A;
+}
+
+.source-inventory-scope-summary {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #3A4A56;
+}
+
+.inventory-mapping-line {
+    -fx-spacing: 8;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.inventory-dbc-name {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #667EEA;
+}
+
+.inventory-mapping-badge {
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-padding: 2 8 2 8;
+    -fx-background-radius: 8;
+    -fx-background-color: #EEF2F6;
+    -fx-text-fill: #1B2A38;
+}
+
+.inventory-mapping-badge.mapping-confirmed {
+    -fx-background-color: #E5F6EA;
+    -fx-text-fill: #1B7A3A;
+}
+
+.inventory-mapping-badge.mapping-recommended {
+    -fx-background-color: #E8F1FB;
+    -fx-text-fill: -stellar-info;
+}
+
+.inventory-mapping-badge.mapping-manual {
+    -fx-background-color: #F3EEFA;
+    -fx-text-fill: #6B46A8;
+}
+
+.inventory-mapping-badge.mapping-attention {
+    -fx-background-color: #FBEFE6;
+    -fx-text-fill: #B35C1E;
+}
+
+.inventory-quick-filter {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent transparent transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-background-radius: 0;
+    -fx-padding: 4 10 6 10;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #6B7C8C;
+}
+
+.inventory-quick-filter:selected,
+.inventory-quick-filter-active {
+    -fx-background-color: #EAF2FF;
+    -fx-border-color: transparent transparent #3B82F6 transparent;
+    -fx-text-fill: -stellar-accent;
+}
+
+.inventory-study-set-summary {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #3A4A56;
+}
+
+.can-inventory-table {
+    -fx-fixed-cell-size: 40;
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #E5EBF1;
+    -fx-border-width: 1;
+}
+
+.can-inventory-table .column-header-background {
+    -fx-background-color: #F5F8FC;
+}
+
+.can-inventory-table .column-header,
+.can-inventory-table .filler {
+    -fx-size: 42px;
+    -fx-background-color: #F7F9FB;
+    -fx-border-color: transparent #E5EBF1 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.can-inventory-table .table-row-cell {
+    -fx-cell-size: 40px;
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent transparent #EEF2F6 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.can-inventory-table .table-row-cell:odd {
+    -fx-background-color: #FAFBFD;
+}
+
+.can-inventory-table .table-row-cell:selected {
+    -fx-background-color: #EDF5FF;
+    -fx-border-color: transparent transparent #DEE6EE #3B82F6;
+    -fx-border-width: 0 0 1 3;
+}
+
+.can-inventory-table .table-cell {
+    -fx-padding: 4 10 4 10;
+    -fx-border-color: transparent #E5EBF1 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+    -fx-font-size: 12px;
+}
+
+.inventory-can-id-cell {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-weight: 600;
+}
+
+.inventory-match-badge {
+    -fx-padding: 2 8 2 8;
+    -fx-background-radius: 8;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 700;
+}
+
+.inventory-match-badge.match-matched {
+    -fx-background-color: #E5F6EA;
+    -fx-text-fill: #1B7A3A;
+}
+
+.inventory-match-badge.match-unmatched {
+    -fx-background-color: #FBEFE6;
+    -fx-text-fill: #B35C1E;
+}
+
+.source-inventory-table-footer {
+    -fx-padding: 4 2 2 2;
+    -fx-min-height: 28;
+    -fx-border-color: #E7ECF2 transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+.source-inventory-details {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent transparent transparent #E5EBF1;
+    -fx-border-width: 0 0 0 1;
+}
+
+.inventory-semantics-help,
+.inventory-inspect-button {
+    -fx-min-width: 28;
+    -fx-pref-width: 28;
+    -fx-padding: 2 4 2 4;
+}
+
+.inventory-status-ready,
+.source-inventory-status-badge.badge-ready {
+    -fx-background-color: #E5F6EA;
+    -fx-text-fill: #1B7A3A;
+}
+
+.inventory-filter-caption {
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #5B6B7C;
+}
+
+.inventory-filter-field {
+    -fx-spacing: 3;
+}
+
+.inventory-metric-badge {
+    -fx-font-size: 11.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #0B5F68;
+    -fx-background-color: #E8F6F7;
+    -fx-background-radius: 6;
+    -fx-padding: 4 10 4 10;
+}
+
+.inventory-scope-metrics {
+    -fx-spacing: 8;
+    -fx-padding: 2 0 2 0;
+}
+
+.inventory-quick-scope-bar {
+    -fx-spacing: 4;
+    -fx-padding: 2 0 4 0;
+}
+
+.inventory-quick-scope {
+    -fx-min-height: 34;
+    -fx-pref-height: 36;
+    -fx-max-height: 40;
+}
+
+.inventory-context-actions {
+    -fx-spacing: 8;
+}
+
+.source-inventory-toolbar {
+    -fx-spacing: 12;
+    -fx-alignment: BOTTOM_LEFT;
+}
+
+.inventory-scope-action-row {
+    -fx-spacing: 10;
+    -fx-padding: 2 0 4 0;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.inventory-scope-caption {
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #5B6B7C;
+    -fx-padding: 0 4 0 0;
+}
+
+.inventory-scope-row {
+    -fx-spacing: 8;
+    -fx-padding: 2 0 2 0;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.inventory-selection-action-row,
+.inventory-study-action-row {
+    -fx-spacing: 8;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.inventory-study-selection-stack {
+    -fx-spacing: 6;
+    -fx-padding: 2 0 4 0;
+}
+
+.inventory-study-action,
+.inventory-quick-scope {
+    -fx-text-overrun: clip;
+}
+
+.inventory-filter-inline {
+    -fx-spacing: 4;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.inventory-compact-meta {
+    -fx-font-size: 11.5px;
+    -fx-text-fill: #5B6B7C;
+}
+
+.inventory-table-command-row {
+    -fx-spacing: 10;
+    -fx-padding: 2 0 2 0;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.inventory-study-toggle-active {
+    -fx-background-color: #E7F6F4;
+    -fx-border-color: #1F8A7A;
+}
+
+/* === Source / Channel context header (target-match tiles) ================== */
+.source-channel-context-header {
+    -fx-spacing: 4;
+    -fx-padding: 0;
+}
+
+.source-channel-context-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #142A3A;
+}
+
+.source-channel-context-title-row {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 8;
+}
+
+.source-channel-active-hint {
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #0B7F86;
+}
+
+.source-channel-active-dot {
+    -fx-background-color: #14A3AB;
+    -fx-background-radius: 8;
+}
+
+.source-channel-context-tiles {
+    -fx-hgap: 8;
+    -fx-vgap: 6;
+    -fx-padding: 2 0 0 0;
+}
+
+.source-channel-meta-tile {
+    -fx-background-radius: 7;
+    -fx-border-radius: 7;
+    -fx-border-width: 1;
+    -fx-padding: 4 8 4 8;
+    -fx-min-height: 38;
+    -fx-max-height: 44;
+}
+
+.source-channel-meta-tile.measurement-source {
+    -fx-background-color: #E8F7F8;
+    -fx-border-color: #B7E0E3;
+}
+
+.source-channel-meta-tile.definition-source {
+    -fx-background-color: #F3ECFF;
+    -fx-border-color: #D7C4F5;
+}
+
+.source-channel-meta-tile.source-channel-meta-neutral {
+    -fx-background-color: #F5F7F9;
+    -fx-border-color: #E2E8EE;
+}
+
+.source-channel-meta-format {
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -stellar-measurement;
+}
+
+.source-channel-meta-tile.definition-source .source-channel-meta-format {
+    -fx-text-fill: -stellar-definition;
+}
+
+.source-channel-meta-primary {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1B2F3D;
+}
+
+.source-channel-meta-tile.definition-source .source-channel-meta-primary {
+    -fx-text-fill: #5B2FA8;
+}
+
+.source-channel-meta-caption {
+    -fx-font-size: 10px;
+    -fx-text-fill: #6B7C8C;
+}
+
+.source-channel-metadata-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.source-channel-metadata-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.source-channel-mapping-cluster {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 8;
+    -fx-padding: 2 0 2 2;
+}
+
+.decision-mapping-summary-row {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 10;
+    -fx-padding: 2 0 2 0;
+}
+
+.source-channel-mapping-badge.mapping-candidate,
+.source-channel-mapping-badge.status-candidate {
+    -fx-background-color: #F0F2FF;
+    -fx-text-fill: #4C51BF;
+    -fx-border-color: #D8DDF8;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-padding: 3 9 3 9;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 800;
+}
+
+.source-channel-mapping-badge.status-recommended,
+.inventory-mapping-badge.mapping-recommended {
+    -fx-background-color: #E8F0FF;
+    -fx-text-fill: #2F5FDB;
+    -fx-border-color: #C5D6F8;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-padding: 3 9 3 9;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 800;
+}
+
+.source-channel-mapping-badge.status-confirmed,
+.inventory-mapping-badge.mapping-confirmed,
+.inventory-mapping-badge.mapping-manual,
+.inventory-mapping-badge.mapping-mapped {
+    -fx-background-color: #E5F6EA;
+    -fx-text-fill: #1B7A3A;
+    -fx-border-color: #BFE8CB;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-padding: 3 9 3 9;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 800;
+}
+
+.source-channel-mapping-badge.status-attention,
+.inventory-mapping-badge.mapping-attention {
+    -fx-background-color: #FFF4E5;
+    -fx-text-fill: #B86A00;
+    -fx-border-color: #F0D2A0;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-padding: 3 9 3 9;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 800;
+}
+
+.source-channel-match-stat,
+.source-channel-coverage-stat,
+.match-stat {
+    -fx-font-size: 11.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #355064;
+}
+
+.source-channel-aggregate-line {
+    -fx-font-size: 11px;
+    -fx-text-fill: #5B6B7C;
+    -fx-padding: 0 0 0 2;
+}
+
+.source-channel-status-badge.status-ready {
+    -fx-background-color: #E5F6EA;
+    -fx-text-fill: #1B7A3A;
+}
+
+.decision-status-pills {
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 0 2 0;
+}
+
+.decision-status-pill {
+    -fx-background-color: #EDF2F7;
+    -fx-text-fill: #4B6278;
+    -fx-background-radius: 999;
+    -fx-padding: 3 9 3 9;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.decision-status-pill.decision-pill-dbc,
+.dbc-definition {
+    -fx-background-color: #F0F2FF;
+    -fx-text-fill: #667EEA;
+}
+
+.decision-status-pill.decision-pill-ready,
+.confirmed {
+    -fx-background-color: #EAF6EE;
+    -fx-text-fill: #2F7D4A;
+}
+
+.decision-section-title {
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #18314A;
+}
+
+.decision-format-badge,
+.measurement-source-badge,
+.measurement-source {
+    -fx-background-color: #EAF7FA;
+    -fx-text-fill: #197C91;
+    -fx-border-color: #B8DEE5;
+    -fx-background-radius: 4;
+    -fx-padding: 1 6 1 6;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+.decision-channel-coverage {
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #2F7D4A;
+    -fx-alignment: CENTER_RIGHT;
+}
+
+.decision-summary-metric {
+    -fx-background-color: #F6F8FB;
+    -fx-background-radius: 6;
+    -fx-padding: 6 4 6 4;
+    -fx-font-size: 10.5px;
+    -fx-text-fill: #355064;
+    -fx-alignment: CENTER;
+}
+
+.decision-action-dbc {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #667EEA;
+}
+
+.decision-action-accepted {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #2F7D4A;
+}
+
+.decision-action-bar .secondary-button,
+.secondary-action {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #B8CCE8;
+    -fx-text-fill: -stellar-accent;
+}
+
+.decision-action-bar .needs-attention {
+    -fx-background-color: #FFF7E6;
+    -fx-border-color: #B7791F;
+    -fx-text-fill: #B7791F;
+}
+
+.decision-status-badge {
+    -fx-background-radius: 999;
+    -fx-padding: 2 8 2 8;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+.decision-status-badge.status-recommended,
+.recommended {
+    -fx-background-color: #EAF2FF;
+    -fx-text-fill: -stellar-accent;
+}
+
+.decision-status-badge.status-confirmed {
+    -fx-background-color: #EAF6EE;
+    -fx-text-fill: #2F7D4A;
+}
+
+.decision-status-badge.status-manual,
+.manual {
+    -fx-background-color: #EDF2F7;
+    -fx-text-fill: #4B6278;
+}
+
+.decision-status-badge.status-attention,
+.needs-attention {
+    -fx-background-color: #FFF7E6;
+    -fx-text-fill: #B7791F;
+}
+
+.decision-status-badge.status-selected {
+    -fx-background-color: #EAF2FF;
+    -fx-text-fill: -stellar-accent;
+}
+
+.decision-nav-state-mark {
+    -fx-font-size: 9px;
+    -fx-min-width: 12;
+    -fx-pref-width: 12;
+    -fx-max-width: 12;
+}
+
+.decision-nav-state-recommended {
+    -fx-text-fill: #3B82F6;
+}
+
+.decision-nav-state-selected {
+    -fx-text-fill: -stellar-accent;
+}
+
+.decision-nav-state-confirmed {
+    -fx-text-fill: #2F7D4A;
+    -fx-font-weight: 800;
+}
+
+.decision-nav-state-attention {
+    -fx-text-fill: #D69E2E;
+}
+
+.decision-status-badge.status-candidate {
+    -fx-background-color: #F0F2FF;
+    -fx-text-fill: #667EEA;
+}
+
+.decision-mapping-preview {
+    -fx-background-color: #F0F2FF;
+    -fx-border-color: #D8DDF8;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.decision-mapping-preview-line {
+    -fx-font-size: 11px;
+}
+
+.decision-preview-mapped {
+    -fx-text-fill: #1B7A3A;
+    -fx-font-weight: 700;
+}
+
+.decision-preview-unmapped {
+    -fx-text-fill: #B86A00;
+    -fx-font-weight: 700;
+}
+
+.decision-preview-coverage {
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #4B2A8A;
+}
+
+.decision-action-bar {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border transparent transparent transparent;
+}
+
+.decision-action-selection {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #18314A;
+    -fx-padding: 0 8 0 0;
+}
+
+.decision-proceed-button {
+    -fx-background-color: -stellar-accent;
+    -fx-text-fill: #FFFFFF;
+}
+
+.decision-proceed-button:hover {
+    -fx-background-color: -stellar-accent-hover;
+}
+
+.channel-decision-header {
+    -fx-spacing: 6;
+}
+
+
+/* ================================================================
+   Decision Workspace modes / Quick Decode
+   ================================================================ */
+.decision-mode-bar {
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #E3EAF1;
+    -fx-border-width: 0 0 1 0;
+}
+
+.decision-mode-caption {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #52677B;
+    -fx-padding: 0 4 0 0;
+}
+
+.decision-mode-choice {
+    -fx-padding: 2 10 3 10;
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #E3EAF1;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-min-width: 250px;
+}
+
+.decision-mode-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 1 0 1 0;
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #18314A;
+    -fx-cursor: hand;
+}
+
+.decision-mode-button:selected {
+    -fx-text-fill: #087E90;
+}
+
+.decision-mode-subtitle {
+    -fx-font-size: 10.5px;
+    -fx-text-fill: #6B7C8F;
+}
+
+.decision-mode-host,
+.quick-decode-root,
+.quick-decode-body,
+.quick-decode-center-stack {
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+}
+
+.quick-decode-root {
+    -fx-background-color: -stellar-bg;
+}
+
+.quick-decode-toolbar,
+.quick-decode-bottom {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #E2E9F0;
+}
+
+.quick-decode-toolbar {
+    -fx-border-width: 0 0 1 0;
+}
+
+.quick-decode-bottom {
+    -fx-border-width: 1 0 0 0;
+}
+
+.quick-decode-body {
+    -fx-padding: 10;
+}
+
+.quick-decode-table {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #DDE6EF;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-font-size: 11.5px;
+}
+
+.quick-decode-table .column-header-background {
+    -fx-background-color: #F5F8FB;
+    -fx-background-radius: 8 8 0 0;
+}
+
+.quick-decode-table .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #E3EAF1 transparent;
+    -fx-font-weight: 800;
+    -fx-text-fill: #29435C;
+    -fx-padding: 4 5 4 5;
+}
+
+.quick-decode-table .tree-table-row-cell {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent transparent #EDF2F6 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* A row click is inspection/focus only. Processing inclusion is controlled by the checkbox, so
+   focused/selected rows must never invert engineering values or disclosure arrows to white. */
+.quick-decode-table .tree-table-row-cell:selected,
+.quick-decode-table .tree-table-row-cell:selected:focused {
+    -fx-background-color: #EEF5FB;
+}
+
+.quick-decode-table .tree-table-row-cell:selected .tree-table-cell,
+.quick-decode-table .tree-table-row-cell:selected:focused .tree-table-cell {
+    -fx-text-fill: #243D56;
+}
+
+.quick-decode-table .tree-table-row-cell:selected .tree-disclosure-node > .arrow,
+.quick-decode-table .tree-table-row-cell:selected:focused .tree-disclosure-node > .arrow {
+    -fx-background-color: -stellar-text-muted;
+}
+
+.quick-decode-table .quick-no-match-row:selected,
+.quick-decode-table .quick-no-match-row:selected:focused {
+    -fx-background-color: #FFF1EF;
+}
+
+.quick-decode-table .tree-table-cell {
+    -fx-padding: 4 6 4 6;
+    -fx-border-color: transparent #EDF2F6 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+    -fx-alignment: center-left;
+}
+
+.quick-decode-table .quick-source-row {
+    -fx-background-color: #F8FBFD;
+    -fx-font-weight: 700;
+}
+
+.quick-decode-table .quick-no-match-row {
+    -fx-background-color: #FFF9F8;
+}
+
+.quick-source-name {
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #18314A;
+}
+
+.quick-channel-name {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #26455F;
+}
+
+.quick-dbc-name {
+    -fx-font-weight: 700;
+    -fx-text-fill: #243D56;
+}
+
+.quick-source-dbc-summary {
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #274A68;
+}
+
+.quick-source-strategy {
+    -fx-font-size: 9.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #526B80;
+}
+
+.quick-best-badge {
+    -fx-background-color: #E2F7EA;
+    -fx-text-fill: #16753B;
+    -fx-background-radius: 5;
+    -fx-padding: 1 5 1 5;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+}
+
+.quick-dbc-combo {
+    -fx-font-size: 11px;
+    -fx-min-height: 28px;
+    -fx-pref-height: 30px;
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #D8E2EC;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.quick-decode-table .quick-source-override-combo {
+    -fx-font-size: 11px;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-max-height: 28px;
+}
+.quick-decode-table .quick-source-override-combo > .list-cell {
+    -fx-padding: 2 6 2 6;
+    -fx-alignment: center-left;
+}
+.quick-decode-table .quick-source-override-combo > .arrow-button {
+    -fx-padding: 2 6 2 4;
+    -fx-background-color: transparent;
+}
+
+.quick-decision-badge,
+.quick-status-badge,
+.quick-legend-badge {
+    -fx-background-radius: 5;
+    -fx-padding: 2 6 2 6;
+    -fx-font-size: 9.5px;
+    -fx-font-weight: 800;
+}
+
+.quick-no-match-text {
+    -fx-text-fill: #C0392B;
+    -fx-font-weight: 700;
+}
+
+.quick-decode-table .progress-bar,
+.quick-dbc-usage .progress-bar {
+    -fx-pref-height: 5px;
+    -fx-min-height: 5px;
+    -fx-max-height: 5px;
+}
+
+.quick-decode-table .progress-bar > .track,
+.quick-dbc-usage .progress-bar > .track {
+    -fx-background-color: #E8EDF2;
+    -fx-background-radius: 5;
+}
+
+.quick-decode-sidebar {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #DDE6EF;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.quick-decode-section-title {
+    -fx-font-size: 11.5px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #223D57;
+}
+
+.quick-no-match {
+    -fx-background-color: #FDEBE8;
+    -fx-text-fill: #B8473B;
+}
+
+.quick-study-button {
+    -fx-min-width: 62px;
+}
+
+.quick-decode-primary {
+    -fx-min-width: 175px;
+}
+
+.quick-decode-summary {
+    -fx-font-size: 11.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #2A465F;
+}
+
+.quick-decode-empty {
+    -fx-font-size: 13px;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+}
+
+/* Quick Decode result: one row per measurement source; channel results remain internal provenance. */
+.quick-source-results-table .table-row-cell:selected,
+.quick-source-results-table .table-row-cell:selected:focused {
+    -fx-background-color: #EAF4FA;
+}
+
+.quick-source-results-table .table-row-cell:selected .table-cell,
+.quick-source-results-table .table-row-cell:selected:focused .table-cell {
+    -fx-text-fill: #1B2A38;
+}
+
+.browser-duplicates-toggle {
+    -fx-padding: 6 8 6 8;
+    -fx-font-size: 11px;
+}
+
+/* ========================================================================== */
+/* Detailed Mapping — enterprise visual redesign v10                          */
+/* Presentation only. Quick Decode, parsers, mapping and processing untouched. */
+/* ========================================================================== */
+
+.detailed-mapping-mode {
+    -fx-background-color: -stellar-bg;
+    -fx-font-size: 12.5px;
+    -fx-padding: 0 8 0 8;
+}
+
+.detailed-filter-drawer {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #E2E8EF;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 6 8 6 8;
+}
+
+.detailed-filters-toggle {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #DCE5EE;
+    -fx-text-fill: #3A526B;
+}
+
+.detailed-filters-toggle-active {
+    -fx-background-color: #EAF7F7;
+    -fx-border-color: #0F8A96;
+    -fx-text-fill: #08717C;
+}
+
+.detailed-mapping-mode .source-inventory-split {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 8 0 8 0;
+}
+
+.detailed-mapping-mode .source-inventory-split > .split-pane-divider {
+    -fx-background-color: #EEF2F6;
+    -fx-padding: 0 0.5 0 0.5;
+}
+
+.detailed-mapping-mode .source-inventory-navigator {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10 8 10 8;
+}
+
+.detailed-mapping-mode .source-inventory-nav-title {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #1A3048;
+}
+
+.detailed-mapping-mode .source-inventory-nav-col-head {
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #6A7C8F;
+}
+
+.detailed-mapping-mode .source-inventory-tree .tree-cell {
+    -fx-font-size: 12.5px;
+    -fx-padding: 7 6 7 6;
+}
+
+.detailed-mapping-mode .source-inventory-tree .source-inventory-channel-label {
+    -fx-min-width: -1;
+}
+
+.custom-decode-center-scroll,
+.custom-decode-center-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.detailed-mapping-mode .source-inventory-tree .tree-cell:filled:selected,
+.detailed-mapping-mode .source-inventory-tree .tree-cell:filled:selected:focused,
+.detailed-mapping-mode .source-inventory-tree .tree-cell.source-inventory-selected {
+    -fx-background-color: #EAF3FF;
+    -fx-border-color: transparent transparent transparent -stellar-accent;
+    -fx-border-width: 0 0 0 3;
+    -fx-text-fill: #18314A;
+}
+
+.detailed-mapping-mode .source-inventory-tree .tree-cell:filled:selected .label,
+.detailed-mapping-mode .source-inventory-tree .tree-cell:filled:selected .text,
+.detailed-mapping-mode .source-inventory-tree .tree-cell.source-inventory-selected .label,
+.detailed-mapping-mode .source-inventory-tree .tree-cell.source-inventory-selected .text {
+    -fx-text-fill: #18314A;
+}
+
+.detailed-mapping-mode .source-inventory-detail {
+    -fx-background-color: transparent;
+    -fx-padding: 0 8 0 8;
+}
+
+.detailed-mapping-mode .source-inventory-surface {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.detailed-mapping-mode .source-inventory-scope-header,
+.detailed-mapping-mode .channel-decision-header {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent transparent #EDF1F5 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10 12 8 12;
+    -fx-spacing: 8;
+}
+
+.detailed-mapping-mode .source-channel-context-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #142A3A;
+}
+
+.detailed-mapping-mode .source-channel-context-title-row {
+    -fx-padding: 0 0 2 0;
+}
+
+.detailed-mapping-mode .source-channel-context-tiles {
+    -fx-spacing: 8;
+    -fx-padding: 3 0 3 0;
+}
+
+.detailed-mapping-mode .source-channel-meta-tile {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-padding: 7 10 7 10;
+    -fx-min-height: 48;
+    -fx-max-height: 54;
+}
+
+.detailed-mapping-mode .source-channel-meta-tile.measurement-source {
+    -fx-background-color: #F7FBFC;
+    -fx-border-color: #D4E9EB;
+}
+
+.detailed-mapping-mode .source-channel-meta-tile.definition-source {
+    -fx-background-color: #FBF9FF;
+    -fx-border-color: #E1D7F5;
+}
+
+.detailed-mapping-mode .source-channel-meta-tile.source-channel-meta-neutral {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+}
+
+.detailed-mapping-mode .source-channel-meta-primary {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 800;
+}
+
+.detailed-mapping-mode .source-channel-meta-caption {
+    -fx-font-size: 10.5px;
+    -fx-text-fill: #718195;
+}
+
+.detailed-mapping-mode .channel-quick-selector-scroll,
+.detailed-mapping-mode .channel-quick-selector-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.detailed-mapping-mode .channel-quick-chip {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #DCE4ED;
+    -fx-border-width: 1;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-padding: 4 10 4 10;
+}
+
+.detailed-mapping-mode .channel-quick-chip:hover {
+    -fx-background-color: #F7FAFD;
+    -fx-border-color: #BFD0E5;
+}
+
+.detailed-mapping-mode .dbc-selector-row {
+    -fx-padding: 2 0 2 0;
+    -fx-spacing: 5;
+}
+
+.detailed-mapping-mode .dbc-selector-combo {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border-strong;
+    -fx-border-width: 1;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+}
+
+.detailed-mapping-mode .decision-mapping-summary-row {
+    -fx-padding: 2 0 0 0;
+    -fx-spacing: 8;
+}
+
+.detailed-mapping-mode .inventory-quick-scope-bar {
+    -fx-padding: 2 0 0 0;
+}
+
+.detailed-mapping-mode .inventory-quick-filter {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #DCE4ED transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-text-fill: #5A6E82;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-padding: 5 10 5 10;
+}
+
+.detailed-mapping-mode .inventory-quick-filter:selected,
+.detailed-mapping-mode .inventory-quick-filter-active {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -stellar-accent transparent;
+    -fx-text-fill: -stellar-accent;
+}
+
+.detailed-mapping-mode .can-inventory-table {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-font-size: 12.5px;
+}
+
+.detailed-mapping-mode .can-inventory-table .column-header-background {
+    -fx-background-color: #F6F8FB;
+    -fx-border-color: transparent transparent #E3E9EF transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.detailed-mapping-mode .can-inventory-table .column-header .label {
+    -fx-font-size: 11.5px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #32485F;
+}
+
+.detailed-mapping-mode .can-inventory-table .table-row-cell {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent transparent #EEF2F6 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.detailed-mapping-mode .can-inventory-table .table-row-cell:hover {
+    -fx-background-color: #F8FAFD;
+}
+
+.detailed-mapping-mode .can-inventory-table .table-row-cell:selected {
+    -fx-background-color: #EEF5FF;
+    -fx-text-fill: #18314A;
+}
+
+.detailed-mapping-mode .source-inventory-table-footer {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #EDF1F5 transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+.detailed-mapping-mode .source-inventory-details {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent;
+    -fx-padding: 10 12 10 12;
+}
+
+.study-panel-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #18314A;
+}
+
+.study-metrics-row {
+    -fx-spacing: 8;
+}
+
+.study-metric-card {
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #E3E9EF;
+    -fx-border-width: 1;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-padding: 7 8 7 8;
+    -fx-min-width: 0;
+    -fx-max-width: 9999;
+}
+
+.study-metric-value {
+    -fx-font-size: 14px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #162B43;
+}
+
+.study-metric-caption {
+    -fx-font-size: 10px;
+    -fx-text-fill: #728297;
+}
+
+.detailed-mapping-mode .decision-action-bar {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: -stellar-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 6 10 6 10;
+    -fx-min-height: 44;
+    -fx-pref-height: 48;
+    -fx-max-height: 56;
+}
+
+.detailed-mapping-mode .decision-action-bar.decision-action-bar-wrapped {
+    -fx-min-height: 84;
+    -fx-pref-height: 92;
+    -fx-max-height: 104;
+}
+
+.detailed-mapping-mode .decision-action-selection,
+.detailed-mapping-mode .decision-action-dbc,
+.detailed-mapping-mode .decision-action-accepted,
+.detailed-mapping-mode .decision-action-button,
+.detailed-mapping-mode .decision-proceed-button {
+    -fx-font-size: 12.5px;
+}
+
+.detailed-mapping-mode .decision-proceed-button,
+.detailed-mapping-mode .decision-action-bar .primary-action {
+    -fx-background-color: -stellar-accent;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: -stellar-accent;
+}
+
+.detailed-mapping-mode .decision-action-bar .primary-action:hover,
+.detailed-mapping-mode .decision-proceed-button:hover {
+    -fx-background-color: -stellar-accent-hover;
+    -fx-border-color: -stellar-accent-hover;
+}
+
+/* Keep Detailed Mapping visually consistent with Quick Decode without changing the shared mode logic. */
+.decision-mode-bar {
+    -fx-padding: 6 10 6 10;
+}
+
+.decision-mode-choice {
+    -fx-min-width: 250;
+    -fx-padding: 3 10 4 10;
+}
+
+.decision-mode-button,
+.decision-mode-subtitle {
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+
+/* V13: signal-browser duplicate provenance indicator. */
+.browser-duplicate-star {
+    -fx-text-fill: #D92D20;
+    -fx-font-weight: 800;
+    -fx-font-size: 13px;
+}
+
+.quick-no-can-data {
+    -fx-text-fill: #667085;
+}
+
+/* ---- Phase 2: Study staleness ---- */
+
+.study-stale-bar {
+    -fx-padding: 7 9 7 9;
+    -fx-background-color: #FFF6E8;
+    -fx-border-color: #F0D9B4;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.study-stale-message {
+    -fx-font-size: 11px;
+    -fx-text-fill: #8A5300;
+}
+
+/* User-facing source statuses. Internal job/validation enums are never rendered. */
+.meas-source-status.source-status-ready,
+.meas-source-status.source-status-processed {
+    -fx-text-fill: #0B7A3E;
+    -fx-background-color: #E6F6EC;
+}
+
+.meas-source-status.source-status-reading {
+    -fx-text-fill: -stellar-text-muted;
+    -fx-background-color: #EEF2F6;
+}
+
+.meas-source-status.source-status-attention {
+    -fx-text-fill: -stellar-warning;
+    -fx-background-color: -stellar-warning-bg;
+}
+
+.meas-source-status.source-status-unavailable {
+    -fx-text-fill: -stellar-danger;
+    -fx-background-color: -stellar-danger-bg;
+}
+
+.measurement-source-inventory-list .list-cell:filled:selected .meas-source-status.source-status-ready,
+.measurement-source-inventory-list .list-cell:filled:selected .meas-source-status.source-status-processed,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .meas-source-status.source-status-ready,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .meas-source-status.source-status-processed {
+    -fx-text-fill: #0B7A3E;
+}
+
+.measurement-source-inventory-list .list-cell:filled:selected .meas-source-status.source-status-reading,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .meas-source-status.source-status-reading {
+    -fx-text-fill: -stellar-text-muted;
+}
+
+.measurement-source-inventory-list .list-cell:filled:selected .meas-source-status.source-status-attention,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .meas-source-status.source-status-attention {
+    -fx-text-fill: -stellar-warning;
+}
+
+.measurement-source-inventory-list .list-cell:filled:selected .meas-source-status.source-status-unavailable,
+.measurement-source-inventory-list .list-cell:filled:selected:focused .meas-source-status.source-status-unavailable {
+    -fx-text-fill: -stellar-danger;
+}
+
+/* Prioritize the high-volume measurement list. Definition sources stay compact. */
+.measurement-sources-panel {
+    -fx-min-height: 420;
+}
+
+.definition-sources-panel {
+    -fx-min-height: 420;
+}
+
+.project-files-sources-scroll .scroll-bar:vertical {
+    -fx-pref-width: 10;
+}
+
+/* Workspace mode switch is intentionally one compact row so the engineering table owns height. */
+.decision-mode-bar-compact {
+    -fx-padding: 5 12 5 12;
+    -fx-min-height: 40;
+    -fx-pref-height: 40;
+    -fx-max-height: 42;
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: transparent transparent #E2E9F0 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.decision-mode-bar-compact .decision-mode-caption {
+    -fx-padding: 0 4 0 0;
+}
+
+.decision-mode-compact-button {
+    -fx-background-color: -stellar-surface;
+    -fx-border-color: #D9E2EA;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 4 10 4 9;
+    -fx-min-height: 29;
+    -fx-font-size: 11.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #294158;
+}
+
+.decision-mode-compact-button:hover {
+    -fx-background-color: #F4F8FA;
+    -fx-border-color: #B8CCD4;
+}
+
+.decision-mode-compact-button:selected {
+    -fx-background-color: #EAF7F7;
+    -fx-border-color: #0F8A96;
+    -fx-text-fill: -stellar-measurement;
+}
+
+.decision-mode-inline-hint {
+    -fx-font-size: 10px;
+    -fx-text-fill: #7A8999;
+}

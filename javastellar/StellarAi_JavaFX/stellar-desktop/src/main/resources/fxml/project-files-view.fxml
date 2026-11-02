@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.TextField?>
+<?import com.stellar.platform.desktop.ui.inventory.MeasurementSourceInventoryList?>
+<?import com.stellar.platform.desktop.ui.inventory.DbcMappingTablePane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import com.stellar.platform.desktop.ui.inventory.SourceInventoryWorkspace?>
+<?import com.stellar.platform.desktop.ui.inventory.ChannelSelectionPane?>
+<?import com.stellar.platform.desktop.ui.inventory.ProcessingActionBar?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.stellar.platform.desktop.ui.ProjectFilesController"
+            styleClass="project-files-page"
+            minWidth="0" minHeight="0"
+            maxWidth="Infinity" maxHeight="Infinity">
+
+    <fx:define>
+        <ToggleGroup fx:id="projectFilesWorkspaceGroup"/>
+        <ToggleGroup fx:id="sourceDecodeModeGroup"/>
+    </fx:define>
+
+    <!-- Compact persistent shell: breadcrumb + metadata + tabs only -->
+    <top>
+        <VBox spacing="4" styleClass="project-files-chrome">
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="project-files-header-row">
+                <HBox spacing="6" alignment="CENTER_LEFT" styleClass="project-files-breadcrumb">
+                    <Label text="Project Files" styleClass="project-files-breadcrumb-parent"/>
+                    <Label text="/" styleClass="project-files-breadcrumb-sep"/>
+                    <Label fx:id="workspaceTitleLabel" text="Sources" styleClass="project-files-breadcrumb-active"/>
+                </HBox>
+                <Region HBox.hgrow="ALWAYS" minWidth="8"/>
+                <Label fx:id="shellSummaryLabel" text="0 Sources · 0 CAN Channels · 0 DBCs / Definitions"
+                       styleClass="project-summary-metric"/>
+            </HBox>
+            <!-- Keep legacy fx:ids for controller wiring; visibility controlled in code -->
+            <HBox spacing="12" alignment="CENTER_LEFT" managed="false" visible="false">
+                <Label fx:id="measurementSummaryLabel" text="0 Measurement Files"/>
+                <Label fx:id="definitionSummaryLabel" text="0 Definitions"/>
+                <Label fx:id="inventorySummaryLabel" text=""/>
+                <Label fx:id="mappingSummaryLabel" text=""/>
+                <Label fx:id="processingHintLabel" text=""/>
+            </HBox>
+            <Label fx:id="addResultLabel" styleClass="status-line,project-add-result" wrapText="true"
+                   managed="false" visible="false"/>
+
+            <HBox fx:id="workspaceNavBar" spacing="2" alignment="CENTER_LEFT"
+                  styleClass="project-files-workspace-nav">
+                <ToggleButton fx:id="sourcesWorkspaceTab" text="Sources"
+                              toggleGroup="$projectFilesWorkspaceGroup"
+                              selected="true"
+                              onAction="#onShowSourcesWorkspace"
+                              styleClass="project-files-workspace-tab"/>
+                <ToggleButton fx:id="sourceInventoryWorkspaceTab" text="Auto Decode"
+                              toggleGroup="$projectFilesWorkspaceGroup"
+                              onAction="#onShowSourceInventoryWorkspace"
+                              styleClass="project-files-workspace-tab"
+                              managed="false" visible="false"/>
+                <ToggleButton fx:id="dbcMappingWorkspaceTab" text="Custom Decode"
+                              toggleGroup="$projectFilesWorkspaceGroup"
+                              onAction="#onShowDbcMappingWorkspace"
+                              styleClass="project-files-workspace-tab"
+                              managed="false" visible="false"/>
+            </HBox>
+            <!-- Decode strategy chooser. Lives in the persistent chrome so it stays visible at every
+                 window size and is never scrolled away, and is shown only inside the Decode stage. -->
+            <HBox fx:id="sourceDecodeModeStrip" id="sourceDecodeModeStrip"
+                  spacing="8" alignment="CENTER_LEFT" minWidth="0"
+                  styleClass="source-decode-mode-strip"
+                  managed="false" visible="false">
+                <Label text="Decode Strategy" styleClass="source-decode-mode-caption"/>
+                <ToggleButton fx:id="sourceAutoDecodeButton" id="sourceAutoDecodeButton" text="Auto Decode"
+                              toggleGroup="$sourceDecodeModeGroup"
+                              onAction="#onOpenAutoDecode"
+                              styleClass="source-decode-mode-button,source-auto-decode-button"/>
+                <Label text="Recommended" styleClass="source-mode-recommended-badge"/>
+                <ToggleButton fx:id="sourceCustomDecodeButton" id="sourceCustomDecodeButton" text="Custom Decode"
+                              toggleGroup="$sourceDecodeModeGroup"
+                              onAction="#onOpenCustomDecode"
+                              styleClass="source-decode-mode-button,source-custom-decode-button"/>
+                <Region HBox.hgrow="ALWAYS" minWidth="8"/>
+                <Label fx:id="decodeReadinessLabel" text="" styleClass="decode-readiness-summary"
+                       textOverrun="ELLIPSIS" minWidth="0"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <StackPane fx:id="workspaceHost"
+                   styleClass="project-files-workspace-host"
+                   minWidth="0" minHeight="0"
+                   maxWidth="Infinity" maxHeight="Infinity">
+
+            <ScrollPane fx:id="sourcesWorkspace"
+                        fitToWidth="true"
+                        fitToHeight="true"
+                        hbarPolicy="NEVER"
+                        vbarPolicy="AS_NEEDED"
+                        styleClass="project-files-scroll,project-files-sources-scroll"
+                        minWidth="0" minHeight="0"
+                        maxWidth="Infinity" maxHeight="Infinity">
+                <content>
+                    <VBox spacing="10" fillWidth="true" styleClass="project-files-inputs,project-files-sources">
+
+                        <!-- Shown only while the project has no measurement source at all. -->
+                        <VBox fx:id="sourcesEmptyState" spacing="9" alignment="CENTER"
+                              VBox.vgrow="ALWAYS" minHeight="240"
+                              styleClass="sources-empty-state"
+                              managed="false" visible="false">
+                            <Label text="Sources" styleClass="sources-empty-title"/>
+                            <Label text="Add measurement data to this project."
+                                   styleClass="sources-empty-lead" wrapText="true"/>
+                            <Button fx:id="sourcesEmptyBrowseButton" text="Browse Files"
+                                    onAction="#onAddMeasurement"
+                                    styleClass="primary-button,sources-empty-browse"/>
+                            <Label text="Drop MF4, ASC, BLF, DAT or LOG files here"
+                                   styleClass="sources-empty-drop-hint" wrapText="true"/>
+                            <Label text="Supported formats:  MF4 • ASC • BLF • DAT • LOG"
+                                   styleClass="sources-empty-formats" wrapText="true"/>
+                        </VBox>
+
+                        <HBox fx:id="sourcesToolbar" spacing="8" alignment="CENTER_LEFT"
+                              styleClass="project-files-sources-toolbar">
+                            <Label fx:id="workflowLabel"
+                                   text="Manage the measurement data analysed by this project."
+                                   styleClass="muted" wrapText="true"
+                                   maxWidth="520"/>
+                            <Region HBox.hgrow="ALWAYS" minWidth="8"/>
+                            <Button text="+ Add Measurement Files" onAction="#onAddMeasurement"
+                                    styleClass="secondary-button,compact-button"/>
+                            <Button text="+ Add DBC" onAction="#onAddDefinition"
+                                    styleClass="definition-action-button,compact-button"/>
+                        </HBox>
+
+                        <HBox fx:id="sourcesWorkbench" spacing="10" fillHeight="true" VBox.vgrow="ALWAYS"
+                              styleClass="sources-definition-workbench">
+                            <VBox spacing="7" HBox.hgrow="ALWAYS" minWidth="400" prefWidth="760" maxWidth="Infinity" styleClass="modern-card,sources-panel,measurement-sources-panel">
+                                <HBox spacing="8" alignment="CENTER_LEFT" styleClass="project-source-list-header">
+                                    <Label text="Measurements" styleClass="modern-card-title"/>
+                                    <Label text="MEASUREMENT" styleClass="measurement-source-badge"/>
+                                    <Label fx:id="measurementCountBadge" text="0" styleClass="project-count-badge"/>
+                                    <Region HBox.hgrow="ALWAYS"/>
+                                    <TextField fx:id="measurementSearchField" promptText="Search sources..."
+                                               prefWidth="190" maxWidth="230"
+                                               styleClass="source-list-search"/>
+                                </HBox>
+                                <Label fx:id="measurementEmptyLabel"
+                                       text="No measurement files added."
+                                       styleClass="project-empty-state" wrapText="true"
+                                       managed="false" visible="false"/>
+                                <MeasurementSourceInventoryList fx:id="measurementSourceList"
+                                                                prefHeight="280" minHeight="160" maxHeight="Infinity"
+                                                                VBox.vgrow="ALWAYS"
+                                                                styleClass="measurement-source-inventory-list"/>
+                                <!-- Read-only inspector for the selected source. Shows only metadata the
+                                     application already holds; nothing is inferred or manufactured. -->
+                                <VBox fx:id="sourceDetailsInspector" spacing="2"
+                                      minHeight="0" maxHeight="150"
+                                      styleClass="source-details-inspector"
+                                      managed="false" visible="false">
+                                    <Label fx:id="sourceDetailsTitle" text="" styleClass="source-details-title"/>
+                                    <Label fx:id="sourceDetailsFacts" text="" styleClass="source-details-facts"
+                                           wrapText="true"/>
+                                    <Label fx:id="sourceDetailsLocation" text="" styleClass="source-details-location"
+                                           wrapText="true"/>
+                                </VBox>
+                            </VBox>
+
+                            <VBox spacing="7" HBox.hgrow="NEVER" minWidth="300" prefWidth="420" maxWidth="520" styleClass="modern-card,sources-panel,definition-sources-panel">
+                                <HBox spacing="8" alignment="CENTER_LEFT" styleClass="project-source-list-header">
+                                    <Label text="Definitions" styleClass="modern-card-title"/>
+                                    <Label text="DEFINITION" styleClass="definition-source-badge"/>
+                                    <Label fx:id="definitionCountBadge" text="0" styleClass="project-count-badge"/>
+                                    <Region HBox.hgrow="ALWAYS"/>
+                                    <TextField fx:id="definitionSearchField" promptText="Search..."
+                                               prefWidth="130" maxWidth="160"
+                                               styleClass="source-list-search"/>
+                                </HBox>
+                                <Label fx:id="definitionEmptyLabel"
+                                       text="No definitions added."
+                                       styleClass="project-empty-state" wrapText="true"
+                                       managed="false" visible="false"/>
+                                <TableView fx:id="definitionTable" prefHeight="520" minHeight="260" maxHeight="Infinity"
+                                           VBox.vgrow="ALWAYS" styleClass="project-source-table,definition-source-table">
+                                    <columns>
+                                        <TableColumn fx:id="defNameCol" text="Name" prefWidth="240" minWidth="140"/>
+                                        <TableColumn fx:id="defTypeCol" text="Type" prefWidth="70" maxWidth="90"/>
+                                        <TableColumn fx:id="defPathCol" text="Path" prefWidth="140" minWidth="80"/>
+                                        <TableColumn fx:id="defSizeCol" text="Size" prefWidth="78"/>
+                                        <TableColumn fx:id="defStatusCol" text="Status" prefWidth="120"/>
+                                        <TableColumn fx:id="defRemoveCol" text="" prefWidth="86" maxWidth="94"/>
+                                    </columns>
+                                </TableView>
+                                <Label text="DBC definitions use a consistent purple semantic across the product."
+                                       styleClass="modern-card-caption,definition-accent"/>
+                            </VBox>
+                        </HBox>
+
+                        <Label fx:id="validationLabel" styleClass="status-line" wrapText="true"
+                               managed="false" visible="false"/>
+
+                        <!-- Retired from Project Files UI for this phase; keep fx:id for safe wiring -->
+                        <ChannelSelectionPane fx:id="channelSelectionPane"
+                                              managed="false" visible="false"
+                                              maxWidth="Infinity"/>
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+            <SourceInventoryWorkspace fx:id="sourceInventoryWorkspace"
+                                      visible="false" managed="false"
+                                      minHeight="0"
+                                      maxWidth="Infinity"
+                                      maxHeight="Infinity"/>
+
+            <DbcMappingTablePane fx:id="dbcMappingTablePane"
+                                 visible="false" managed="false"
+                                 minHeight="0"
+                                 maxWidth="Infinity"
+                                 maxHeight="Infinity"/>
+        </StackPane>
+    </center>
+
+    <bottom>
+        <VBox spacing="0" maxWidth="Infinity">
+            <!-- Sources has exactly one dominant next action. Kept outside the scroll region so it
+                 stays reachable at every supported window size. -->
+            <HBox fx:id="sourcesActionBar" spacing="10" alignment="CENTER_LEFT"
+                  styleClass="sources-action-bar" maxWidth="Infinity"
+                  managed="false" visible="false">
+                <Label fx:id="sourcesReadinessLabel" text="" styleClass="sources-readiness-label"
+                       wrapText="true"/>
+                <Region HBox.hgrow="ALWAYS" minWidth="8"/>
+                <Button fx:id="continueToDecodeButton" text="Continue to Decode"
+                        onAction="#onContinueToDecode"
+                        disable="true"
+                        minWidth="-Infinity"
+                        styleClass="primary-button,continue-to-decode-button"/>
+            </HBox>
+            <!-- Retired Processing Selection chrome for this phase; keep node for future workspace -->
+            <ProcessingActionBar fx:id="processingActionBar"
+                                 managed="false" visible="false"
+                                 maxWidth="Infinity"/>
+        </VBox>
+    </bottom>
+</BorderPane>

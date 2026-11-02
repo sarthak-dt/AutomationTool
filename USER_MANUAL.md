@@ -15,6 +15,12 @@ The left navigation contains **New comparison**, **S3 browser**, **DBC manager**
 3. **New comparison** — review the selection, set tolerances, click **Run comparison**.
 4. **Reports** — download timestamped comparison CSV, JSON, and decoded Python / Java output CSV files.
 
+Manual measurement uploads are retained in the current Streamlit session while navigating to the DBC manager. Clear them from
+**New comparison** using **Clear uploaded measurement files**. Generated comparison and Python / Java output CSVs use relative
+timestamps in seconds and omit readable datetime columns; decoded output CSVs also omit the internal `is_discrete` column.
+When a selected channel is confirmed absent from a measurement, the comparison CSV includes an informational `NOT_COMPARABLE` row
+with the available channels and states that no decoding was performed. This explanation does not change comparison totals.
+
 ## 2. S3 connection
 
 | Field | Meaning |
@@ -76,12 +82,11 @@ Timestamps are seconds, relative to the first frame of the file. Output is numer
 * **NaN values:** both NaN → match; one NaN → `MISSING_IN_*`; *Skip rows* drops them.
 * **Units:** compared when both are present; a difference is noted, or becomes `NOT_COMPARABLE` with the strict policy.
 
-### Readable time (date and time)
+### Sample timestamps
 
-Internally every sample time is *seconds since the first frame* (same reference for Python and Java). When the file's start time is known
-(MF4 header start time; BLF absolute time in UTC) the tables show readable times such as `2023-08-14 17:14:38.010`, and `python_output.csv`
-gets a `datetime` column next to `timestamp` (seconds). The Java CSV may use `timestamp` (seconds) **or** `datetime`. For files without a start time
-(e.g. relative ASC logs) seconds are shown. `is_discrete` is not exported (it is detected internally).
+Sample timestamps are exported as seconds since the first frame, using the same reference for Python and Java. Generated comparison,
+Python output, and Java output CSVs do not include a readable date/time column. Exported JSON omits absolute date/time fields. The
+internal `is_discrete` field is not included in Python or Java output CSVs.
 
 ## 5b. Channel-wise decoding and comparison
 

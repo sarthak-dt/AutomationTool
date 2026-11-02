@@ -70,10 +70,14 @@ def parse_java_csv(data: bytes) -> pd.DataFrame:
     if (df["signal"] == "").any():
         raise JavaCsvError(f"{int((df['signal'] == '').sum())} row(s) have an empty signal name.")
     if "timestamp" not in df.columns or (df["timestamp"].str.strip() == "").all():
-        dts = pd.to_datetime(df["datetime"].str.strip(), errors="coerce")
+        datetime_text = df["datetime"].str.strip()
+        dts = pd.to_datetime(datetime_text, format="%d/%m/%Y %H:%M:%S:%f", errors="coerce")
+        fallback = dts.isna()
+        if fallback.any():
+            dts.loc[fallback] = pd.to_datetime(datetime_text.loc[fallback], errors="coerce", dayfirst=True)
         if dts.isna().any():
             first = int(dts.isna().idxmax()) + 2
-            raise JavaCsvError(f"{int(dts.isna().sum())} row(s) have an unreadable datetime (first at line {first}); use e.g. 2023-08-14 17:14:38.010.")
+            raise JavaCsvError(f"{int(dts.isna().sum())} row(s) have an unreadable datetime (first at line {first}); use e.g. 14/08/2023 17:14:38:010.")
         if getattr(dts.dt, "tz", None) is not None:
             dts = dts.dt.tz_localize(None)
         df["_dt"] = dts

@@ -13,7 +13,7 @@ from typing import Any
 
 import pandas as pd
 
-FMT = "%Y-%m-%d %H:%M:%S.%f"
+FMT = "%d/%m/%Y %H:%M:%S:%f"
 
 
 def parse_start(value: Any) -> pd.Timestamp | None:
@@ -39,11 +39,12 @@ def epoch_to_start(epoch: float | None) -> str | None:
 
 
 def format_dt(ts: pd.Timestamp) -> str:
+    """Format wall-clock timestamps as dd/mm/yyyy HH:MM:SS:SSS (milliseconds)."""
     return ts.round("ms").strftime(FMT)[:-3]
 
 
 def datetimes(start: pd.Timestamp | None, seconds: pd.Series) -> pd.Series:
-    """Series of 'YYYY-MM-DD HH:MM:SS.mmm' strings ('' when start is unknown)."""
+    """Series of 'dd/mm/yyyy HH:MM:SS:SSS' strings ('' when start is unknown)."""
     if start is None:
         return pd.Series([""] * len(seconds), index=seconds.index, dtype=object)
     dt = start + pd.to_timedelta(pd.to_numeric(seconds, errors="coerce"), unit="s")

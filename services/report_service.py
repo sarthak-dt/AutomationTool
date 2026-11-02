@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import io
 import json
+import re
 import zipfile
 from datetime import datetime
 from typing import Any
@@ -18,7 +19,6 @@ import pandas as pd
 
 from types import SimpleNamespace
 
-from services import timeutil
 from services.channel_gate import channel_gate
 from services.comparison_engine import ROW_COLUMNS
 from services.file_service import sanitize_filename
@@ -73,7 +73,7 @@ def comparison_available(job: Any) -> bool:
 # individual reports
 # ---------------------------------------------------------------------------
 EXPORT_COLUMNS = [
-    "Index", "File Name", "Date/Time", "Timestamp", "CAN ID", "Signal Name",
+    "Index", "File Name", "Timestamp", "CAN ID", "Signal Name",
     "DBC Name",
     "Python Channel", "Java Channel", "Python Decoded Value", "Java Decoded Value",
     "Absolute Error", "Status", "Message",
@@ -102,43 +102,96 @@ def _comparison_message(row: pd.Series) -> str:
     return ""
 
 
-def export_frame(rows: pd.DataFrame | None, starts: dict[str, Any] | None = None) -> pd.DataFrame:
-    """Comparison rows in the reporting layout: index, datetime, timestamp, CAN ID, channel, signal,
-    Python value/unit, Java value/unit, abs error, status (+ details)."""
+def export_frame(
+    rows: pd.DataFrame | None,
+    starts: dict[str, Any] | None = None,
+    job: Any = None,
+) -> pd.DataFrame:
+    """Comparison rows in the reporting layout: index, timestamp, CAN ID, channel, signal,
+    Python value/unit, Java value/unit, abs error, status (+ details). ``starts`` is retained
+    for caller compatibility; CSV export intentionally omits readable date/time values."""
     if rows is None or len(rows) == 0:
-        return pd.DataFrame(columns=EXPORT_COLUMNS)
-    starts = starts or {}
-    r = rows.reset_index(drop=True)
-    for col, default in (("java_channel", 0), ("channel", 0), ("can_id", "")):
-        if col not in r.columns:
-            r[col] = default
-    dt = pd.Series("", index=r.index, dtype=object)
-    for name, g in r.groupby("file"):
-        if name in starts:
-            dt.loc[g.index] = timeutil.datetimes(starts[name], g["timestamp"])
-    out = pd.DataFrame(
-        {
-            "Index": np.arange(1, len(r) + 1),
-            "File Name": r["file"],
-            "Date/Time": dt,
-            "Timestamp": r["timestamp"],
-            "CAN ID": r["can_id"],
-            "Signal Name": r["signal"],
-            "DBC Name": r["dbc_name"] if "dbc_name" in r.columns else "",
-            "Python Channel": r["channel"].where(r["status"] != Status.MISSING_IN_PYTHON, 0),
-            "Java Channel": r["java_channel"].where(r["status"] != Status.MISSING_IN_JAVA, 0),
-            "Python Decoded Value": r["python_value"],
-            "Java Decoded Value": r["java_value"],
-            "Absolute Error": r["abs_diff"],
-            "Status": r["status"],
-            "Message": r.apply(_comparison_message, axis=1),
-        }
-    )
-    return out[EXPORT_COLUMNS]
+        out = pd.DataFrame(columns=EXPORT_COLUMNS)
+    else:
+        r = rows.reset_index(drop=True)
+        for col, default in (("java_channel", 0), ("channel", 0), ("can_id", "")):
+            if col not in r.columns:
+                r[col] = default
+        out = pd.DataFrame(
+            {
+                "Index": np.arange(1, len(r) + 1),
+                "File Name": r["file"],
+                "Timestamp": r["timestamp"],
+                "CAN ID": r["can_id"],
+                "Signal Name": r["signal"],
+                "DBC Name": r["dbc_name"] if "dbc_name" in r.columns else "",
+                "Python Channel": r["channel"].where(r["status"] != Status.MISSING_IN_PYTHON, 0),
+                "Java Channel": r["java_channel"].where(r["status"] != Status.MISSING_IN_JAVA, 0),
+                "Python Decoded Value": r["python_value"],
+                "Java Decoded Value": r["java_value"],
+                "Absolute Error": r["abs_diff"],
+                "Status": r["status"],
+                "Message": r.apply(_comparison_message, axis=1),
+            }
+        )[EXPORT_COLUMNS]
+
+    if job is not None:
+        diagnostic_rows = _missing_channel_rows(job, len(out))
+        if diagnostic_rows:
+            out = pd.concat([out, pd.DataFrame(diagnostic_rows, columns=EXPORT_COLUMNS)], ignore_index=True)
+    return out
+
+
+def _missing_channel_rows(job: Any, first_index: int) -> list[dict[str, Any]]:
+    """Build export-only explanations when selected channels are absent from a file."""
+    settings = getattr(job, "settings", None) or {}
+    requested = {int(ch) for ch in settings.get("decode_channels", [])}
+    for key in ("python_channel", "java_channel"):
+        channel = int(settings.get(key, 0) or 0)
+        if channel > 0:
+            requested.add(channel)
+    diagnostics = []
+    next_index = first_index + 1
+    for outcome in getattr(job, "files", []):
+        stats = getattr(outcome, "python_stats", None) or {}
+        actual = stats.get("channels_in_file")
+        if actual is None:
+            continue  # channel presence could not be verified
+        present = {int(ch) for ch in actual}
+        absent_from_notices = set()
+        for notice in stats.get("channel_notices", []):
+            match = re.search(r"\bchannel\s+(\d+)\s+is not present\b", str(notice), flags=re.IGNORECASE)
+            if match:
+                absent_from_notices.add(int(match.group(1)))
+        missing = (requested | absent_from_notices) - present
+        for channel in sorted(missing):
+            have = ", ".join(str(ch) for ch in sorted(present)) or "none detected"
+            diagnostics.append(
+                {
+                    "Index": next_index,
+                    "File Name": outcome.name,
+                    "Timestamp": "",
+                    "CAN ID": "",
+                    "Signal Name": "No decoded signals",
+                    "DBC Name": "",
+                    "Python Channel": "",
+                    "Java Channel": "",
+                    "Python Decoded Value": "",
+                    "Java Decoded Value": "",
+                    "Absolute Error": "",
+                    "Status": Status.NOT_COMPARABLE,
+                    "Message": (
+                        f"Selected channel {channel} is not present in this measurement file "
+                        f"(channels detected: {have}); no decoding was performed for this channel."
+                    ),
+                }
+            )
+            next_index += 1
+    return diagnostics
 
 
 def comparison_csv(job: Any) -> bytes:
-    return _csv_bytes(export_frame(job.rows, timeutil.file_starts(job)))
+    return _csv_bytes(export_frame(job.rows, job=job))
 
 
 def signal_summary_csv(job: Any) -> bytes:
@@ -146,22 +199,18 @@ def signal_summary_csv(job: Any) -> bytes:
 
 
 def python_output_csv(job: Any) -> bytes:
-    # is_discrete is an internal helper flag (the comparison engine auto-detects it); not part of the exported sample file.
-    df = python_output_frame(job).drop(columns=["is_discrete"], errors="ignore")
-    starts = timeutil.file_starts(job)
-    if starts and len(df):
-        dt = pd.Series("", index=df.index, dtype=object)
-        for name, g in df.groupby("file"):
-            if name in starts:
-                dt.loc[g.index] = timeutil.datetimes(starts[name], g["timestamp"])
-        df.insert(df.columns.get_loc("timestamp"), "datetime", dt)  # readable time before 'timestamp' (seconds)
-    return _csv_bytes(df)
+    return _csv_bytes(_decoded_output_csv(python_output_frame(job)))
 
 
 def java_output_csv(job: Any) -> bytes | None:
     """Only real Java output is ever exported. Returns None when there is none."""
     df = java_output_frame(job)
-    return _csv_bytes(df) if not df.empty else None
+    return _csv_bytes(_decoded_output_csv(df)) if not df.empty else None
+
+
+def _decoded_output_csv(frame: pd.DataFrame) -> pd.DataFrame:
+    """Export decoder samples with relative seconds only, omitting internal fields."""
+    return frame.drop(columns=["is_discrete", "datetime"], errors="ignore").copy()
 
 
 def job_summary_dict(job: Any) -> dict[str, Any]:
@@ -215,6 +264,15 @@ def job_summary_dict(job: Any) -> dict[str, Any]:
 
 def result_json(job: Any, include_rows: bool = True) -> bytes:
     payload = job_summary_dict(job)
+    # JSON is a sample/timestamp report, so omit absolute wall-clock metadata too.
+    payload.pop("started_at", None)
+    payload.pop("finished_at", None)
+    for file_result in payload.get("files", []):
+        for stats_name in ("python_stats", "java_stats"):
+            stats = file_result.get(stats_name)
+            if isinstance(stats, dict):
+                stats.pop("start_time", None)
+                stats.pop("datetime", None)
     payload["signal_summary"] = df_records(job.signal_summary)
     payload["python_signals"] = df_records(job.python_signal_table)
     if include_rows:
@@ -238,7 +296,7 @@ def excel_bytes(job: Any) -> bytes:
     with pd.ExcelWriter(buf, engine="openpyxl") as xw:
         pd.DataFrame(flat, columns=["key", "value"]).to_excel(xw, sheet_name="Summary", index=False)
         job.signal_summary.to_excel(xw, sheet_name="Signals", index=False)
-        rows = export_frame(job.rows, timeutil.file_starts(job))
+        rows = export_frame(job.rows, job=job)
         # Excel row limit protection
         comparison = rows.head(1_000_000).astype({"python_value": object, "java_value": object})
         comparison.to_excel(xw, sheet_name="Comparison", index=False)

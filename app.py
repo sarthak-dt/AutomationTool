@@ -281,15 +281,25 @@ def page_dashboard() -> None:
 def manual_uploader() -> list[MeasurementRef]:
     ss = st.session_state
     ups = st.file_uploader("Log files (MF4, BLF, ASC, LOG)", type=LOG_TYPES, accept_multiple_files=True, key=f"manual_up_{ss.manual_up_n}")
-    ss.manual_files = []
     for f in ups or []:
         try:
             clean = validate_upload(f.name, f.size, ALLOWED_MEASUREMENT_EXTS, CFG.max_measurement_bytes)
         except ValidationError as exc:
             st.error(str(exc))
             continue
-        ss.manual_files.append(MeasurementRef(name=clean, size=f.size, data=f.getvalue()))
+        payload = f.getvalue()
+        fid = (clean, hashlib.sha256(payload).hexdigest())
+        if fid not in ss.manual_seen:
+            ss.manual_seen.add(fid)
+            ss.manual_files.append(MeasurementRef(name=clean, size=f.size, data=payload))
     return list(ss.manual_files)
+
+
+def clear_manual_uploads() -> None:
+    ss = st.session_state
+    ss.manual_files = []
+    ss.manual_seen = set()
+    ss.manual_up_n += 1
 
 
 def page_newrun() -> None:
@@ -313,6 +323,9 @@ def page_newrun() -> None:
             else:
                 html(C.source_card_html("⇧", "Measurement source: Manual upload", "Upload one or multiple MF4 / BLF / ASC / LOG files from your computer."))
                 refs = manual_uploader()
+                if refs:
+                    st.success(f"{len(refs)} measurement file(s) retained for this session.")
+                    st.button("Clear uploaded measurement files", key="manual_clear", on_click=clear_manual_uploads)
         with c2:
             html(C.source_card_html("▤", "DBC source: Manual upload", "Upload one or multiple DBC files from your computer. Select which DBCs to apply for the run."))
             dbcs = usable_selected_dbcs()
@@ -803,7 +816,7 @@ def page_results() -> None:
                 v = v[v["signal"].str.contains(text.strip(), case=False, regex=False)]
             rank = {x: i for i, x in enumerate(Status.PRIORITY)}
             v = v.assign(_r=v["status"].map(rank), _d=-v["abs_diff"].fillna(-1)).sort_values(["_r", "_d", "signal", "timestamp"]).drop(columns=["_r", "_d"])
-            f3.download_button("Export CSV (demo)" if job.is_demo else "Export CSV", rep.export_frame(v, timeutil.file_starts(job)).to_csv(index=False).encode("utf-8"), f"{job.job_id}_signal_comparison.csv",
+            f3.download_button("Export CSV (demo)" if job.is_demo else "Export CSV", rep.export_frame(v, job=job).to_csv(index=False).encode("utf-8"), f"{job.job_id}_signal_comparison.csv",
                                "text/csv", key="res_export", **stretch(st.download_button))
             st.caption(f"{len(v)} of {len(job.rows)} rows" + (" — first 400 shown, use Export CSV for all." if len(v) > 400 else ""))
             if v.empty:

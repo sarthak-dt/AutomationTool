@@ -14,7 +14,7 @@ from services import report_service as rep
 from services.dbc_service import DbcFile, DbcInfo
 from services.file_service import ValidationError
 from services.java_decoder_client import JavaApiConfig, JavaDecoderClient
-from services.job_runner import MeasurementRef, run_job
+from services.job_runner import FileOutcome, JobResult, MeasurementRef, run_job
 from services.models import ComparisonSettings, DecoderResult, EngineState, Status, normalize_frame
 
 from tests.conftest import make_frame
@@ -249,6 +249,40 @@ def test_dbc_conflicts_are_recorded_in_job(cfg):
     a.data = b.data = b"x"
     job = run_job([local("a.asc")], [a, b], ComparisonSettings(), cfg, unavailable_java(), python_decode=py_decoder())
     assert any(c["kind"] == "MESSAGE_ID_CONFLICT" for c in job.conflicts)
+
+
+def test_missing_dbc_bound_channel_is_explained_in_comparison_csv():
+    job = JobResult(
+        job_id="CMP-test",
+        started_at="2026-11-02T12:00:00",
+        settings=ComparisonSettings().to_dict(),
+    )
+    job.files.append(
+        FileOutcome(
+            name="capture.mf4",
+            source="local",
+            size=10,
+            python_stats={
+                "channels_in_file": [1],
+                "channel_notices": [
+                    "Channel 2 is not present in this file (channels in file: [1]). "
+                    "DBC 'engine.dbc' was not applied, so nothing was decoded for channel 2."
+                ],
+            },
+        )
+    )
+
+    exported = pd.read_csv(io.BytesIO(rep.comparison_csv(job)))
+
+    assert len(exported) == 1
+    row = exported.iloc[0]
+    assert row["File Name"] == "capture.mf4"
+    assert row["Signal Name"] == "No decoded signals"
+    assert row["Status"] == Status.NOT_COMPARABLE
+    assert "Selected channel 2 is not present" in row["Message"]
+    assert "channels detected: 1" in row["Message"]
+    assert "no decoding was performed" in row["Message"]
+    assert "Date/Time" not in exported.columns and "datetime" not in exported.columns
 
 
 # ------------------------------------------------------------------ reports

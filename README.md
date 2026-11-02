@@ -40,9 +40,16 @@ With **All channels**, a row is **MATCH** only when both decoders report the sam
 unmatched on either side, separately for each channel. On *New comparison*, the Python and Java comparison-channel controls remain
 separate; different comparison channels are reported as MISMATCH. The channel numbers must match for a row to be MATCH.
 
-The comparison CSV columns are `Index`, `File Name`, `Date/Time`, `Timestamp`, `CAN ID`, `Signal Name`, `DBC Name`, `Python Channel`,
+The comparison CSV columns are `Index`, `File Name`, `Timestamp`, `CAN ID`, `Signal Name`, `DBC Name`, `Python Channel`,
 `Java Channel`, `Python Decoded Value`, `Java Decoded Value`, `Absolute Error`, `Status`, and `Message`. An empty DBC channel
 binding applies that DBC to every channel detected in each measurement file.
+If a selected channel is confirmed absent from a measurement, the comparison CSV includes an informational `NOT_COMPARABLE` row
+explaining that neither decoder processed that channel; this report-only row does not affect comparison totals.
+
+Generated comparison, Python output, and Java output CSVs contain relative `Timestamp` values in seconds and no readable `Date/Time`
+or `datetime` column. Python and Java output CSVs omit the internal `is_discrete` column. Exported JSON omits absolute date/time fields;
+sample `timestamp` values remain relative seconds. Manual measurement uploads remain available while
+navigating to the DBC manager for the current Streamlit session; use **Clear uploaded measurement files** to remove them.
 
 When more than four measurement files are selected, **New comparison** divides them into batches of up to four. Choose a batch,
 run it, and download its report before selecting the next batch. Each batch is a separate job and produces a separate report.

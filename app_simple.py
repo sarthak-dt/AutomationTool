@@ -10,6 +10,7 @@ Nothing here shows sample data: results appear only after a real job ran.
 """
 from __future__ import annotations
 
+import hashlib
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -196,16 +197,33 @@ def dbc_section() -> None:
 
 def manual_section() -> list[MeasurementRef]:
     ss = st.session_state
-    st.markdown("**Log files** (MF4, BLF, ASC, LOG)")
+    st.markdown("**Measurement files** (MF4, BLF, ASC)")
     ups = st.file_uploader("Log files", type=LOG_TYPES, accept_multiple_files=True, key=f"manual_up_{ss.manual_up_n}", label_visibility="collapsed")
     ss.manual_files = []
+    seen_hashes: set[str] = set()
+    seen_names: set[tuple[str, int]] = set()
+    s3_names = {(obj.name.casefold(), int(obj.size)) for obj in ss.s3_sel}
+    skipped: dict[str, list[str]] = {}
     for f in ups or []:
         try:
             clean = validate_upload(f.name, f.size, ALLOWED_MEASUREMENT_EXTS, CFG.max_measurement_bytes)
         except ValidationError as exc:
             st.error(str(exc))
             continue
-        ss.manual_files.append(MeasurementRef(name=clean, size=f.size, data=f.getvalue()))
+        payload = f.getvalue()
+        digest = hashlib.sha256(payload).hexdigest()
+        identity = (clean.casefold(), int(f.size))
+        if digest in seen_hashes or identity in seen_names:
+            skipped.setdefault("Manual upload", []).append(clean)
+            continue
+        if identity in s3_names:
+            skipped.setdefault("S3 selection", []).append(clean)
+            continue
+        seen_hashes.add(digest)
+        seen_names.add(identity)
+        ss.manual_files.append(MeasurementRef(name=clean, size=f.size, data=payload))
+    for source_name, names in skipped.items():
+        st.warning(f"Already present in {source_name}; duplicate file(s) skipped: " + ", ".join(dict.fromkeys(names)))
     return list(ss.manual_files)
 
 
@@ -306,7 +324,22 @@ def s3_section() -> list[MeasurementRef]:
         column_config={"Use": st.column_config.CheckboxColumn("Use", default=False)},
         key=f"s3_tbl_{here}_{all_on}", **stretch(st.data_editor),
     )
-    ss.s3_sel = [o for o, use in zip(listing.files, edited["Use"].tolist()) if bool(use)]
+    manual_names = {(ref.name.casefold(), int(ref.size)) for ref in ss.manual_files}
+    ss.s3_sel = []
+    s3_names: set[tuple[str, int]] = set()
+    duplicates = []
+    for obj, use in zip(listing.files, edited["Use"].tolist()):
+        if not bool(use):
+            continue
+        identity = (obj.name.casefold(), int(obj.size))
+        if identity in manual_names or identity in s3_names:
+            duplicates.append(obj.name)
+            continue
+        s3_names.add(identity)
+        ss.s3_sel.append(obj)
+    if duplicates:
+        st.warning("Already present in Manual upload or selected S3 files; duplicate file(s) skipped: "
+                   + ", ".join(dict.fromkeys(duplicates)))
     if listing.skipped_unsupported:
         st.caption(f"{listing.skipped_unsupported} unsupported file(s) hidden.")
     return [MeasurementRef(name=o.name, size=o.size, s3_object=o) for o in ss.s3_sel]
@@ -348,16 +381,16 @@ def run_section(source: str, refs: list[MeasurementRef], settings: ComparisonSet
 
 
 def match_section(source: str, refs: list[MeasurementRef], settings: ComparisonSettings) -> None:
-    mf4_refs = [ref for ref in refs if Path(ref.name).suffix.lower() == ".mf4"]
+    matchable_refs = [ref for ref in refs if Path(ref.name).suffix.lower() in {".mf4", ".blf", ".asc", ".log"}]
     dbcs = usable_dbcs()
     with st.expander("DBC Match to This File"):
-        if not mf4_refs:
-            st.info("Select an MF4 measurement file to check its CAN IDs against the uploaded DBC files.")
+        if not matchable_refs:
+            st.info("Select an MF4, BLF, or ASC measurement file to check its CAN IDs against the uploaded DBC files.")
             return
-        selected = st.selectbox("MF4 file to check", mf4_refs, format_func=lambda ref: ref.name, key="dbc_match_file")
+        selected = st.selectbox("Measurement file to check", matchable_refs, format_func=lambda ref: ref.name, key="dbc_match_file")
         if st.button("Check DBC Match to This File", key="dbc_match_btn", disabled=not dbcs):
             try:
-                with st.spinner("Reading MF4 CAN IDs and matching DBC message IDs by channel..."):
+                with st.spinner("Reading measurement CAN IDs and matching DBC message IDs by channel..."):
                     matches = match_dbc_to_measurement(
                         selected,
                         dbcs,
@@ -371,9 +404,9 @@ def match_section(source: str, refs: list[MeasurementRef], settings: ComparisonS
                     st.dataframe(matches, hide_index=True, **stretch(st.dataframe))
                     counts = matches["status"].value_counts().to_dict()
                     st.caption(
-                        "Matched: {matched} · Unmatched in MF4: {mf4} · Unmatched in DBC: {dbc}".format(
+                        "Matched: {matched} · Unmatched in measurement: {file} · Unmatched in DBC: {dbc}".format(
                             matched=counts.get("MATCHED", 0),
-                            mf4=counts.get("UNMATCHED IN MF4", 0),
+                            file=sum(count for status, count in counts.items() if status.startswith("UNMATCHED IN ") and status != "UNMATCHED IN DBC"),
                             dbc=counts.get("UNMATCHED IN DBC", 0),
                         )
                     )

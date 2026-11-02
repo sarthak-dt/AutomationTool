@@ -99,8 +99,8 @@ empty to decode every available channel. MF4 bus channel numbers are kept as sto
 BLF/ASC/LOG, python-can's 0-based channel is shown 1-based (interface names such as `can0` → Channel 1). Every decoded row retains its
 actual channel and CAN ID (e.g. `0x7E8`).
 
-**3. Use “DBC Match to This File”** (*New comparison*) to select an MF4 and see matched CAN IDs, IDs present in the MF4 but absent from
-the assigned DBCs, and DBC IDs not observed in the MF4. The table is grouped by CAN channel and respects both DBC assignments and the
+**3. Use “DBC Match to This File”** (*New comparison*) to select an MF4, BLF, or ASC and see matched CAN IDs, IDs present in the file but absent from
+the assigned DBCs, and DBC IDs not observed in the file. The table is grouped by CAN channel and respects both DBC assignments and the
 channel selection.
 
 **4. Comparison channel rules on *New comparison*:** pick the *Python decoder channel* and the *Java decoder channel* (or *All channels*).

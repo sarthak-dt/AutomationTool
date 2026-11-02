@@ -36,7 +36,7 @@ filters decoding; leave it empty to decode every available channel. Decoded samp
 
 With **All channels**, a row is **MATCH** only when both decoders report the same known channel and the decoded values agree within tolerance. A known channel difference is **MISMATCH**, even if values agree; missing channel metadata is **NOT_COMPARABLE** and includes an explanation in the CSV `Message` column. If a derived signal-only MF4 has lost its channel metadata, use the Python output channel selector to explicitly assign the channel only after verifying it from the source measurement; the CSV `Message` field records that assignment.
 
-**DBC Match to This File** checks the selected DBC message IDs against a selected MF4's CAN IDs and reports matched IDs and IDs
+**DBC Match to This File** checks the selected DBC message IDs against a selected MF4, BLF, or ASC measurement's CAN IDs and reports matched IDs and IDs
 unmatched on either side, separately for each channel. On *New comparison*, the Python and Java comparison-channel controls remain
 separate; different comparison channels are reported as MISMATCH. The channel numbers must match for a row to be MATCH.
 

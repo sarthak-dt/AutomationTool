@@ -280,7 +280,11 @@ def page_dashboard() -> None:
 # ---------------------------------------------------------------------------
 def manual_uploader() -> list[MeasurementRef]:
     ss = st.session_state
-    ups = st.file_uploader("Log files (MF4, BLF, ASC, LOG)", type=LOG_TYPES, accept_multiple_files=True, key=f"manual_up_{ss.manual_up_n}")
+    ups = st.file_uploader("Measurement files (MF4, BLF, ASC)", type=LOG_TYPES, accept_multiple_files=True, key=f"manual_up_{ss.manual_up_n}")
+    skipped: dict[str, list[str]] = {}
+    seen_hashes = {hashlib.sha256(ref.data or b"").hexdigest() for ref in ss.manual_files}
+    seen_names = {(ref.name.casefold(), int(ref.size)) for ref in ss.manual_files}
+    s3_names = {(obj.name.casefold(), int(obj.size)) for obj in ss.s3_files}
     for f in ups or []:
         try:
             clean = validate_upload(f.name, f.size, ALLOWED_MEASUREMENT_EXTS, CFG.max_measurement_bytes)
@@ -288,10 +292,20 @@ def manual_uploader() -> list[MeasurementRef]:
             st.error(str(exc))
             continue
         payload = f.getvalue()
-        fid = (clean, hashlib.sha256(payload).hexdigest())
-        if fid not in ss.manual_seen:
-            ss.manual_seen.add(fid)
-            ss.manual_files.append(MeasurementRef(name=clean, size=f.size, data=payload))
+        digest = hashlib.sha256(payload).hexdigest()
+        identity = (clean.casefold(), int(f.size))
+        if digest in seen_hashes or identity in seen_names:
+            skipped.setdefault("Manual upload", []).append(clean)
+            continue
+        if identity in s3_names:
+            skipped.setdefault("S3 selection", []).append(clean)
+            continue
+        seen_hashes.add(digest)
+        seen_names.add(identity)
+        ss.manual_seen.add((clean, digest))
+        ss.manual_files.append(MeasurementRef(name=clean, size=f.size, data=payload))
+    for source_name, names in skipped.items():
+        st.warning(f"Already present in {source_name}; duplicate file(s) skipped: " + ", ".join(dict.fromkeys(names)))
     return list(ss.manual_files)
 
 
@@ -309,6 +323,9 @@ def page_newrun() -> None:
         html(C.panel_head_html("Configure a comparison", "Measurement files come from S3 or a manual upload. DBC files are uploaded manually.", "Step 1 of 3"))
         st.radio("Measurement source", [S3, MANUAL], horizontal=True, key="w_source")
         source = ss.w_source
+        duplicate_notice = ss.pop("s3_duplicate_notice", "")
+        if duplicate_notice:
+            st.warning(duplicate_notice)
         c1, c2 = st.columns(2, gap="medium")
         refs: list[MeasurementRef] = []
         with c1:
@@ -317,14 +334,16 @@ def page_newrun() -> None:
                 refs = [MeasurementRef(name=o.name, size=o.size, s3_object=o) for o in ss.s3_files]
                 if refs:
                     st.success(f"{len(refs)} S3 file(s) selected in `/{ss.s3_folder}` ({human_size(sum(r.size for r in refs))})")
+                    st.caption("Files: " + ", ".join(ref.name for ref in refs))
                 else:
                     st.warning("No S3 files selected yet.")
                 st.button("Configure S3 connection", type="primary", key="nr_s3", on_click=goto, args=("s3",))
             else:
-                html(C.source_card_html("⇧", "Measurement source: Manual upload", "Upload one or multiple MF4 / BLF / ASC / LOG files from your computer."))
+                html(C.source_card_html("⇧", "Measurement source: Manual upload", "Upload one or multiple MF4 / BLF / ASC files from your computer."))
                 refs = manual_uploader()
                 if refs:
                     st.success(f"{len(refs)} measurement file(s) retained for this session.")
+                    st.caption("Files: " + ", ".join(ref.name for ref in refs))
                     st.button("Clear uploaded measurement files", key="manual_clear", on_click=clear_manual_uploads)
         with c2:
             html(C.source_card_html("▤", "DBC source: Manual upload", "Upload one or multiple DBC files from your computer. Select which DBCs to apply for the run."))
@@ -339,19 +358,19 @@ def page_newrun() -> None:
         html(C.notice_html("Expected flow: " + theme.escape(flow), "info"))
 
         with st.expander("DBC Match to This File"):
-            mf4_refs = [ref for ref in refs if Path(ref.name).suffix.lower() == ".mf4"]
-            if not mf4_refs:
-                st.info("Select an MF4 measurement file to check its CAN IDs against the selected DBC files.")
+            matchable_refs = [ref for ref in refs if Path(ref.name).suffix.lower() in {".mf4", ".blf", ".asc", ".log"}]
+            if not matchable_refs:
+                st.info("Select an MF4, BLF, or ASC measurement file to check its CAN IDs against the selected DBC files.")
             else:
                 selected_ref = st.selectbox(
-                    "MF4 file",
-                    mf4_refs,
+                    "Measurement file",
+                    matchable_refs,
                     format_func=lambda ref: ref.name,
                     key="w_dbc_match_file",
                 )
                 if st.button("Check DBC Match to This File", key="dbc_match_btn", disabled=not dbcs):
                     try:
-                        with st.spinner("Reading MF4 CAN IDs and matching DBC message IDs by channel..."):
+                        with st.spinner("Reading measurement CAN IDs and matching DBC message IDs by channel..."):
                             matches = match_dbc_to_measurement(
                                 selected_ref,
                                 dbcs,
@@ -365,9 +384,9 @@ def page_newrun() -> None:
                             st.dataframe(matches, hide_index=True, **stretch(st.dataframe))
                             counts = matches["status"].value_counts().to_dict()
                             st.caption(
-                                "Matched: {matched} · Unmatched in MF4: {mf4} · Unmatched in DBC: {dbc}".format(
+                                "Matched: {matched} · Unmatched in measurement: {file} · Unmatched in DBC: {dbc}".format(
                                     matched=counts.get("MATCHED", 0),
-                                    mf4=counts.get("UNMATCHED IN MF4", 0),
+                                    file=sum(count for status, count in counts.items() if status.startswith("UNMATCHED IN ") and status != "UNMATCHED IN DBC"),
                                     dbc=counts.get("UNMATCHED IN DBC", 0),
                                 )
                             )
@@ -510,6 +529,7 @@ def s3_clear() -> None:
     ss.w_s3_access = ss.w_s3_secret = ""
     ss.s3_svc = ss.s3_listing = None
     ss.s3_files = []
+    ss.s3_duplicate_notice = ""
     clear_secrets()
 
 
@@ -620,7 +640,22 @@ def page_s3() -> None:
                 st.session_state[f"w_s3f_{o.key}"] = not all_on
 
         def use_files() -> None:
-            st.session_state.s3_files = list(chosen)
+            manual_names = {(ref.name.casefold(), int(ref.size)) for ref in st.session_state.manual_files}
+            accepted = []
+            duplicates = []
+            seen = set()
+            for obj in chosen:
+                identity = (obj.name.casefold(), int(obj.size))
+                if identity in manual_names or identity in seen:
+                    duplicates.append(obj.name)
+                    continue
+                seen.add(identity)
+                accepted.append(obj)
+            st.session_state.s3_files = accepted
+            st.session_state.s3_duplicate_notice = (
+                "Already present in Manual upload or selected S3 files; duplicate file(s) skipped: "
+                + ", ".join(dict.fromkeys(duplicates)) if duplicates else ""
+            )
             goto("newrun")
 
         x, y, z = st.columns([4, 1.3, 1.5])

@@ -22,7 +22,13 @@ from services.file_service import JobWorkspace, ValidationError, sanitize_filena
 from services.java_decoder_client import JavaDecoderClient
 from services.logging_utils import get_logger, redact_text
 from services.models import ComparisonSettings, DecoderResult, EngineState
-from services.python_decoder import decode_measurement, discover_can_channels, match_mf4_dbcs
+from services.python_decoder import (
+    CAN_LOG_EXTS,
+    decode_measurement,
+    discover_can_channels,
+    match_can_log_dbcs,
+    match_mf4_dbcs,
+)
 from services.s3_service import S3Error, S3Object, S3Service
 
 log = get_logger("job")
@@ -420,9 +426,10 @@ def match_dbc_to_measurement(
     s3_service: S3Service | None = None,
     selected_channels: tuple[int, ...] = (),
 ) -> pd.DataFrame:
-    """Compare selected DBC message IDs with one MF4's raw CAN IDs, by channel."""
-    if Path(ref.name).suffix.lower() != ".mf4":
-        raise ValidationError("DBC Match to This File requires an MF4 measurement.")
+    """Compare selected DBC message IDs with one measurement's raw CAN IDs."""
+    suffix = Path(ref.name).suffix.lower()
+    if suffix != ".mf4" and suffix not in CAN_LOG_EXTS:
+        raise ValidationError("DBC Match to This File supports MF4, BLF, ASC, and LOG measurements.")
     if not dbcs:
         raise ValidationError("Select at least one valid DBC file.")
     if any(not dbc.info.usable for dbc in dbcs):
@@ -432,7 +439,9 @@ def match_dbc_to_measurement(
         measurement = _materialize(ws, ref, 0, s3_service, app_config)
         dbc_paths = [ws.write_bytes("dbc", dbc.name, dbc.data) for dbc in dbcs]
         bindings = [dbc_channel_bindings(dbc) for dbc in dbcs]
-        return match_mf4_dbcs(measurement, dbc_paths, bindings, selected_channels)
+        if suffix == ".mf4":
+            return match_mf4_dbcs(measurement, dbc_paths, bindings, selected_channels)
+        return match_can_log_dbcs(measurement, dbc_paths, bindings, selected_channels)
 
 
 def _materialize(

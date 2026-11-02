@@ -670,6 +670,68 @@ def match_mf4_dbcs(
         mdf.close()
 
 
+def match_can_log_dbcs(
+    path: str | Path,
+    dbc_paths: list[str | Path],
+    dbc_channels: list[Any] | None = None,
+    selected_channels: tuple[int, ...] = (),
+) -> pd.DataFrame:
+    """Report DBC and raw CAN-ID matches for ASC, BLF, or LOG files by channel."""
+    import can
+
+    path = Path(path)
+    paths = [Path(p) for p in dbc_paths]
+    databases, _ = _load_databases(paths)
+    if dbc_channels is not None and len(dbc_channels) != len(paths):
+        raise ValueError("DBC channel list does not match the DBC files.")
+    bindings = ChannelLookups(databases, dbc_channels).bindings
+    selected = set(selected_channels)
+    observed: dict[int, set[tuple[int, bool]]] = {}
+    with can.LogReader(str(path)) as reader:
+        for frame in reader:
+            if getattr(frame, "is_error_frame", False) or getattr(frame, "is_remote_frame", False):
+                continue
+            channel = frame_channel(frame)
+            if channel <= 0 or (selected and channel not in selected):
+                continue
+            observed.setdefault(channel, set()).add(
+                (int(frame.arbitration_id), bool(frame.is_extended_id))
+            )
+
+    channels = sorted(selected) if selected else sorted(observed)
+    columns = ["channel", "can_id", "extended", "status", "dbc"]
+    rows: list[dict[str, Any]] = []
+    file_format = path.suffix.lstrip(".").upper()
+    for channel in channels:
+        file_ids = observed.get(channel)
+        if file_ids is None:
+            rows.append({"channel": channel, "can_id": "", "extended": None,
+                         "status": f"CHANNEL NOT PRESENT IN {file_format}", "dbc": ""})
+            continue
+
+        id_to_dbcs: dict[tuple[int, bool], list[str]] = {}
+        for name, database, binding in zip((p.name for p in paths), databases, bindings):
+            if binding is not None and channel not in binding:
+                continue
+            for message in database.messages:
+                key = (int(message.frame_id), bool(message.is_extended_frame))
+                id_to_dbcs.setdefault(key, []).append(name)
+
+        dbc_ids = set(id_to_dbcs)
+        for can_id, is_extended in sorted(file_ids & dbc_ids):
+            rows.append({"channel": channel, "can_id": fmt_can_id(can_id),
+                         "extended": is_extended, "status": "MATCHED",
+                         "dbc": ", ".join(dict.fromkeys(id_to_dbcs[(can_id, is_extended)]))})
+        for can_id, is_extended in sorted(file_ids - dbc_ids):
+            rows.append({"channel": channel, "can_id": fmt_can_id(can_id),
+                         "extended": is_extended, "status": f"UNMATCHED IN {file_format}", "dbc": ""})
+        for can_id, is_extended in sorted(dbc_ids - file_ids):
+            rows.append({"channel": channel, "can_id": fmt_can_id(can_id),
+                         "extended": is_extended, "status": "UNMATCHED IN DBC",
+                         "dbc": ", ".join(dict.fromkeys(id_to_dbcs[(can_id, is_extended)]))})
+    return pd.DataFrame(rows, columns=columns)
+
+
 def _decode_mf4(
     path: Path, dbc_paths: list[Path], settings: ComparisonSettings, dbc_channels: list[Any] | None = None
 ) -> DecoderResult:

@@ -20,6 +20,7 @@ import shutil
 import tempfile
 
 from config import AppConfig
+from services.dbc_service import _decode_text
 from services.logging_utils import get_logger, redact_text, register_secret
 from services.models import ComparisonSettings, DecoderResult, EngineState, empty_frame, normalize_frame
 
@@ -280,7 +281,22 @@ class JavaDecoderClient:
                 staged_dbcs = []
                 for idx, dbc in enumerate(dbcs):
                     target = staged / f"{idx}-{dbc.name}"
-                    shutil.copyfile(dbc, target)
+                    # Python's DBC validation accepts common legacy encodings
+                    # (notably Windows-1252), while the Java API requires valid
+                    # UTF-8. Normalize only the staged Java copy; Python decoding
+                    # and the user's uploaded DBC remain byte-for-byte unchanged.
+                    raw_dbc = dbc.read_bytes()
+                    dbc_text, dbc_encoding = _decode_text(raw_dbc)
+                    if dbc_encoding != "utf-8":
+                        with target.open("w", encoding="utf-8", newline="") as staged_dbc:
+                            staged_dbc.write(dbc_text)
+                        log.info(
+                            "Re-encoded DBC %s from %s to UTF-8 for Java API compatibility",
+                            dbc.name,
+                            dbc_encoding,
+                        )
+                    else:
+                        shutil.copyfile(dbc, target)
                     staged_dbcs.append(target)
                 measurement, dbcs = staged_measurement, staged_dbcs
             request_kwargs = self._build_request(measurement, dbcs, settings)

@@ -10,12 +10,15 @@ from __future__ import annotations
 import io
 import json
 import re
+import tempfile
 import zipfile
 from datetime import datetime
 from typing import Any
 
 import numpy as np
 import pandas as pd
+from openpyxl import Workbook
+from openpyxl.writer.excel import ExcelWriter
 
 from types import SimpleNamespace
 
@@ -26,6 +29,11 @@ from services.logging_utils import redact_mapping
 from services.models import EngineState, Status
 
 MAX_GRAPHS_IN_ZIP = 30
+EXCEL_MAX_ROWS = 1_048_576  # Excel's per-worksheet limit, including the header row.
+EXCEL_COMPARISON_ROWS_PER_SHEET = EXCEL_MAX_ROWS - 1
+EXCEL_WRITE_CHUNK_ROWS = 10_000
+COMPARISON_CSV_ROWS_PER_PART = 1_000_000  # Keeps each CSV below Excel's worksheet row cap.
+XLSX_COMPRESSION_LEVEL = 9  # Maximum lossless DEFLATE compression.
 
 
 # ---------------------------------------------------------------------------
@@ -194,6 +202,64 @@ def comparison_csv(job: Any) -> bytes:
     return _csv_bytes(export_frame(job.rows, job=job))
 
 
+def comparison_csv_part_count(
+    job: Any, rows_per_part: int = COMPARISON_CSV_ROWS_PER_PART
+) -> int:
+    """Number of Excel-friendly CSV parts needed for all comparison rows."""
+    if rows_per_part < 1:
+        raise ValueError("rows_per_part must be >= 1")
+    comparison_rows = len(job.rows) if job.rows is not None else 0
+    diagnostics = _missing_channel_rows(job, comparison_rows)
+    return max(1, (comparison_rows + len(diagnostics) + rows_per_part - 1) // rows_per_part)
+
+
+def comparison_csv_part(
+    job: Any,
+    part_number: int,
+    rows_per_part: int = COMPARISON_CSV_ROWS_PER_PART,
+) -> bytes:
+    """Build one numbered CSV chunk without materializing the complete export."""
+    part_count = comparison_csv_part_count(job, rows_per_part)
+    if part_number < 1 or part_number > part_count:
+        raise ValueError(f"part_number must be between 1 and {part_count}")
+    start = (part_number - 1) * rows_per_part
+    stop = start + rows_per_part
+    comparison_rows = job.rows if job.rows is not None else pd.DataFrame(columns=ROW_COLUMNS)
+    comparison_count = len(comparison_rows)
+    comparison_start = min(start, comparison_count)
+    comparison_stop = min(stop, comparison_count)
+    with tempfile.TemporaryFile(mode="w+b") as temp_file:
+        text_file = io.TextIOWrapper(temp_file, encoding="utf-8", newline="")
+        wrote_header = False
+
+        def write_frame(frame: pd.DataFrame) -> None:
+            nonlocal wrote_header
+            frame.to_csv(text_file, index=False, header=not wrote_header)
+            wrote_header = True
+
+        for chunk_start in range(comparison_start, comparison_stop, EXCEL_WRITE_CHUNK_ROWS):
+            chunk_stop = min(comparison_stop, chunk_start + EXCEL_WRITE_CHUNK_ROWS)
+            frame = export_frame(comparison_rows.iloc[chunk_start:chunk_stop])
+            frame["Index"] = np.arange(chunk_start + 1, chunk_stop + 1)
+            write_frame(frame)
+
+        if stop > comparison_count:
+            diagnostics = _missing_channel_rows(job, comparison_count)
+            diagnostic_start = max(0, start - comparison_count)
+            diagnostic_stop = min(len(diagnostics), stop - comparison_count)
+            if diagnostic_start < diagnostic_stop:
+                write_frame(pd.DataFrame(
+                    diagnostics[diagnostic_start:diagnostic_stop], columns=EXPORT_COLUMNS
+                ))
+
+        if not wrote_header:
+            write_frame(pd.DataFrame(columns=EXPORT_COLUMNS))
+        text_file.flush()
+        text_file.detach()
+        temp_file.seek(0)
+        return temp_file.read()
+
+
 def signal_summary_csv(job: Any) -> bytes:
     return _csv_bytes(job.signal_summary)
 
@@ -281,45 +347,93 @@ def result_json(job: Any, include_rows: bool = True) -> bytes:
 
 
 def excel_bytes(job: Any) -> bytes:
-    """Workbook with Summary, Signals, Comparison, Python signals sheets."""
-    buf = io.BytesIO()
-    summary = job_summary_dict(job)
-    flat = [
-        ("job_id", summary["job_id"]),
-        ("started_at", summary["started_at"]),
-        ("duration_s", summary["duration_s"]),
-        ("java_engine_state", summary["java_engine_state"]),
-        ("comparison_performed", summary["comparison_performed"]),
-        ("disclaimer", summary["disclaimer"]),
-        ("dbc_files", ", ".join(summary["dbc_files"])),
-    ] + [(f"summary.{k}", v) for k, v in (summary["summary"] or {}).items()]
-    with pd.ExcelWriter(buf, engine="openpyxl") as xw:
-        pd.DataFrame(flat, columns=["key", "value"]).to_excel(xw, sheet_name="Summary", index=False)
-        job.signal_summary.to_excel(xw, sheet_name="Signals", index=False)
-        rows = export_frame(job.rows, job=job)
-        # Excel row limit protection
-        comparison = rows.head(1_000_000).astype({"python_value": object, "java_value": object})
-        comparison.to_excel(xw, sheet_name="Comparison", index=False)
-        _style_comparison_sheet(xw.sheets["Comparison"], comparison)
-        job.python_signal_table.to_excel(xw, sheet_name="Python signals", index=False)
-    return buf.getvalue()
+    """Compact workbook containing only comparison rows, split across Excel-sized sheets."""
+    workbook = Workbook(write_only=True)
+    worksheets: list[tuple[Any, int]] = []
+    current_sheet = None
+    current_sheet_rows = 0
+    sheet_number = 0
+    index = 1
+
+    def add_sheet() -> None:
+        nonlocal current_sheet, current_sheet_rows, sheet_number
+        sheet_number += 1
+        current_sheet_rows = 0
+        name = "Comparison" if sheet_number == 1 else f"Comparison {sheet_number}"
+        current_sheet = workbook.create_sheet(title=name)
+        current_sheet.freeze_panes = "A2"
+        current_sheet.append(EXPORT_COLUMNS)
+        worksheets.append((current_sheet, 0))
+
+    def append_frame(frame: pd.DataFrame) -> None:
+        nonlocal current_sheet, current_sheet_rows, index
+        for values in frame.itertuples(index=False, name=None):
+            if current_sheet is None or current_sheet_rows >= EXCEL_COMPARISON_ROWS_PER_SHEET:
+                add_sheet()
+            excel_row = [index, *(_excel_cell_value(value) for value in values[1:])]
+            current_sheet.append(excel_row)
+            current_sheet_rows += 1
+            worksheets[-1] = (current_sheet, current_sheet_rows)
+            index += 1
+
+    # Export in small batches. A normal openpyxl worksheet retains every cell in
+    # memory; write-only worksheets keep workbook-generation memory bounded.
+    job_rows = job.rows if job.rows is not None else pd.DataFrame(columns=ROW_COLUMNS)
+    for start in range(0, len(job_rows), EXCEL_WRITE_CHUNK_ROWS):
+        exported = export_frame(job_rows.iloc[start : start + EXCEL_WRITE_CHUNK_ROWS])
+        append_frame(exported)
+
+    diagnostics = _missing_channel_rows(job, index - 1)
+    for start in range(0, len(diagnostics), EXCEL_WRITE_CHUNK_ROWS):
+        append_frame(pd.DataFrame(diagnostics[start : start + EXCEL_WRITE_CHUNK_ROWS], columns=EXPORT_COLUMNS))
+
+    if current_sheet is None:
+        add_sheet()
+    for worksheet, data_rows in worksheets:
+        _style_comparison_sheet(worksheet, data_rows)
+
+    # Save the ZIP container to disk so workbook construction does not also keep
+    # its growing compressed byte buffer in memory. Streamlit needs bytes for its
+    # download API, so only the final artifact is read back into memory.
+    with tempfile.TemporaryFile(mode="w+b") as temp_file:
+        archive = zipfile.ZipFile(
+            temp_file,
+            mode="w",
+            compression=zipfile.ZIP_DEFLATED,
+            allowZip64=True,
+            compresslevel=XLSX_COMPRESSION_LEVEL,
+        )
+        ExcelWriter(workbook, archive).save()
+        temp_file.seek(0)
+        return temp_file.read()
 
 
-def _style_comparison_sheet(worksheet: Any, rows: pd.DataFrame) -> None:
+def _excel_cell_value(value: Any) -> Any:
+    """Convert pandas/numpy missing values to cells openpyxl can write."""
+    if value is None or pd.isna(value):
+        return None
+    if isinstance(value, np.generic):
+        value = value.item()
+    if isinstance(value, float) and not np.isfinite(value):
+        return str(value)
+    return value
+
+
+def _style_comparison_sheet(worksheet: Any, data_rows: int) -> None:
     """Highlight value mismatches and known/unknown Python/Java channel differences in Excel."""
-    if rows.empty:
+    if data_rows <= 0:
         return
 
     from openpyxl.formatting.rule import FormulaRule
     from openpyxl.styles import Font, PatternFill
     from openpyxl.utils import get_column_letter
 
-    columns = {str(name): index + 1 for index, name in enumerate(rows.columns)}
+    columns = {str(name): index + 1 for index, name in enumerate(EXPORT_COLUMNS)}
     status_col = get_column_letter(columns["Status"])
     python_channel_col = get_column_letter(columns["Python Channel"])
     java_channel_col = get_column_letter(columns["Java Channel"])
-    last_col = get_column_letter(len(rows.columns))
-    last_row = len(rows) + 1
+    last_col = get_column_letter(len(EXPORT_COLUMNS))
+    last_row = data_rows + 1
 
     mismatch_fill = PatternFill(fill_type="solid", fgColor="FECACA")
     channel_fill = PatternFill(fill_type="solid", fgColor="FCA5A5")
@@ -477,7 +591,7 @@ def build_report_zip(job: Any, include_graphs: bool = True) -> bytes:
         ]
     if java_csv is not None:
         readme_lines.append("  java_output.csv       decoded samples returned by the Java API")
-    readme_lines.append("  report.xlsx           workbook with the same information")
+    readme_lines.append("  report.xlsx           comparison-only workbook; large results use numbered sheets")
     if graphs:
         readme_lines.append(f"  graphs/               interactive HTML graphs ({len(graphs)} signals, mismatches first)")
     elif include_graphs and not plotly_available():

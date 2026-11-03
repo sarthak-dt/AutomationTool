@@ -368,7 +368,7 @@ def test_python_output_csv_contains_real_samples(python_only_job):
 def test_excel_report_sheets(compared_job):
     openpyxl = pytest.importorskip("openpyxl")
     wb = openpyxl.load_workbook(io.BytesIO(rep.excel_bytes(compared_job)))
-    assert wb.sheetnames == ["Summary", "Signals", "Comparison", "Python signals"]
+    assert wb.sheetnames == ["Comparison"]
     assert wb["Comparison"].max_row == len(compared_job.rows) + 1
 
 

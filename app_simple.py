@@ -199,11 +199,11 @@ def manual_section() -> list[MeasurementRef]:
     ss = st.session_state
     st.markdown("**Measurement files** (MF4, BLF, ASC)")
     ups = st.file_uploader("Log files", type=LOG_TYPES, accept_multiple_files=True, key=f"manual_up_{ss.manual_up_n}", label_visibility="collapsed")
-    ss.manual_files = []
-    seen_hashes: set[str] = set()
-    seen_names: set[tuple[str, int]] = set()
+    seen_hashes = {hashlib.sha256(ref.data or b"").hexdigest() for ref in ss.manual_files}
+    seen_names = {(ref.name.casefold(), int(ref.size)) for ref in ss.manual_files}
     s3_names = {(obj.name.casefold(), int(obj.size)) for obj in ss.s3_sel}
     skipped: dict[str, list[str]] = {}
+    candidates: list[tuple[str, int, bytes, str]] = []
     for f in ups or []:
         try:
             clean = validate_upload(f.name, f.size, ALLOWED_MEASUREMENT_EXTS, CFG.max_measurement_bytes)
@@ -212,7 +212,25 @@ def manual_section() -> list[MeasurementRef]:
             continue
         payload = f.getvalue()
         digest = hashlib.sha256(payload).hexdigest()
-        identity = (clean.casefold(), int(f.size))
+        candidates.append((clean, int(f.size), payload, digest))
+
+    digest_counts: dict[str, int] = {}
+    identity_counts: dict[tuple[str, int], int] = {}
+    for clean, size, _, digest in candidates:
+        digest_counts[digest] = digest_counts.get(digest, 0) + 1
+        identity = (clean.casefold(), size)
+        identity_counts[identity] = identity_counts.get(identity, 0) + 1
+    duplicate_digests = {digest for digest, count in digest_counts.items() if count > 1}
+    duplicate_identities = {identity for identity, count in identity_counts.items() if count > 1}
+
+    for clean, size, payload, digest in candidates:
+        identity = (clean.casefold(), size)
+        fid = (clean, digest)
+        if digest in duplicate_digests or identity in duplicate_identities:
+            skipped.setdefault("Manual upload", []).append(clean)
+            continue
+        if fid in ss.manual_seen:
+            continue  # Still present in Streamlit's uploader and already retained.
         if digest in seen_hashes or identity in seen_names:
             skipped.setdefault("Manual upload", []).append(clean)
             continue
@@ -221,10 +239,44 @@ def manual_section() -> list[MeasurementRef]:
             continue
         seen_hashes.add(digest)
         seen_names.add(identity)
-        ss.manual_files.append(MeasurementRef(name=clean, size=f.size, data=payload))
+        ss.manual_seen.add(fid)
+        ss.manual_files.append(MeasurementRef(name=clean, size=size, data=payload))
     for source_name, names in skipped.items():
         st.warning(f"Already present in {source_name}; duplicate file(s) skipped: " + ", ".join(dict.fromkeys(names)))
+    if ss.manual_files:
+        st.caption("Retained measurement files:")
+        for ref in ss.manual_files:
+            digest = hashlib.sha256(ref.data or b"").hexdigest()
+            file_col, remove_col = st.columns([5, 1])
+            file_col.caption(f"{ref.name} · {human_size(ref.size)}")
+            remove_col.button(
+                "Remove",
+                key=f"simple_remove_manual_{digest}",
+                on_click=remove_manual_file,
+                args=(ref.name, digest),
+                help=f"Remove {ref.name}",
+            )
+        st.button("Clear all uploaded measurement files", key="simple_manual_clear", on_click=clear_manual_files)
     return list(ss.manual_files)
+
+
+def remove_manual_file(name: str, digest: str) -> None:
+    ss = st.session_state
+    ss.manual_files = [
+        ref for ref in ss.manual_files
+        if not (ref.name == name and hashlib.sha256(ref.data or b"").hexdigest() == digest)
+    ]
+    ss.manual_seen = {
+        (ref.name, hashlib.sha256(ref.data or b"").hexdigest()) for ref in ss.manual_files
+    }
+    ss.manual_up_n += 1
+
+
+def clear_manual_files() -> None:
+    ss = st.session_state
+    ss.manual_files = []
+    ss.manual_seen = set()
+    ss.manual_up_n += 1
 
 
 def s3_clear() -> None:
@@ -648,15 +700,29 @@ def downloads_tab(job: Any, compared: bool) -> None:
     if not compared:
         st.caption("Comparison reports are unavailable because the Java decoder is MOCK / UNAVAILABLE. Python outputs can be downloaded.")
     st.markdown("**Reports**")
-    a, b, c = st.columns(3)
-    a.download_button("⬇ Comparison CSV", cached(f"{jid}:cmp", lambda: rep.comparison_csv(job)) if compared else b"", f"{jid}_comparison.csv", "text/csv", disabled=not compared, key="dl_cmp", **stretch(st.download_button))
+    a, b = st.columns(2)
+    a.download_button("⬇ Comparison workbook", cached(f"{jid}:comparison_xlsx", lambda: rep.excel_bytes(job)) if compared else b"", f"{jid}_comparison.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", disabled=not compared, key="dl_cmp_xlsx", **stretch(st.download_button))
     b.download_button("⬇ Summary JSON", cached(f"{jid}:json", lambda: rep.result_json(job)), f"{jid}_result.json", "application/json", key="dl_json", **stretch(st.download_button))
-    try:
-        c.download_button("⬇ Excel report", cached(f"{jid}:xlsx", lambda: rep.excel_bytes(job)), f"{jid}_report.xlsx",
-                          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", key="dl_xlsx", **stretch(st.download_button))
-    except Exception as exc:
-        c.button("⬇ Excel report", disabled=True, key="dl_xlsx_off", **stretch(st.button))
-        c.caption(f"Unavailable: {type(exc).__name__}")
+    if compared:
+        csv_part_count = rep.comparison_csv_part_count(job)
+        st.markdown("**Comparison CSV parts**")
+        st.caption(f"Each part contains up to {rep.COMPARISON_CSV_ROWS_PER_PART:,} rows and keeps Index numbering continuous.")
+        part_columns = st.columns(min(3, csv_part_count))
+        for part_number in range(1, csv_part_count + 1):
+            with part_columns[(part_number - 1) % len(part_columns)]:
+                part_key = f"{jid}:comparison_csv_part"
+                if st.button(f"Prepare CSV part {part_number} of {csv_part_count}", key=f"prepare_csv_part_{part_number}"):
+                    st.session_state.cache[part_key] = {
+                        "part": part_number,
+                        "data": rep.comparison_csv_part(job, part_number),
+                    }
+                prepared = st.session_state.cache.get(part_key)
+                if prepared and prepared.get("part") == part_number:
+                    part_filename = f"{jid}_comparison.csv" if part_number == 1 else f"{jid}_comparison_{part_number}.csv"
+                    st.download_button(
+                        f"Download CSV part {part_number}", prepared["data"], part_filename, "text/csv",
+                        key=f"download_csv_part_{part_number}", **stretch(st.download_button),
+                    )
     st.markdown("**Decoded output files**")
     d, e, f = st.columns(3)
     d.download_button("⬇ Python output CSV", cached(f"{jid}:py", lambda: rep.python_output_csv(job)), f"{jid}_python_output.csv", "text/csv", key="dl_py", **stretch(st.download_button))

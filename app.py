@@ -285,6 +285,7 @@ def manual_uploader() -> list[MeasurementRef]:
     seen_hashes = {hashlib.sha256(ref.data or b"").hexdigest() for ref in ss.manual_files}
     seen_names = {(ref.name.casefold(), int(ref.size)) for ref in ss.manual_files}
     s3_names = {(obj.name.casefold(), int(obj.size)) for obj in ss.s3_files}
+    candidates: list[tuple[str, int, bytes, str]] = []
     for f in ups or []:
         try:
             clean = validate_upload(f.name, f.size, ALLOWED_MEASUREMENT_EXTS, CFG.max_measurement_bytes)
@@ -293,7 +294,25 @@ def manual_uploader() -> list[MeasurementRef]:
             continue
         payload = f.getvalue()
         digest = hashlib.sha256(payload).hexdigest()
-        identity = (clean.casefold(), int(f.size))
+        candidates.append((clean, int(f.size), payload, digest))
+
+    digest_counts: dict[str, int] = {}
+    identity_counts: dict[tuple[str, int], int] = {}
+    for clean, size, _, digest in candidates:
+        digest_counts[digest] = digest_counts.get(digest, 0) + 1
+        identity = (clean.casefold(), size)
+        identity_counts[identity] = identity_counts.get(identity, 0) + 1
+    duplicate_digests = {digest for digest, count in digest_counts.items() if count > 1}
+    duplicate_identities = {identity for identity, count in identity_counts.items() if count > 1}
+
+    for clean, size, payload, digest in candidates:
+        identity = (clean.casefold(), size)
+        fid = (clean, digest)
+        if digest in duplicate_digests or identity in duplicate_identities:
+            skipped.setdefault("Manual upload", []).append(clean)
+            continue
+        if fid in ss.manual_seen:
+            continue  # Still present in Streamlit's uploader and already retained.
         if digest in seen_hashes or identity in seen_names:
             skipped.setdefault("Manual upload", []).append(clean)
             continue
@@ -302,11 +321,37 @@ def manual_uploader() -> list[MeasurementRef]:
             continue
         seen_hashes.add(digest)
         seen_names.add(identity)
-        ss.manual_seen.add((clean, digest))
-        ss.manual_files.append(MeasurementRef(name=clean, size=f.size, data=payload))
+        ss.manual_seen.add(fid)
+        ss.manual_files.append(MeasurementRef(name=clean, size=size, data=payload))
     for source_name, names in skipped.items():
         st.warning(f"Already present in {source_name}; duplicate file(s) skipped: " + ", ".join(dict.fromkeys(names)))
+    if ss.manual_files:
+        st.caption("Retained measurement files:")
+        for ref in ss.manual_files:
+            digest = hashlib.sha256(ref.data or b"").hexdigest()
+            file_col, remove_col = st.columns([5, 1])
+            file_col.caption(f"{ref.name} · {human_size(ref.size)}")
+            remove_col.button(
+                "Remove",
+                key=f"remove_manual_{digest}",
+                on_click=remove_manual_file,
+                args=(ref.name, digest),
+                help=f"Remove {ref.name}",
+            )
     return list(ss.manual_files)
+
+
+def remove_manual_file(name: str, digest: str) -> None:
+    ss = st.session_state
+    ss.manual_files = [
+        ref for ref in ss.manual_files
+        if not (ref.name == name and hashlib.sha256(ref.data or b"").hexdigest() == digest)
+    ]
+    ss.manual_seen = {
+        (ref.name, hashlib.sha256(ref.data or b"").hexdigest()) for ref in ss.manual_files
+    }
+    # Remount the uploader so a removed item is not re-added from its widget state.
+    ss.manual_up_n += 1
 
 
 def clear_manual_uploads() -> None:
@@ -343,7 +388,6 @@ def page_newrun() -> None:
                 refs = manual_uploader()
                 if refs:
                     st.success(f"{len(refs)} measurement file(s) retained for this session.")
-                    st.caption("Files: " + ", ".join(ref.name for ref in refs))
                     st.button("Clear uploaded measurement files", key="manual_clear", on_click=clear_manual_uploads)
         with c2:
             html(C.source_card_html("▤", "DBC source: Manual upload", "Upload one or multiple DBC files from your computer. Select which DBCs to apply for the run."))
@@ -983,13 +1027,40 @@ def page_reports() -> None:
             html(C.notice_html(notice + " Python output CSV remains available when Python decoding succeeded."))
         a, b = st.columns(2, gap="medium")
         with a:
-            html(C.source_card_html("▤", "CSV signal results", "Signal/sample rows, values, errors and status."))
-            report_download("comparison", "comparison CSV", f"{filename}_comparison.csv", "text/csv",
-                            lambda: rep.comparison_csv(job), disabled=not compared)
+            html(C.source_card_html("▤", "Excel comparison results", "All signal/sample rows, split across numbered sheets when needed."))
+            report_download(
+                "comparison_xlsx",
+                "comparison workbook",
+                f"{filename}_comparison.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                lambda: rep.excel_bytes(job),
+                disabled=not compared,
+            )
         with b:
             html(C.source_card_html("{ }", "JSON result", "Structured job metadata and comparison records."))
             report_download("json", "JSON result", f"{filename}_result.json", "application/json",
                             lambda: rep.result_json(job))
+    if compared:
+        csv_part_count = rep.comparison_csv_part_count(job)
+        with panel("comparison_csv_parts"):
+            html(C.panel_head_html(
+                "Download comparison CSV parts",
+                f"Each file contains up to {rep.COMPARISON_CSV_ROWS_PER_PART:,} rows so it opens within Excel's row limit. Index values continue across parts.",
+            ))
+            part_columns = st.columns(min(3, csv_part_count))
+            for part_number in range(1, csv_part_count + 1):
+                part_filename = (
+                    f"{filename}_comparison.csv" if part_number == 1
+                    else f"{filename}_comparison_{part_number}.csv"
+                )
+                with part_columns[(part_number - 1) % len(part_columns)]:
+                    report_download(
+                        f"comparison_csv_part_{part_number}",
+                        f"comparison CSV part {part_number} of {csv_part_count}",
+                        part_filename,
+                        "text/csv",
+                        lambda part_number=part_number: rep.comparison_csv_part(job, part_number),
+                    )
     with panel("outputs"):
         html(C.panel_head_html("Decoded output files", "Raw decoded samples of each engine."))
         c, d = st.columns(2, gap="medium")

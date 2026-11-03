@@ -22,7 +22,7 @@ Run the tests: `./verify.sh` (installs dev requirements first).
    Or choose **Manual Upload** on *New comparison* and upload the log files from your computer.
 2. **DBC manager** — upload one or more `.dbc` files, tick the ones to use (invalid files and conflicts are flagged).
 3. **New comparison** — set resampling / tolerance, click **Run comparison**.
-4. **Reports** — opened automatically after the run. Download lossless Excel comparison parts (each no larger than 25 MB), JSON, and decoded Python / Java output CSV files.
+4. **Reports** — opened automatically after the run. Download numbered comparison CSV parts and decoded Python / Java output CSV files.
 
 `streamlit run app_simple.py` starts a compact one-page variant (source switch + dashboard on one page). It includes the same
 CAN-channel selection, per-DBC channel assignment, and **DBC Match to This File** controls as the full application.
@@ -40,17 +40,15 @@ With **All channels**, a row is **MATCH** only when both decoders report the sam
 unmatched on either side, separately for each channel. On *New comparison*, the Python and Java comparison-channel controls remain
 separate; different comparison channels are reported as MISMATCH. The channel numbers must match for a row to be MATCH.
 
-The comparison workbook's `Comparison` sheets contain `Index`, `File Name`, `Timestamp`, `CAN ID`, `Signal Name`, `DBC Name`, `Python Channel`,
+Comparison CSV parts contain `Index`, `File Name`, `Timestamp`, `CAN ID`, `Signal Name`, `DBC Name`, `Python Channel`,
 `Java Channel`, `Python Decoded Value`, `Java Decoded Value`, `Absolute Error`, `Status`, and `Message`. An empty DBC channel
 binding applies that DBC to every channel detected in each measurement file.
-If a selected channel is confirmed absent from a measurement, the workbook includes an informational `NOT_COMPARABLE` row
+If a selected channel is confirmed absent from a measurement, the comparison CSV includes an informational `NOT_COMPARABLE` row
 explaining that neither decoder processed that channel; this report-only row does not affect comparison totals.
 
-Each Excel comparison part contains only a `Comparison` sheet, is lossless, and is size-checked before download; `Index` values continue
-across parts. For smaller downloads, **Reports** also offers numbered comparison CSV parts of up to one million rows each (for example,
+**Reports** offers numbered comparison CSV parts of up to one million rows each (for example,
 `_comparison.csv`, `_comparison_2.csv`); their `Index` values continue across parts. Python and Java output CSVs contain relative `Timestamp` values in seconds
-and omit readable `Date/Time` and the internal `is_discrete` column. Exported JSON
-omits absolute date/time fields; sample `timestamp` values remain relative seconds.
+and omit readable `Date/Time` and the internal `is_discrete` column.
 Manual measurement uploads remain available while
 navigating to the DBC manager for the current Streamlit session; use **Clear uploaded measurement files** to remove them.
 

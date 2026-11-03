@@ -13,14 +13,13 @@ The left navigation contains **New comparison**, **S3 browser**, **DBC manager**
 1. **S3 browser** — enter connection details, *Test connection*, open a folder, click **Select this folder**, tick the measurement files, click **Use selected files**.
 2. **DBC manager** — upload one or more `.dbc` files, tick the ones to use.
 3. **New comparison** — review the selection, set tolerances, click **Run comparison**.
-4. **Reports** — download timestamped Excel comparison parts (each no larger than 25 MB), JSON, and decoded Python / Java output CSV files.
+4. **Reports** — download numbered comparison CSV parts and decoded Python / Java output CSV files.
 
 Manual measurement uploads are retained in the current Streamlit session while navigating to the DBC manager. Clear them from
-**New comparison** using **Clear uploaded measurement files**. Large comparisons are downloaded as numbered, lossless Excel workbook parts.
-Each part contains only the comparison sheet, is size-checked to stay within 25 MB, and preserves continuous `Index` values across parts.
+**New comparison** using **Clear uploaded measurement files**. Large comparisons are downloaded as numbered CSV parts with continuous `Index` values across parts.
 Python and Java output CSVs use relative timestamps in seconds and omit readable datetime
 columns and the internal `is_discrete` column. For smaller downloads, **Reports** also provides numbered comparison CSV parts of up to one
-million rows each, with continuous `Index` values. When a selected channel is confirmed absent from a measurement, the workbook includes an informational `NOT_COMPARABLE` row
+million rows each, with continuous `Index` values. When a selected channel is confirmed absent from a measurement, the comparison CSV includes an informational `NOT_COMPARABLE` row
 with the available channels and states that no decoding was performed. This explanation does not change comparison totals.
 
 ## 2. S3 connection
@@ -116,13 +115,11 @@ channel selection.
 
 | File | Content |
 |---|---|
-| `*_comparison_part_N.xlsx` | Comparison rows with values, differences, tolerance, status, and notes; each lossless part is size-checked to stay within 25 MB. |
-| `signal_summary.csv` | One row per file + signal with rolled-up status and match %. |
-| `result.json` | Summary, per-file status, signal summary, all rows (strict JSON, `null` for empty values). |
+| `*_comparison.csv`, `*_comparison_N.csv` | Numbered comparison rows with values, differences, tolerance, status, and notes; each part contains up to one million rows. |
 | `python_output.csv` | Real decoded Python samples. |
 | `java_output.csv` | Only present when the Java API returned real data. |
 
-Downloaded files include the job completion timestamp in their filenames. When the Java engine is unavailable, the comparison workbook is disabled.
+Downloaded files include the job completion timestamp in their filenames. Java output CSV is available only when the Java API returned real data.
 
 ## 6. Troubleshooting
 

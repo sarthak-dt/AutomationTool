@@ -991,6 +991,11 @@ def page_reports() -> None:
         report_ts = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
     filename = f"DecoderComparator_{report_ts}"
 
+    prepared_report = ss.cache.get(f"{jid}:prepared_report")
+    if prepared_report and str(prepared_report.get("file_name", "")).endswith(".xlsx"):
+        # Release a large single-workbook artifact retained by an earlier app version.
+        ss.cache.pop(f"{jid}:prepared_report", None)
+
     def report_download(kind: str, title: str, file_name: str, mime: str, builder, disabled: bool = False) -> None:
         """Generate one large download only after an explicit click; retain only that artifact."""
         if st.button(f"Prepare {title}", key=f"prepare_{kind}", disabled=disabled):
@@ -1027,15 +1032,63 @@ def page_reports() -> None:
             html(C.notice_html(notice + " Python output CSV remains available when Python decoding succeeded."))
         a, b = st.columns(2, gap="medium")
         with a:
-            html(C.source_card_html("▤", "Excel comparison results", "All signal/sample rows, split across numbered sheets when needed."))
-            report_download(
-                "comparison_xlsx",
-                "comparison workbook",
-                f"{filename}_comparison.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                lambda: rep.excel_bytes(job),
-                disabled=not compared,
-            )
+            html(C.source_card_html("▤", "Excel comparison results", "Lossless workbook parts capped at 25 MB each; only one part is prepared at a time."))
+            if compared:
+                workbook_state_key = "comparison_workbook_part_progress"
+                total_export_rows = rep.comparison_export_row_count(job)
+                workbook_state = ss.get(workbook_state_key)
+                if not workbook_state or workbook_state.get("job_id") != jid:
+                    workbook_state = {
+                        "job_id": jid, "next_row": 0, "next_part": 1, "artifact": None,
+                    }
+                    ss[workbook_state_key] = workbook_state
+
+                artifact = workbook_state.get("artifact")
+                if artifact is None and total_export_rows > 0 and workbook_state["next_row"] >= total_export_rows:
+                    workbook_state.update({"next_row": 0, "next_part": 1})
+                if artifact:
+                    st.caption(
+                        f"Part {artifact['part']} · rows {artifact['start'] + 1:,}–{artifact['end']:,} "
+                        f"of {total_export_rows:,} · {human_size(len(artifact['data']))}"
+                    )
+                    st.download_button(
+                        f"Download workbook part {artifact['part']}",
+                        artifact["data"],
+                        artifact["filename"],
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        key=f"download_workbook_part_{jid}_{artifact['part']}",
+                        **stretch(st.download_button),
+                    )
+                can_prepare = (
+                    workbook_state["next_row"] < total_export_rows
+                    or (total_export_rows == 0 and artifact is None)
+                )
+                if can_prepare:
+                    if artifact:
+                        st.caption("Save the prepared part before preparing the next part; only one part is kept in memory.")
+                    prepare_label = f"Prepare workbook part {workbook_state['next_part']}"
+                    if st.button(prepare_label, key=f"prepare_workbook_part_{jid}_{workbook_state['next_part']}", disabled=not compared, **stretch(st.button)):
+                        start_row = workbook_state["next_row"]
+                        part_number = workbook_state["next_part"]
+                        with st.spinner(f"Preparing lossless workbook part {part_number} (maximum 25 MB)..."):
+                            data, next_row = rep.excel_part_bytes(job, start_row)
+                        workbook_state.update({
+                            "next_row": next_row,
+                            "next_part": part_number + 1,
+                            "artifact": {
+                                "part": part_number,
+                                "start": start_row,
+                                "end": next_row,
+                                "filename": f"{filename}_comparison_part_{part_number}.xlsx",
+                                "data": data,
+                            },
+                        })
+                        ss[workbook_state_key] = workbook_state
+                        st.rerun()
+                elif artifact:
+                    st.success("All comparison rows have been included in the prepared workbook parts.")
+            else:
+                st.button("Prepare comparison workbook", disabled=True, key="prepare_workbook_unavailable", **stretch(st.button))
         with b:
             html(C.source_card_html("{ }", "JSON result", "Structured job metadata and comparison records."))
             report_download("json", "JSON result", f"{filename}_result.json", "application/json",

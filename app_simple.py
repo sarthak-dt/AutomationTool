@@ -701,7 +701,60 @@ def downloads_tab(job: Any, compared: bool) -> None:
         st.caption("Comparison reports are unavailable because the Java decoder is MOCK / UNAVAILABLE. Python outputs can be downloaded.")
     st.markdown("**Reports**")
     a, b = st.columns(2)
-    a.download_button("⬇ Comparison workbook", cached(f"{jid}:comparison_xlsx", lambda: rep.excel_bytes(job)) if compared else b"", f"{jid}_comparison.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", disabled=not compared, key="dl_cmp_xlsx", **stretch(st.download_button))
+    with a:
+        st.markdown("**Comparison workbook parts**")
+        st.caption("Lossless Excel files capped at 25 MB each. Prepare and download one part at a time.")
+        if compared:
+            part_state_key = "comparison_workbook_part_progress"
+            total_export_rows = rep.comparison_export_row_count(job)
+            part_state = st.session_state.get(part_state_key)
+            if not part_state or part_state.get("job_id") != jid:
+                part_state = {"job_id": jid, "next_row": 0, "next_part": 1, "artifact": None}
+                st.session_state[part_state_key] = part_state
+
+            artifact = part_state.get("artifact")
+            if artifact is None and total_export_rows > 0 and part_state["next_row"] >= total_export_rows:
+                part_state.update({"next_row": 0, "next_part": 1})
+            if artifact:
+                st.caption(
+                    f"Part {artifact['part']} · rows {artifact['start'] + 1:,}–{artifact['end']:,} "
+                    f"of {total_export_rows:,} · {human_size(len(artifact['data']))}"
+                )
+                st.download_button(
+                    f"⬇ Download workbook part {artifact['part']}",
+                    artifact["data"], artifact["filename"],
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    key=f"simple_download_workbook_part_{jid}_{artifact['part']}",
+                    **stretch(st.download_button),
+                )
+            can_prepare = (
+                part_state["next_row"] < total_export_rows
+                or (total_export_rows == 0 and artifact is None)
+            )
+            if can_prepare:
+                if artifact:
+                    st.caption("Save the prepared part before preparing the next one; only one part is kept in memory.")
+                if st.button(
+                    f"Prepare workbook part {part_state['next_part']}",
+                    key=f"simple_prepare_workbook_part_{jid}_{part_state['next_part']}",
+                    **stretch(st.button),
+                ):
+                    start_row = part_state["next_row"]
+                    part_number = part_state["next_part"]
+                    with st.spinner(f"Preparing lossless workbook part {part_number} (maximum 25 MB)..."):
+                        data, next_row = rep.excel_part_bytes(job, start_row)
+                    part_state.update({
+                        "next_row": next_row,
+                        "next_part": part_number + 1,
+                        "artifact": {
+                            "part": part_number, "start": start_row, "end": next_row,
+                            "filename": f"{jid}_comparison_part_{part_number}.xlsx", "data": data,
+                        },
+                    })
+                    st.session_state[part_state_key] = part_state
+                    st.rerun()
+            elif artifact:
+                st.success("All comparison rows have been included in the prepared workbook parts.")
     b.download_button("⬇ Summary JSON", cached(f"{jid}:json", lambda: rep.result_json(job)), f"{jid}_result.json", "application/json", key="dl_json", **stretch(st.download_button))
     if compared:
         csv_part_count = rep.comparison_csv_part_count(job)

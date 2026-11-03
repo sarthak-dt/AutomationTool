@@ -34,6 +34,8 @@ EXCEL_COMPARISON_ROWS_PER_SHEET = EXCEL_MAX_ROWS - 1
 EXCEL_WRITE_CHUNK_ROWS = 10_000
 COMPARISON_CSV_ROWS_PER_PART = 1_000_000  # Keeps each CSV below Excel's worksheet row cap.
 XLSX_COMPRESSION_LEVEL = 9  # Maximum lossless DEFLATE compression.
+MAX_WORKBOOK_PART_BYTES = 25_000_000
+WORKBOOK_PART_TARGET_ROWS = 400_000
 
 
 # ---------------------------------------------------------------------------
@@ -208,9 +210,14 @@ def comparison_csv_part_count(
     """Number of Excel-friendly CSV parts needed for all comparison rows."""
     if rows_per_part < 1:
         raise ValueError("rows_per_part must be >= 1")
+    total_rows = comparison_export_row_count(job)
+    return max(1, (total_rows + rows_per_part - 1) // rows_per_part)
+
+
+def comparison_export_row_count(job: Any) -> int:
+    """Total comparison rows, including report-only missing-channel rows."""
     comparison_rows = len(job.rows) if job.rows is not None else 0
-    diagnostics = _missing_channel_rows(job, comparison_rows)
-    return max(1, (comparison_rows + len(diagnostics) + rows_per_part - 1) // rows_per_part)
+    return comparison_rows + len(_missing_channel_rows(job, comparison_rows))
 
 
 def comparison_csv_part(
@@ -347,13 +354,58 @@ def result_json(job: Any, include_rows: bool = True) -> bytes:
 
 
 def excel_bytes(job: Any) -> bytes:
-    """Compact workbook containing only comparison rows, split across Excel-sized sheets."""
+    """Create a single small comparison workbook or direct large jobs to workbook parts."""
+    total_rows = comparison_export_row_count(job)
+    if total_rows > WORKBOOK_PART_TARGET_ROWS:
+        raise ValueError(
+            "This comparison is too large for one workbook download. Download the numbered workbook parts instead."
+        )
+    data = _excel_bytes_range(job, 0, total_rows)
+    if len(data) > MAX_WORKBOOK_PART_BYTES:
+        raise ValueError(
+            "The comparison workbook exceeds 25 MB. Download the numbered workbook parts instead."
+        )
+    return data
+
+
+def excel_part_bytes(
+    job: Any,
+    start_row: int,
+    max_bytes: int = MAX_WORKBOOK_PART_BYTES,
+) -> tuple[bytes, int]:
+    """Create a lossless workbook part no larger than max_bytes, with adaptive row count."""
+    total_rows = comparison_export_row_count(job)
+    if total_rows == 0 and start_row == 0:
+        data = _excel_bytes_range(job, 0, 0)
+        if len(data) > max_bytes:
+            raise ValueError(f"The empty comparison workbook exceeds the {max_bytes:,}-byte limit.")
+        return data, 0
+    if start_row < 0 or start_row >= total_rows:
+        raise ValueError(f"start_row must be between 0 and {max(0, total_rows - 1)}")
+    if max_bytes < 1:
+        raise ValueError("max_bytes must be >= 1")
+
+    row_count = min(WORKBOOK_PART_TARGET_ROWS, total_rows - start_row)
+    while True:
+        stop_row = start_row + row_count
+        data = _excel_bytes_range(job, start_row, stop_row)
+        if len(data) <= max_bytes:
+            return data, stop_row
+        if row_count == 1:
+            raise ValueError(
+                f"A single comparison row exceeds the {max_bytes:,}-byte workbook part limit."
+            )
+        row_count = max(1, row_count // 2)
+
+
+def _excel_bytes_range(job: Any, start_row: int, stop_row: int) -> bytes:
+    """Stream a comparison-row interval into a comparison-only workbook."""
     workbook = Workbook(write_only=True)
     worksheets: list[tuple[Any, int]] = []
     current_sheet = None
     current_sheet_rows = 0
     sheet_number = 0
-    index = 1
+    index = start_row + 1
 
     def add_sheet() -> None:
         nonlocal current_sheet, current_sheet_rows, sheet_number
@@ -379,13 +431,20 @@ def excel_bytes(job: Any) -> bytes:
     # Export in small batches. A normal openpyxl worksheet retains every cell in
     # memory; write-only worksheets keep workbook-generation memory bounded.
     job_rows = job.rows if job.rows is not None else pd.DataFrame(columns=ROW_COLUMNS)
-    for start in range(0, len(job_rows), EXCEL_WRITE_CHUNK_ROWS):
-        exported = export_frame(job_rows.iloc[start : start + EXCEL_WRITE_CHUNK_ROWS])
+    comparison_count = len(job_rows)
+    comparison_stop = min(stop_row, comparison_count)
+    for start in range(start_row, comparison_stop, EXCEL_WRITE_CHUNK_ROWS):
+        chunk_stop = min(comparison_stop, start + EXCEL_WRITE_CHUNK_ROWS)
+        exported = export_frame(job_rows.iloc[start:chunk_stop])
         append_frame(exported)
 
-    diagnostics = _missing_channel_rows(job, index - 1)
-    for start in range(0, len(diagnostics), EXCEL_WRITE_CHUNK_ROWS):
-        append_frame(pd.DataFrame(diagnostics[start : start + EXCEL_WRITE_CHUNK_ROWS], columns=EXPORT_COLUMNS))
+    if stop_row > comparison_count:
+        diagnostics = _missing_channel_rows(job, comparison_count)
+        diagnostic_start = max(0, start_row - comparison_count)
+        diagnostic_stop = min(len(diagnostics), stop_row - comparison_count)
+        for start in range(diagnostic_start, diagnostic_stop, EXCEL_WRITE_CHUNK_ROWS):
+            chunk_stop = min(diagnostic_stop, start + EXCEL_WRITE_CHUNK_ROWS)
+            append_frame(pd.DataFrame(diagnostics[start:chunk_stop], columns=EXPORT_COLUMNS))
 
     if current_sheet is None:
         add_sheet()
@@ -591,7 +650,10 @@ def build_report_zip(job: Any, include_graphs: bool = True) -> bytes:
         ]
     if java_csv is not None:
         readme_lines.append("  java_output.csv       decoded samples returned by the Java API")
-    readme_lines.append("  report.xlsx           comparison-only workbook; large results use numbered sheets")
+    if comparison_export_row_count(job) <= WORKBOOK_PART_TARGET_ROWS:
+        readme_lines.append("  report.xlsx           comparison-only workbook (maximum 25 MB)")
+    else:
+        readme_lines.append("  report.xlsx           omitted: download the numbered workbook parts from the app")
     if graphs:
         readme_lines.append(f"  graphs/               interactive HTML graphs ({len(graphs)} signals, mismatches first)")
     elif include_graphs and not plotly_available():
@@ -607,10 +669,11 @@ def build_report_zip(job: Any, include_graphs: bool = True) -> bytes:
             zf.writestr("comparison.csv", comparison_csv(job))
         if java_csv is not None:
             zf.writestr("java_output.csv", java_csv)
-        try:
-            zf.writestr("report.xlsx", excel_bytes(job))
-        except Exception as exc:  # keep the ZIP usable even if xlsx fails
-            zf.writestr("report_xlsx_error.txt", f"Excel report could not be created: {type(exc).__name__}")
+        if comparison_export_row_count(job) <= WORKBOOK_PART_TARGET_ROWS:
+            try:
+                zf.writestr("report.xlsx", excel_bytes(job))
+            except Exception as exc:  # keep the ZIP usable even if xlsx fails
+                zf.writestr("report_xlsx_error.txt", f"Excel report could not be created: {type(exc).__name__}")
         zf.writestr("run_log.txt", "\n".join(redact_mapping(job.log_lines)) + "\n")
         for name, content in graphs.items():
             zf.writestr(name, content)

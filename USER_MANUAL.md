@@ -18,9 +18,11 @@ The left navigation contains **New comparison**, **S3 browser**, **DBC manager**
 Manual measurement uploads are retained in the current Streamlit session while navigating to the DBC manager. Clear them from
 **New comparison** using **Clear uploaded measurement files**. Large comparisons are downloaded as numbered CSV parts with continuous `Index` values across parts.
 Python and Java output CSVs use relative timestamps in seconds and omit readable datetime
-columns and the internal `is_discrete` column. For smaller downloads, **Reports** also provides numbered comparison CSV parts of up to one
+columns and the internal `is_discrete` column. Large Python and Java decoded outputs are also split into numbered, gzip-compressed CSV parts of up to one million rows;
+part 1 uses the base filename and later parts add `_2`, `_3`, and so on. For comparison downloads, **Reports** provides numbered gzip-compressed CSV parts of up to one
 million rows each, with continuous `Index` values. When a selected channel is confirmed absent from a measurement, the comparison CSV includes an informational `NOT_COMPARABLE` row
 with the available channels and states that no decoding was performed. This explanation does not change comparison totals.
+The `.csv.gz` compression is lossless; decompress a file to restore the original CSV.
 
 ## 2. S3 connection
 
@@ -115,9 +117,9 @@ channel selection.
 
 | File | Content |
 |---|---|
-| `*_comparison.csv`, `*_comparison_N.csv` | Numbered comparison rows with values, differences, tolerance, status, and notes; each part contains up to one million rows. |
-| `python_output.csv` | Real decoded Python samples. |
-| `java_output.csv` | Only present when the Java API returned real data. |
+| `*_comparison.csv.gz`, `*_comparison_N.csv.gz` | Numbered gzip-compressed comparison rows with values, differences, tolerance, status, and notes; each part contains up to one million rows. |
+| `*_python_output.csv.gz`, `*_python_output_2.csv.gz`, etc. | All real Python decoded samples, split into sequential compressed parts of up to one million rows. |
+| `*_java_output.csv.gz`, `*_java_output_2.csv.gz`, etc. | Real Java decoded samples, split into sequential compressed parts; available only when the Java API returned data. |
 
 Downloaded files include the job completion timestamp in their filenames. Java output CSV is available only when the Java API returned real data.
 

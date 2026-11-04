@@ -8,6 +8,7 @@ is missing the ZIP simply omits graphs and says so in ``README.txt``).
 from __future__ import annotations
 
 import io
+import gzip
 import json
 import re
 import tempfile
@@ -33,6 +34,7 @@ EXCEL_MAX_ROWS = 1_048_576  # Excel's per-worksheet limit, including the header 
 EXCEL_COMPARISON_ROWS_PER_SHEET = EXCEL_MAX_ROWS - 1
 EXCEL_WRITE_CHUNK_ROWS = 10_000
 COMPARISON_CSV_ROWS_PER_PART = 1_000_000  # Keeps each CSV below Excel's worksheet row cap.
+CSV_GZIP_LEVEL = 9
 XLSX_COMPRESSION_LEVEL = 9  # Maximum lossless DEFLATE compression.
 MAX_WORKBOOK_PART_BYTES = 25_000_000
 WORKBOOK_PART_TARGET_ROWS = 400_000
@@ -50,6 +52,26 @@ def df_records(df: pd.DataFrame) -> list[dict[str, Any]]:
 
 def _csv_bytes(df: pd.DataFrame) -> bytes:
     return df.to_csv(index=False).encode("utf-8")
+
+
+def _csv_text_writer(temp_file: Any, compress: bool) -> io.TextIOWrapper:
+    """Create a UTF-8 CSV writer, optionally gzip-compressing as rows are written."""
+    if compress:
+        stream = gzip.GzipFile(
+            fileobj=temp_file, mode="wb", compresslevel=CSV_GZIP_LEVEL, mtime=0
+        )
+    else:
+        stream = temp_file
+    return io.TextIOWrapper(stream, encoding="utf-8", newline="")
+
+
+def _finish_csv_writer(text_file: io.TextIOWrapper, compress: bool) -> None:
+    text_file.flush()
+    if compress:
+        # Closing GzipFile writes its trailer; it leaves the temporary file open.
+        text_file.close()
+    else:
+        text_file.detach()
 
 
 OUTPUT_COLUMNS = ["file", "can_id", "channel", "signal", "timestamp", "value", "unit", "message", "is_discrete"]
@@ -224,6 +246,7 @@ def comparison_csv_part(
     job: Any,
     part_number: int,
     rows_per_part: int = COMPARISON_CSV_ROWS_PER_PART,
+    compress: bool = False,
 ) -> bytes:
     """Build one numbered CSV chunk without materializing the complete export."""
     part_count = comparison_csv_part_count(job, rows_per_part)
@@ -236,7 +259,7 @@ def comparison_csv_part(
     comparison_start = min(start, comparison_count)
     comparison_stop = min(stop, comparison_count)
     with tempfile.TemporaryFile(mode="w+b") as temp_file:
-        text_file = io.TextIOWrapper(temp_file, encoding="utf-8", newline="")
+        text_file = _csv_text_writer(temp_file, compress)
         wrote_header = False
 
         def write_frame(frame: pd.DataFrame) -> None:
@@ -261,8 +284,7 @@ def comparison_csv_part(
 
         if not wrote_header:
             write_frame(pd.DataFrame(columns=EXPORT_COLUMNS))
-        text_file.flush()
-        text_file.detach()
+        _finish_csv_writer(text_file, compress)
         temp_file.seek(0)
         return temp_file.read()
 
@@ -279,6 +301,98 @@ def java_output_csv(job: Any) -> bytes | None:
     """Only real Java output is ever exported. Returns None when there is none."""
     df = java_output_frame(job)
     return _csv_bytes(_decoded_output_csv(df)) if not df.empty else None
+
+
+def python_output_csv_part_count(
+    job: Any, rows_per_part: int = COMPARISON_CSV_ROWS_PER_PART
+) -> int:
+    """Number of numbered CSV parts needed for all Python decoded samples."""
+    return _decoded_output_csv_part_count(job.python_data, rows_per_part, allow_empty=True)
+
+
+def python_output_csv_part(
+    job: Any, part_number: int, rows_per_part: int = COMPARISON_CSV_ROWS_PER_PART,
+    compress: bool = False,
+) -> bytes:
+    """Build one Python output part without concatenating the full decoded output."""
+    return _decoded_output_csv_part(
+        job.python_data, part_number, rows_per_part, allow_empty=True, compress=compress
+    )
+
+
+def java_output_csv_part_count(
+    job: Any, rows_per_part: int = COMPARISON_CSV_ROWS_PER_PART
+) -> int:
+    """Number of numbered CSV parts, or zero when there is no real Java output."""
+    return _decoded_output_csv_part_count(job.java_data, rows_per_part, allow_empty=False)
+
+
+def java_output_csv_part(
+    job: Any, part_number: int, rows_per_part: int = COMPARISON_CSV_ROWS_PER_PART,
+    compress: bool = False,
+) -> bytes | None:
+    """Build one Java output part, or return None when no Java samples exist."""
+    if java_output_csv_part_count(job, rows_per_part) == 0:
+        return None
+    return _decoded_output_csv_part(
+        job.java_data, part_number, rows_per_part, allow_empty=False, compress=compress
+    )
+
+
+def _decoded_output_csv_part_count(
+    data_by_file: Any, rows_per_part: int, *, allow_empty: bool
+) -> int:
+    if rows_per_part < 1:
+        raise ValueError("rows_per_part must be >= 1")
+    total_rows = sum(
+        len(frame) for frame in (data_by_file or {}).values()
+        if frame is not None and not frame.empty
+    )
+    if total_rows == 0:
+        return 1 if allow_empty else 0
+    return (total_rows + rows_per_part - 1) // rows_per_part
+
+
+def _decoded_output_csv_part(
+    data_by_file: Any, part_number: int, rows_per_part: int, *, allow_empty: bool,
+    compress: bool = False,
+) -> bytes:
+    part_count = _decoded_output_csv_part_count(
+        data_by_file, rows_per_part, allow_empty=allow_empty
+    )
+    if part_number < 1 or part_number > part_count:
+        raise ValueError(f"part_number must be between 1 and {part_count}")
+
+    start = (part_number - 1) * rows_per_part
+    stop = start + rows_per_part
+    output_columns = [column for column in OUTPUT_COLUMNS if column not in {"is_discrete", "datetime"}]
+    row_offset = 0
+    wrote_header = False
+
+    with tempfile.TemporaryFile(mode="w+b") as temp_file:
+        text_file = _csv_text_writer(temp_file, compress)
+        for file_name, source in (data_by_file or {}).items():
+            if source is None or source.empty:
+                continue
+            source_start = max(0, start - row_offset)
+            source_stop = min(len(source), stop - row_offset)
+            if source_start < source_stop:
+                for chunk_start in range(source_start, source_stop, EXCEL_WRITE_CHUNK_ROWS):
+                    chunk_stop = min(source_stop, chunk_start + EXCEL_WRITE_CHUNK_ROWS)
+                    chunk = source.iloc[chunk_start:chunk_stop].copy()
+                    chunk["file"] = file_name
+                    chunk = _decoded_output_csv(chunk[OUTPUT_COLUMNS])
+                    chunk.to_csv(text_file, index=False, header=not wrote_header)
+                    wrote_header = True
+            row_offset += len(source)
+            if row_offset >= stop:
+                break
+
+        if not wrote_header:
+            pd.DataFrame(columns=output_columns).to_csv(text_file, index=False)
+        _finish_csv_writer(text_file, compress)
+        temp_file.seek(0)
+        return temp_file.read()
 
 
 def _decoded_output_csv(frame: pd.DataFrame) -> pd.DataFrame:

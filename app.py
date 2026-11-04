@@ -1036,36 +1036,54 @@ def page_reports() -> None:
         with panel("comparison_csv_parts"):
             html(C.panel_head_html(
                 "Download comparison CSV parts",
-                f"Each file contains up to {rep.COMPARISON_CSV_ROWS_PER_PART:,} rows so it opens within Excel's row limit. Index values continue across parts.",
+                f"Each losslessly gzip-compressed file contains up to {rep.COMPARISON_CSV_ROWS_PER_PART:,} rows. Index values continue across parts.",
             ))
             part_columns = st.columns(min(3, csv_part_count))
             for part_number in range(1, csv_part_count + 1):
                 part_filename = (
-                    f"{filename}_comparison.csv" if part_number == 1
-                    else f"{filename}_comparison_{part_number}.csv"
+                    f"{filename}_comparison.csv.gz" if part_number == 1
+                    else f"{filename}_comparison_{part_number}.csv.gz"
                 )
                 with part_columns[(part_number - 1) % len(part_columns)]:
                     report_download(
                         f"comparison_csv_part_{part_number}",
                         f"comparison CSV part {part_number} of {csv_part_count}",
                         part_filename,
-                        "text/csv",
-                        lambda part_number=part_number: rep.comparison_csv_part(job, part_number),
+                        "application/gzip",
+                        lambda part_number=part_number: rep.comparison_csv_part(job, part_number, compress=True),
                     )
     with panel("outputs"):
         html(C.panel_head_html("Decoded output files", "Raw decoded samples of each engine."))
         c, d = st.columns(2, gap="medium")
         with c:
             html(C.source_card_html("🐍", "Python decoder output", "All decoded samples (file, signal, time, value, unit)."))
-            report_download("python", "Python output CSV", f"{filename}_python_output.csv", "text/csv",
-                            lambda: rep.python_output_csv(job))
+            python_part_count = rep.python_output_csv_part_count(job)
+            st.caption(f"Each losslessly compressed CSV part contains up to {rep.COMPARISON_CSV_ROWS_PER_PART:,} rows.")
+            for python_part in range(1, python_part_count + 1):
+                python_suffix = "" if python_part == 1 else f"_{python_part}"
+                report_download(
+                    f"python_output_part_{python_part}",
+                    f"Python output CSV part {python_part} of {python_part_count}",
+                    f"{filename}_python_output{python_suffix}.csv.gz",
+                    "application/gzip",
+                    lambda python_part=python_part: rep.python_output_csv_part(job, python_part, compress=True),
+                )
         with d:
             html(C.source_card_html("☕", "Java decoder output", "Only available when the Java API returned real data."))
-            if not job.java_data:
+            java_part_count = rep.java_output_csv_part_count(job)
+            if java_part_count == 0:
                 st.caption("Not available: no real Java output for this job.")
             else:
-                report_download("java", "Java output CSV", f"{filename}_java_output.csv", "text/csv",
-                                lambda: rep.java_output_csv(job), disabled=False)
+                st.caption(f"Each losslessly compressed CSV part contains up to {rep.COMPARISON_CSV_ROWS_PER_PART:,} rows.")
+                for java_part in range(1, java_part_count + 1):
+                    java_suffix = "" if java_part == 1 else f"_{java_part}"
+                    report_download(
+                        f"java_output_part_{java_part}",
+                        f"Java output CSV part {java_part} of {java_part_count}",
+                        f"{filename}_java_output{java_suffix}.csv.gz",
+                        "application/gzip",
+                        lambda java_part=java_part: rep.java_output_csv_part(job, java_part, compress=True),
+                    )
 
 
 # ---------------------------------------------------------------------------

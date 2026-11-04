@@ -46,9 +46,11 @@ binding applies that DBC to every channel detected in each measurement file.
 If a selected channel is confirmed absent from a measurement, the comparison CSV includes an informational `NOT_COMPARABLE` row
 explaining that neither decoder processed that channel; this report-only row does not affect comparison totals.
 
-**Reports** offers numbered comparison CSV parts of up to one million rows each (for example,
-`_comparison.csv`, `_comparison_2.csv`); their `Index` values continue across parts. Python and Java output CSVs contain relative `Timestamp` values in seconds
-and omit readable `Date/Time` and the internal `is_discrete` column.
+**Reports** offers numbered gzip-compressed comparison CSV parts of up to one million rows each (for example,
+`_comparison.csv.gz`, `_comparison_2.csv.gz`); their `Index` values continue across parts. Python and Java output CSVs contain relative `Timestamp` values in seconds
+and omit readable `Date/Time` and the internal `is_discrete` column. Large decoded outputs are also split into numbered gzip-compressed parts of up to one million rows
+(for example, `_python_output.csv.gz`, `_python_output_2.csv.gz` and `_java_output.csv.gz`, `_java_output_2.csv.gz`) so all samples can be downloaded without truncation.
+Gzip compression is lossless; decompress each `.csv.gz` file to restore its CSV contents.
 Manual measurement uploads remain available while
 navigating to the DBC manager for the current Streamlit session; use **Clear uploaded measurement files** to remove them.
 

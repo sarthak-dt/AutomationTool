@@ -703,7 +703,7 @@ def downloads_tab(job: Any, compared: bool) -> None:
     if compared:
         csv_part_count = rep.comparison_csv_part_count(job)
         st.markdown("**Comparison CSV parts**")
-        st.caption(f"Each part contains up to {rep.COMPARISON_CSV_ROWS_PER_PART:,} rows and keeps Index numbering continuous.")
+        st.caption(f"Each losslessly gzip-compressed part contains up to {rep.COMPARISON_CSV_ROWS_PER_PART:,} rows and keeps Index numbering continuous.")
         part_columns = st.columns(min(3, csv_part_count))
         for part_number in range(1, csv_part_count + 1):
             with part_columns[(part_number - 1) % len(part_columns)]:
@@ -711,22 +711,55 @@ def downloads_tab(job: Any, compared: bool) -> None:
                 if st.button(f"Prepare CSV part {part_number} of {csv_part_count}", key=f"prepare_csv_part_{part_number}"):
                     st.session_state.cache[part_key] = {
                         "part": part_number,
-                        "data": rep.comparison_csv_part(job, part_number),
+                        "data": rep.comparison_csv_part(job, part_number, compress=True),
                     }
                 prepared = st.session_state.cache.get(part_key)
                 if prepared and prepared.get("part") == part_number:
-                    part_filename = f"{jid}_comparison.csv" if part_number == 1 else f"{jid}_comparison_{part_number}.csv"
+                    part_filename = f"{jid}_comparison.csv.gz" if part_number == 1 else f"{jid}_comparison_{part_number}.csv.gz"
                     st.download_button(
-                        f"Download CSV part {part_number}", prepared["data"], part_filename, "text/csv",
+                        f"Download CSV part {part_number}", prepared["data"], part_filename, "application/gzip",
                         key=f"download_csv_part_{part_number}", **stretch(st.download_button),
                     )
     st.markdown("**Decoded output files**")
-    d, e, f = st.columns(3)
-    d.download_button("⬇ Python output CSV", cached(f"{jid}:py", lambda: rep.python_output_csv(job)), f"{jid}_python_output.csv", "text/csv", key="dl_py", **stretch(st.download_button))
-    jcsv = rep.java_output_csv(job)
-    e.download_button("⬇ Java output CSV", jcsv or b"", f"{jid}_java_output.csv", "text/csv", disabled=jcsv is None, key="dl_java", **stretch(st.download_button))
-    if jcsv is None:
-        e.caption("Not available: no real Java output.")
+    d, e = st.columns(2)
+
+    def output_parts(slot: Any, engine: str, label: str, part_count: int, builder: Any) -> None:
+        if part_count == 0:
+            slot.caption("Not available: no real Java output.")
+            return
+        slot.caption(f"Each losslessly gzip-compressed CSV part contains up to {rep.COMPARISON_CSV_ROWS_PER_PART:,} rows.")
+        part_key = f"{jid}:{engine}_output_part"
+        for part_number in range(1, part_count + 1):
+            if slot.button(
+                f"Prepare {label} output CSV part {part_number} of {part_count}",
+                key=f"prepare_{jid}_{engine}_output_part_{part_number}",
+                **stretch(st.button),
+            ):
+                st.session_state.cache[part_key] = {
+                    "part": part_number,
+                    "data": builder(part_number, compress=True),
+                }
+            prepared = st.session_state.cache.get(part_key)
+            if prepared and prepared.get("part") == part_number:
+                suffix = "" if part_number == 1 else f"_{part_number}"
+                st.download_button(
+                    f"⬇ Download {label} output CSV part {part_number} of {part_count}",
+                    prepared["data"], f"{jid}_{engine}_output{suffix}.csv.gz", "application/gzip",
+                    key=f"download_{jid}_{engine}_output_part_{part_number}", **stretch(st.download_button),
+                )
+
+    python_part_count = rep.python_output_csv_part_count(job)
+    with d:
+        output_parts(
+            d, "python", "Python", python_part_count,
+            lambda part, compress=False: rep.python_output_csv_part(job, part, compress=compress),
+        )
+    java_part_count = rep.java_output_csv_part_count(job)
+    with e:
+        output_parts(
+            e, "java", "Java", java_part_count,
+            lambda part, compress=False: rep.java_output_csv_part(job, part, compress=compress),
+        )
     st.markdown("**Everything in one file**")
     if st.button("Build report ZIP", key="zip_build"):
         with st.spinner("Building ZIP (graphs can take a moment)..."):

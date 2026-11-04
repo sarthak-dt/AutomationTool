@@ -10,6 +10,10 @@ Everything shown comes from real runs; no sample data is ever displayed.
 """
 from __future__ import annotations
 
+import csv
+from array import array
+from html import escape as escape_html
+import io
 from pathlib import Path
 import hashlib
 from typing import Any
@@ -1084,6 +1088,280 @@ def page_reports() -> None:
                         "application/gzip",
                         lambda java_part=java_part: rep.java_output_csv_part(job, java_part, compress=True),
                     )
+
+    def report_csv_part(kind: str, part_number: int, rows_per_part: int) -> bytes:
+        if kind == "comparison":
+            return rep.comparison_csv_part(job, part_number, rows_per_part=rows_per_part)
+        if kind == "python":
+            return rep.python_output_csv_part(job, part_number, rows_per_part=rows_per_part)
+        data = rep.java_output_csv_part(job, part_number, rows_per_part=rows_per_part)
+        return data or b""
+
+    def report_page_csv(kind: str, row_indexes: list[int] | array) -> bytes:
+        if kind == "comparison":
+            columns = rep.EXPORT_COLUMNS
+            comparison_count = len(job.rows) if job.rows is not None else 0
+            requested = set(row_indexes)
+            page_rows: dict[int, list[Any]] = {}
+            regular_indexes = [index for index in row_indexes if index < comparison_count]
+            if regular_indexes:
+                frame = rep.export_frame(job.rows.iloc[regular_indexes])
+                frame["Index"] = [index + 1 for index in regular_indexes]
+                page_rows.update(
+                    (index, list(row))
+                    for index, row in zip(regular_indexes, frame.itertuples(index=False, name=None))
+                )
+            if any(index >= comparison_count for index in requested):
+                for row in rep._missing_channel_rows(job, comparison_count):
+                    index = int(row["Index"]) - 1
+                    if index in requested:
+                        page_rows[index] = [row[column] for column in columns]
+            rows = [page_rows[index] for index in row_indexes if index in page_rows]
+            return pd.DataFrame(rows, columns=columns).to_csv(index=False).encode("utf-8")
+
+        data_by_file = job.python_data if kind == "python" else job.java_data
+        columns = [
+            column for column in rep.OUTPUT_COLUMNS
+            if column not in {"is_discrete", "datetime"}
+        ]
+        selected = []
+        offset = 0
+        for file_name, source in data_by_file.items():
+            if source is None or source.empty:
+                continue
+            stop = offset + len(source)
+            local_indexes = [index - offset for index in row_indexes if offset <= index < stop]
+            if local_indexes:
+                chunk = source.iloc[local_indexes].copy()
+                chunk["file"] = file_name
+                selected.append(chunk[rep.OUTPUT_COLUMNS])
+            offset = stop
+        frame = pd.concat(selected, ignore_index=True) if selected else pd.DataFrame(columns=rep.OUTPUT_COLUMNS)
+        return frame[columns].to_csv(index=False).encode("utf-8")
+
+    def decoded_output_row_count(data_by_file: dict[str, pd.DataFrame]) -> int:
+        return sum(
+            len(frame) for frame in data_by_file.values()
+            if frame is not None and not frame.empty
+        )
+
+    def adjust_report_page(page_key: str, delta: int) -> None:
+        st.session_state[page_key] = max(1, int(st.session_state.get(page_key, 1)) + delta)
+
+    table_specs = [
+        ("python", "Python decoded output", decoded_output_row_count(job.python_data)),
+        ("java", "Java decoded output", decoded_output_row_count(job.java_data)),
+    ]
+    if compared:
+        table_specs.append(("comparison", "Comparison results", rep.comparison_export_row_count(job)))
+
+    with panel("interactive_report_tables"):
+        html(C.panel_head_html(
+            "Interactive CSV tables",
+            "CSV columns and values are shown unchanged. Tables display 1,000 rows per page; search scans the complete output.",
+        ))
+        for kind, title, total_rows in table_specs:
+            if kind == "java" and total_rows == 0:
+                continue
+            state_key = f"{jid}:report_table:{kind}"
+            widget_prefix = f"report_{jid}_{kind}"
+            table_state = ss.get(state_key, {"term": "", "matches": None})
+            collapsed_key = f"{widget_prefix}_collapsed"
+            fullscreen_key = f"{widget_prefix}_fullscreen"
+            collapsed = bool(ss.get(collapsed_key, False))
+            fullscreen = bool(ss.get(fullscreen_key, False))
+            container_key = f"report_table_{kind}" + ("_fullscreen" if fullscreen else "")
+            fullscreen_style = ""
+            if fullscreen:
+                fullscreen_style = f"""
+                .st-key-{container_key} {{
+                    position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;
+                    box-sizing:border-box;overflow:auto!important;padding:20px!important;
+                    background:#fff!important;z-index:10000!important;border-radius:0!important;
+                }}
+                .st-key-{container_key} .report-csv-table-wrap {{
+                    max-height:calc(100vh - 270px);
+                }}
+                """
+
+            html(f"""
+                <style>
+                .st-key-{container_key} {{
+                    background:#fff;border:1px solid #e2e8f0;border-radius:10px;
+                    padding:16px;margin:12px 0;
+                }}
+                .st-key-{container_key} .report-csv-table-wrap {{
+                    overflow:auto;max-height:62vh;border:1px solid #e2e8f0;border-radius:8px;
+                }}
+                .st-key-{container_key} table {{
+                    border-collapse:collapse;white-space:nowrap;width:100%;
+                }}
+                .st-key-{container_key} th {{
+                    position:sticky;top:0;background:#f9fafb;z-index:1;text-align:left;
+                    padding:9px 10px;border-bottom:1px solid #e2e8f0;font-size:12px;
+                }}
+                .st-key-{container_key} td {{
+                    padding:8px 10px;border-bottom:1px solid #eaecf0;font-size:12px;
+                }}
+                .st-key-{container_key} tr:hover td {{background:#f9fafb;}}
+                {fullscreen_style}
+                </style>
+            """)
+            with st.container(key=container_key):
+                header, expand_toggle = st.columns([12, 1])
+                with header:
+                    html(C.panel_head_html(title))
+                with expand_toggle:
+                    if st.button(
+                        " ",
+                        key=f"{widget_prefix}_collapse_toggle",
+                        icon=":material/keyboard_arrow_right:" if collapsed else ":material/keyboard_arrow_down:",
+                        help="Expand table" if collapsed else "Collapse table",
+                        type="tertiary",
+                    ):
+                        collapsed = not collapsed
+                        ss[collapsed_key] = collapsed
+                        st.rerun()
+                if collapsed:
+                    continue
+
+                with st.form(key=f"{widget_prefix}_search_form"):
+                    search_term = st.text_input(
+                        "Search CSV values",
+                        value=ss.get(f"{widget_prefix}_search_input", ""),
+                        key=f"{widget_prefix}_search_input",
+                        placeholder="Search any column; leave blank to clear",
+                    )
+                    submitted = st.form_submit_button("Search")
+                if submitted:
+                    term = search_term.strip().casefold()
+                    matches = None
+                    if term:
+                        scan_rows = 20_000
+                        scan_part_count = (total_rows + scan_rows - 1) // scan_rows
+                        found = array("Q")
+                        with st.spinner(f"Searching {total_rows:,} CSV rows..."):
+                            for part_number in range(1, scan_part_count + 1):
+                                csv_data = report_csv_part(kind, part_number, scan_rows)
+                                chunk = pd.read_csv(
+                                    io.BytesIO(csv_data), dtype=str, keep_default_na=False
+                                )
+                                row_offset = (part_number - 1) * scan_rows
+                                matches_chunk = pd.Series(False, index=chunk.index)
+                                for column in chunk.columns:
+                                    matches_chunk |= chunk[column].str.contains(
+                                        term, case=False, regex=False, na=False
+                                    )
+                                found.extend(
+                                    array("Q", (row_offset + index for index in chunk.index[matches_chunk]))
+                                )
+                        matches = found
+                    table_state = {"term": term, "matches": matches}
+                    ss[state_key] = table_state
+                    ss[f"{widget_prefix}_page"] = 1
+
+                matches = table_state.get("matches")
+                displayed_rows = len(matches) if matches is not None else total_rows
+                page_count = max(1, (displayed_rows + 999) // 1000)
+                page_key = f"{widget_prefix}_page"
+                page_number = min(max(int(ss.get(page_key, 1)), 1), page_count)
+                ss[page_key] = page_number
+
+                previous, page_select, following, visibility, fullscreen_button = st.columns(
+                    [1, 2, 1, 1.5, 1.5]
+                )
+                previous.button(
+                    "← Previous",
+                    key=f"{widget_prefix}_previous",
+                    disabled=page_number <= 1,
+                    on_click=adjust_report_page,
+                    args=(page_key, -1),
+                )
+                with page_select:
+                    page_number = st.selectbox(
+                        "Page",
+                        range(1, page_count + 1),
+                        key=page_key,
+                    )
+                following.button(
+                    "Next →",
+                    key=f"{widget_prefix}_next",
+                    disabled=page_number >= page_count,
+                    on_click=adjust_report_page,
+                    args=(page_key, 1),
+                )
+                with visibility:
+                    if st.button("👁 Columns", key=f"{widget_prefix}_columns_toggle"):
+                        ss[f"{widget_prefix}_columns_open"] = not ss.get(f"{widget_prefix}_columns_open", False)
+                with fullscreen_button:
+                    if st.button(
+                        "⛶ Exit full screen" if fullscreen else "⛶ Full screen",
+                        key=f"{widget_prefix}_fullscreen_toggle",
+                    ):
+                        ss[fullscreen_key] = not fullscreen
+                        st.rerun()
+
+                if ss.get(f"{widget_prefix}_columns_open", False):
+                    columns_key = f"{widget_prefix}_visible_columns"
+                    if columns_key not in ss:
+                        if kind == "comparison":
+                            ss[columns_key] = list(rep.EXPORT_COLUMNS)
+                        else:
+                            ss[columns_key] = [
+                                column for column in rep.OUTPUT_COLUMNS
+                                if column not in {"is_discrete", "datetime"}
+                            ]
+                    visible_columns = st.multiselect(
+                        "Visible CSV columns",
+                        options=(
+                            rep.EXPORT_COLUMNS if kind == "comparison"
+                            else [
+                                column for column in rep.OUTPUT_COLUMNS
+                                if column not in {"is_discrete", "datetime"}
+                            ]
+                        ),
+                        key=columns_key,
+                    )
+                else:
+                    visible_columns = (
+                        rep.EXPORT_COLUMNS if kind == "comparison"
+                        else [
+                            column for column in rep.OUTPUT_COLUMNS
+                            if column not in {"is_discrete", "datetime"}
+                        ]
+                    )
+
+                if matches is None:
+                    first_index = (page_number - 1) * 1000
+                    row_indexes = list(range(first_index, min(first_index + 1000, total_rows)))
+                else:
+                    first_index = (page_number - 1) * 1000
+                    row_indexes = list(matches[first_index:first_index + 1000])
+                csv_text = report_page_csv(kind, row_indexes).decode("utf-8")
+                csv_reader = csv.reader(io.StringIO(csv_text, newline=""))
+                headers = next(csv_reader, [])
+                rows = list(csv_reader)
+                visible_indexes = [index for index, name in enumerate(headers) if name in visible_columns]
+                header_html = "".join(f"<th>{escape_html(headers[index])}</th>" for index in visible_indexes)
+                body_html = "".join(
+                    "<tr>" + "".join(
+                        f"<td>{escape_html(row[index])}</td>" for index in visible_indexes
+                    ) + "</tr>"
+                    for row in rows
+                )
+                html(
+                    '<div class="report-csv-table-wrap"><table><thead><tr>'
+                    + header_html
+                    + "</tr></thead><tbody>"
+                    + body_html
+                    + "</tbody></table></div>"
+                )
+                start_row = first_index + 1 if displayed_rows else 0
+                end_row = min(first_index + len(rows), displayed_rows)
+                st.caption(
+                    f"Showing {start_row:,}-{end_row:,} of {displayed_rows:,} rows"
+                    + (f" matching {table_state['term']!r}" if table_state.get("term") else "")
+                )
 
 
 # ---------------------------------------------------------------------------

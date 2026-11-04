@@ -1667,5 +1667,159 @@
     "error": 1,
     "match_percentage": null,
     "python_signals": 720
+  },
+  {
+    "job_id": "CMP-20261104-120543",
+    "started_at": "2026-11-04T12:05:43",
+    "duration_s": 0.12,
+    "files": [
+      "hero.asc"
+    ],
+    "n_files": 1,
+    "files_failed": 0,
+    "n_dbcs": 1,
+    "java_state": "OK",
+    "comparison_performed": true,
+    "signals_total": 4,
+    "match": 30,
+    "mismatch": 0,
+    "missing_in_python": 0,
+    "missing_in_java": 0,
+    "not_comparable": 0,
+    "error": 0,
+    "match_percentage": 100.0,
+    "python_signals": 4
+  },
+  {
+    "job_id": "CMP-20261104-120719",
+    "started_at": "2026-11-04T12:07:19",
+    "duration_s": 0.09,
+    "files": [
+      "hero.asc"
+    ],
+    "n_files": 1,
+    "files_failed": 0,
+    "n_dbcs": 1,
+    "java_state": "OK",
+    "comparison_performed": true,
+    "signals_total": 4,
+    "match": 30,
+    "mismatch": 0,
+    "missing_in_python": 0,
+    "missing_in_java": 0,
+    "not_comparable": 0,
+    "error": 0,
+    "match_percentage": 100.0,
+    "python_signals": 4
+  },
+  {
+    "job_id": "CMP-20261104-121034",
+    "started_at": "2026-11-04T12:10:34",
+    "duration_s": 0.13,
+    "files": [
+      "hero.asc"
+    ],
+    "n_files": 1,
+    "files_failed": 0,
+    "n_dbcs": 1,
+    "java_state": "OK",
+    "comparison_performed": true,
+    "signals_total": 4,
+    "match": 30,
+    "mismatch": 0,
+    "missing_in_python": 0,
+    "missing_in_java": 0,
+    "not_comparable": 0,
+    "error": 0,
+    "match_percentage": 100.0,
+    "python_signals": 4
+  },
+  {
+    "job_id": "CMP-20261104-121129",
+    "started_at": "2026-11-04T12:11:29",
+    "duration_s": 7.45,
+    "files": [
+      "4BE883CD_00000977_00000001-63C7AA13.MF4"
+    ],
+    "n_files": 1,
+    "files_failed": 0,
+    "n_dbcs": 1,
+    "java_state": "OK",
+    "comparison_performed": true,
+    "signals_total": 10,
+    "match": 7350,
+    "mismatch": 0,
+    "missing_in_python": 0,
+    "missing_in_java": 0,
+    "not_comparable": 0,
+    "error": 0,
+    "match_percentage": 100.0,
+    "python_signals": 10
+  },
+  {
+    "job_id": "CMP-20261104-121529",
+    "started_at": "2026-11-04T12:15:29",
+    "duration_s": 7.42,
+    "files": [
+      "4BE883CD_00000977_00000001-63C7AA13.MF4"
+    ],
+    "n_files": 1,
+    "files_failed": 0,
+    "n_dbcs": 1,
+    "java_state": "OK",
+    "comparison_performed": true,
+    "signals_total": 10,
+    "match": 7350,
+    "mismatch": 0,
+    "missing_in_python": 0,
+    "missing_in_java": 0,
+    "not_comparable": 0,
+    "error": 0,
+    "match_percentage": 100.0,
+    "python_signals": 10
+  },
+  {
+    "job_id": "CMP-20261104-124345",
+    "started_at": "2026-11-04T12:43:45",
+    "duration_s": 7.69,
+    "files": [
+      "4BE883CD_00000977_00000001-63C7AA13.MF4"
+    ],
+    "n_files": 1,
+    "files_failed": 0,
+    "n_dbcs": 1,
+    "java_state": "OK",
+    "comparison_performed": true,
+    "signals_total": 10,
+    "match": 7350,
+    "mismatch": 0,
+    "missing_in_python": 0,
+    "missing_in_java": 0,
+    "not_comparable": 0,
+    "error": 0,
+    "match_percentage": 100.0,
+    "python_signals": 10
+  },
+  {
+    "job_id": "CMP-20261104-124511",
+    "started_at": "2026-11-04T12:45:11",
+    "duration_s": 43.57,
+    "files": [
+      "tata_sierra_0002391_20260921_161433.mf4"
+    ],
+    "n_files": 1,
+    "files_failed": 0,
+    "n_dbcs": 2,
+    "java_state": "ERROR",
+    "comparison_performed": false,
+    "signals_total": 1,
+    "match": 0,
+    "mismatch": 0,
+    "missing_in_python": 0,
+    "missing_in_java": 0,
+    "not_comparable": 0,
+    "error": 1,
+    "match_percentage": null,
+    "python_signals": 87
   }
 ]

@@ -50,6 +50,9 @@ from ui.compat import stretch
 CFG = load_config()
 setup_logging(CFG.log_level)
 
+# Phase 2: email report delivery is implemented but intentionally disabled for now.
+EMAIL_REPORT_ENABLED = False
+
 S3, MANUAL = "S3 Upload", "Manual Upload"
 LOG_TYPES = [e.lstrip(".") for e in ALLOWED_MEASUREMENT_EXTS]
 BATCH_SIZE = 4
@@ -994,6 +997,22 @@ def page_reports() -> None:
     except (TypeError, ValueError):
         report_ts = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
     filename = f"DecoderComparator_{report_ts}"
+    # Keep the report email UI and ZIP preparation dormant until Phase 2.
+    email_ready = EMAIL_REPORT_ENABLED and bool(
+        job.files
+        and compared
+        and job.java_state == EngineState.OK
+        and all(
+            outcome.python_state == EngineState.OK
+            and outcome.java_state == EngineState.OK
+            and outcome.comparison_performed
+            and not outcome.error
+            and not outcome.python_error
+            and not outcome.java_error
+            for outcome in job.files
+        )
+        and not int(job.summary.get("error", 0) or 0)
+    )
 
     prepared_report = ss.cache.get(f"{jid}:prepared_report")
     if prepared_report and (
@@ -1056,6 +1075,139 @@ def page_reports() -> None:
                         "application/gzip",
                         lambda part_number=part_number: rep.comparison_csv_part(job, part_number, compress=True),
                     )
+
+    email_state_key = f"email_report:{jid}:v3"
+    email_error_key = f"email_report_error:{jid}:v3"
+    email_sent_key = f"email_report_sent:{jid}"
+    ss.pop(f"email_report:{jid}", None)
+    ss.pop(f"email_report_error:{jid}", None)
+    ss.pop(f"email_report:{jid}:v2", None)
+    ss.pop(f"email_report_error:{jid}:v2", None)
+    ss.pop(f"email_report:{jid}:v4", None)
+    ss.pop(f"email_report_error:{jid}:v4", None)
+
+    def prepare_email_report() -> dict[str, Any]:
+        report_zip = rep.comparison_csv_parts_zip(job, filename)
+        summary = job.summary
+        mf4_names = [outcome.name for outcome in job.files]
+        dbc_names = [name.split(" (", 1)[0] for name in job.dbc_names]
+        mf4_lines = "\n".join(f"- {name}" for name in mf4_names) or "- None"
+        dbc_lines = "\n".join(
+            f"- {mf4_name} → {', '.join(dbc_names) or 'None'}"
+            for mf4_name in mf4_names
+        ) or "- None"
+        mf4_subject = ", ".join(mf4_names) or jid
+        try:
+            report_date = pd.Timestamp(job.finished_at).strftime("%Y-%m-%d")
+        except (TypeError, ValueError):
+            report_date = pd.Timestamp.now().strftime("%Y-%m-%d")
+        subject = f"Decoder Comparison Report – {mf4_subject} – {report_date}"
+        body = "\n".join([
+            "Hi,",
+            "",
+            "Please find attached the Decoder Comparison Report for the following files.",
+            "",
+            "MF4 Files:",
+            "",
+            mf4_lines,
+            "",
+            "DBC Files Applied:",
+            "",
+            dbc_lines,
+            "",
+            "Decoding Status:",
+            "",
+            "- Python Decoding: Successful",
+            "- Java Decoding: Successful",
+            "- Comparison: Completed Successfully",
+            "",
+            "Comparison Summary:",
+            "",
+            f"- Total Signals: {summary.get('signals_total', 0):,}",
+            f"- Matched Signals: {summary.get('signals_all_match', 0):,}",
+            f"- Mismatched Signals: {summary.get('signals_with_mismatch', 0):,}",
+            "- Overall Result: Comparison Completed",
+            "",
+            "The attached ZIP contains the comparison CSV reports for detailed analysis.",
+            "",
+            "Please review the report and share your feedback.",
+            "",
+            "Thank you.",
+            "",
+            "Best regards,",
+            "Decoder Comparator",
+        ])
+        return {
+            "data": report_zip,
+            "file_name": f"{filename}_comparison_reports.zip",
+            "subject": subject,
+            "body": body,
+        }
+
+    if email_ready and not ss.get(email_state_key) and not ss.get(email_error_key):
+        try:
+            with st.spinner("Preparing comparison ZIP for email..."):
+                ss[email_state_key] = prepare_email_report()
+        except (OSError, TypeError, ValueError) as exc:
+            ss[email_error_key] = str(exc)
+
+    with panel("email_report"):
+        html(C.panel_head_html(
+            "Email comparison report",
+            "One ZIP containing only this run's numbered Comparison CSV files.",
+        ))
+        if not EMAIL_REPORT_ENABLED:
+            st.info("Planned for Phase 2. Email report delivery is currently disabled.")
+        elif not email_ready:
+            st.button("Email Report", key=f"email_report_{jid}", disabled=True)
+            st.caption(
+                "Available only after every file has successful Python and Java decoding and comparison, "
+                "with no decoder or comparison errors."
+            )
+        elif ss.get(email_error_key):
+            st.error(f"Could not prepare the email report: {ss[email_error_key]}")
+            if st.button("Retry email report preparation", key=f"retry_email_report_{jid}"):
+                ss.pop(email_error_key, None)
+                st.rerun()
+        elif email_ready and ss.get(email_state_key):
+            # Phase 2 only: load the SMTP implementation when email is enabled.
+            from services import email_service
+
+            email_state = ss[email_state_key]
+            st.success("The comparison ZIP is ready to send.")
+            st.download_button(
+                "Download comparison ZIP",
+                email_state["data"],
+                email_state["file_name"],
+                "application/zip",
+                key=f"email_report_download_{jid}",
+            )
+            configured_providers = email_service.providers_from_config(CFG)
+            if not configured_providers:
+                st.warning("Configure Zoho SMTP in the app's .env file before sending. Outlook SMTP can be configured as a fallback.")
+            with st.form(f"email_report_form_{jid}"):
+                recipient = st.text_input("Recipient email", key=f"email_recipient_{jid}", placeholder="name@example.com")
+                sent_provider = ss.get(email_sent_key)
+                send_clicked = st.form_submit_button(
+                    "Send report email", type="primary", disabled=not bool(configured_providers)
+                )
+            if send_clicked:
+                try:
+                    with st.spinner("Sending report email with ZIP attachment..."):
+                        provider_name = email_service.send_report_email(
+                            CFG, recipient, email_state["subject"], email_state["body"],
+                            email_state["file_name"], email_state["data"],
+                        )
+                    ss[email_sent_key] = provider_name
+                    st.success(f"Report sent to {recipient.strip()} through {provider_name}.")
+                except (ValueError, RuntimeError) as exc:
+                    st.error(str(exc))
+            elif sent_provider:
+                st.success(f"Report was sent through {sent_provider}.")
+            if configured_providers:
+                provider_names = " then ".join(provider.name for provider in configured_providers)
+                st.caption(f"Delivery order: {provider_names}. The ZIP is attached by the app; no mail compose URL is used.")
+
     with panel("outputs"):
         html(C.panel_head_html("Decoded output files", "Raw decoded samples of each engine."))
         c, d = st.columns(2, gap="medium")
@@ -1089,8 +1241,69 @@ def page_reports() -> None:
                         lambda java_part=java_part: rep.java_output_csv_part(job, java_part, compress=True),
                     )
 
+    # Per-file comparison rates use the same denominator as the job summary:
+    # only MATCH and MISMATCH samples count as compared samples.
+    if compared:
+        with panel("file_comparison_summary"):
+            html(C.panel_head_html(
+                "File-wise comparison summary",
+                "Match and mismatch percentages are calculated from compared samples; missing and non-comparable rows are shown separately.",
+            ))
+            summary_rows = []
+            rows_by_file = job.rows.groupby("file", sort=False) if job.rows is not None and not job.rows.empty else {}
+            for outcome in job.files:
+                file_rows = rows_by_file.get_group(outcome.name) if hasattr(rows_by_file, "get_group") and outcome.name in rows_by_file.groups else pd.DataFrame()
+                status_counts = file_rows["status"].value_counts() if not file_rows.empty else pd.Series(dtype="int64")
+                matches = int(status_counts.get(Status.MATCH, 0))
+                mismatches = int(status_counts.get(Status.MISMATCH, 0))
+                compared_samples = matches + mismatches
+                summary_rows.append({
+                    "File": outcome.name,
+                    "Compared samples": compared_samples,
+                    "Matches": matches,
+                    "Match %": f"{100 * matches / compared_samples:.2f}%" if compared_samples else "—",
+                    "Mismatches": mismatches,
+                    "Mismatch %": f"{100 * mismatches / compared_samples:.2f}%" if compared_samples else "—",
+                    "Missing in Python": int(status_counts.get(Status.MISSING_IN_PYTHON, 0)),
+                    "Missing in Java": int(status_counts.get(Status.MISSING_IN_JAVA, 0)),
+                    "Not comparable": int(status_counts.get(Status.NOT_COMPARABLE, 0)),
+                    "Errors": int(status_counts.get(Status.ERROR, 0)),
+                })
+            overall = job.summary
+            overall_compared = int(overall.get("compared_rows", 0) or 0)
+            overall_mismatches = int(overall.get("mismatch", 0) or 0)
+            summary_rows.insert(0, {
+                "File": "ALL FILES",
+                "Compared samples": overall_compared,
+                "Matches": int(overall.get("match", 0) or 0),
+                "Match %": f"{float(overall['match_percentage']):.2f}%" if overall.get("match_percentage") is not None else "—",
+                "Mismatches": overall_mismatches,
+                "Mismatch %": f"{100 * overall_mismatches / overall_compared:.2f}%" if overall_compared else "—",
+                "Missing in Python": int(overall.get("missing_in_python", 0) or 0),
+                "Missing in Java": int(overall.get("missing_in_java", 0) or 0),
+                "Not comparable": int(overall.get("not_comparable", 0) or 0),
+                "Errors": int(overall.get("error", 0) or 0),
+            })
+            st.dataframe(
+                pd.DataFrame(summary_rows),
+                hide_index=True,
+                **stretch(st.dataframe),
+            )
+
+    show_mismatches_only = False
+    if compared:
+        show_mismatches_only = st.checkbox(
+            "Show mismatch samples only in Comparison results",
+            key=f"report_mismatches_only_{jid}",
+            help="Filters the comparison table to rows where Python and Java values or channels disagree.",
+        )
+
     def report_csv_part(kind: str, part_number: int, rows_per_part: int) -> bytes:
         if kind == "comparison":
+            if show_mismatches_only:
+                start = (part_number - 1) * rows_per_part
+                stop = start + rows_per_part
+                return report_page_csv("comparison", comparison_source_indexes[start:stop])
             return rep.comparison_csv_part(job, part_number, rows_per_part=rows_per_part)
         if kind == "python":
             return rep.python_output_csv_part(job, part_number, rows_per_part=rows_per_part)
@@ -1148,12 +1361,20 @@ def page_reports() -> None:
     def adjust_report_page(page_key: str, delta: int) -> None:
         st.session_state[page_key] = max(1, int(st.session_state.get(page_key, 1)) + delta)
 
+    comparison_source_indexes = (
+        [
+            index for index, status in enumerate(job.rows["status"].tolist())
+            if status == Status.MISMATCH
+        ]
+        if show_mismatches_only and job.rows is not None and not job.rows.empty
+        else list(range(rep.comparison_export_row_count(job)))
+    )
     table_specs = [
         ("python", "Python decoded output", decoded_output_row_count(job.python_data)),
         ("java", "Java decoded output", decoded_output_row_count(job.java_data)),
     ]
     if compared:
-        table_specs.append(("comparison", "Comparison results", rep.comparison_export_row_count(job)))
+        table_specs.append(("comparison", "Comparison results", len(comparison_source_indexes)))
 
     with panel("interactive_report_tables"):
         html(C.panel_head_html(
@@ -1163,12 +1384,13 @@ def page_reports() -> None:
         for kind, title, total_rows in table_specs:
             if kind == "java" and total_rows == 0:
                 continue
-            state_key = f"{jid}:report_table:{kind}"
-            widget_prefix = f"report_{jid}_{kind}"
+            mismatch_suffix = ":mismatches" if kind == "comparison" and show_mismatches_only else ""
+            state_key = f"{jid}:report_table:{kind}{mismatch_suffix}"
+            widget_prefix = f"report_{jid}_{kind}{mismatch_suffix}"
             table_state = ss.get(state_key, {"term": "", "matches": None})
             collapsed_key = f"{widget_prefix}_collapsed"
             fullscreen_key = f"{widget_prefix}_fullscreen"
-            collapsed = bool(ss.get(collapsed_key, False))
+            collapsed = bool(ss.get(collapsed_key, kind in {"python", "java"}))
             fullscreen = bool(ss.get(fullscreen_key, False))
             container_key = f"report_table_{kind}" + ("_fullscreen" if fullscreen else "")
             fullscreen_style = ""
@@ -1337,6 +1559,8 @@ def page_reports() -> None:
                 else:
                     first_index = (page_number - 1) * 1000
                     row_indexes = list(matches[first_index:first_index + 1000])
+                if kind == "comparison" and show_mismatches_only:
+                    row_indexes = [comparison_source_indexes[index] for index in row_indexes]
                 csv_text = report_page_csv(kind, row_indexes).decode("utf-8")
                 csv_reader = csv.reader(io.StringIO(csv_text, newline=""))
                 headers = next(csv_reader, [])

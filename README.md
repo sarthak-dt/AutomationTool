@@ -24,6 +24,38 @@ Run the tests: `./verify.sh` (installs dev requirements first).
 3. **New comparison** — set resampling / tolerance, click **Run comparison**.
 4. **Reports** — opened automatically after the run. Download numbered comparison CSV parts and decoded Python / Java output CSV files.
 
+### Emailing a comparison report
+
+Email report delivery is planned for Phase 2 and is currently disabled. Its
+SMTP implementation and configuration are retained for that phase; the Reports
+page shows this status. The ZIP remains available through the regular download
+controls.
+
+When Phase 2 is enabled, the intended flow sends the generated message and ZIP
+through SMTP, trying Zoho first and Outlook if Zoho delivery fails. Configure
+the credentials in `.env` (copy `.env.example`); no recipient or report content
+is put into a mail-client URL.
+
+In Zoho Mail, open **Settings → Server Configurations Details** and use the
+SMTP server shown for your mailbox and plan (it varies by data center and
+account type) with port `587` and STARTTLS. Create an app-specific password in
+Zoho Accounts Security (recommended, and required with MFA); put the mailbox address in
+`EMAIL_PRIMARY_USERNAME` and the app password in `EMAIL_PRIMARY_PASSWORD`.
+`EMAIL_PRIMARY_FROM` is optional and defaults to the username. Restart the app
+after changing `.env`. Keep `.env` private and never commit it.
+
+To enable the fallback, configure `EMAIL_FALLBACK_USERNAME` and
+`EMAIL_FALLBACK_PASSWORD`. For personal Outlook use `smtp-mail.outlook.com:587`;
+for Microsoft 365 work accounts use the organization's approved SMTP host (often
+`smtp.office365.com:587`). SMTP AUTH with username/password must be allowed for
+that account. Outlook.com specifies Modern Auth/OAuth2, which this SMTP sender
+does not implement; it cannot serve as a fallback unless the account's SMTP
+policy permits the password-based SMTP login used by this app.
+`EMAIL_FALLBACK_FROM` is optional and defaults to the
+username. A failed Zoho send is retried through Outlook when that fallback is
+configured; if neither provider succeeds the app reports the provider error
+types without exposing credentials.
+
 `streamlit run app_simple.py` starts a compact one-page variant (source switch + dashboard on one page). It includes the same
 CAN-channel selection, per-DBC channel assignment, and **DBC Match to This File** controls as the full application.
 Differences from the prototype: sample numbers are replaced by real results, resampling offers *none* and *1 second* (the engine does not implement 100 ms), the default absolute tolerance is 0.1 as in the prototype.

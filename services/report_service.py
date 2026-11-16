@@ -14,6 +14,7 @@ import re
 import tempfile
 import zipfile
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -287,6 +288,27 @@ def comparison_csv_part(
         _finish_csv_writer(text_file, compress)
         temp_file.seek(0)
         return temp_file.read()
+
+
+def comparison_csv_parts_zip(
+    job: Any,
+    filename_prefix: str,
+    rows_per_part: int = COMPARISON_CSV_ROWS_PER_PART,
+) -> bytes:
+    """Package only the current run's existing, numbered comparison CSV parts."""
+    if not filename_prefix or Path(filename_prefix).name != filename_prefix:
+        raise ValueError("filename_prefix must be a non-empty filename prefix")
+    part_count = comparison_csv_part_count(job, rows_per_part)
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_STORED) as archive:
+        for part_number in range(1, part_count + 1):
+            suffix = "" if part_number == 1 else f"_{part_number}"
+            filename = f"{filename_prefix}_comparison{suffix}.csv.gz"
+            archive.writestr(
+                filename,
+                comparison_csv_part(job, part_number, rows_per_part, compress=True),
+            )
+    return buffer.getvalue()
 
 
 def signal_summary_csv(job: Any) -> bytes:

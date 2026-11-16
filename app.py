@@ -1250,15 +1250,30 @@ def page_reports() -> None:
                 "Match and mismatch percentages are calculated from compared samples; missing and non-comparable rows are shown separately.",
             ))
             summary_rows = []
+            selected_decode_channels = job.settings.get("decode_channels") or []
+            decode_channels_label = (
+                ", ".join(str(int(channel)) for channel in sorted(selected_decode_channels))
+                if selected_decode_channels else "All channels"
+            )
             rows_by_file = job.rows.groupby("file", sort=False) if job.rows is not None and not job.rows.empty else {}
+            all_matched_rows = (
+                job.rows[job.rows["status"] == Status.MATCH]
+                if job.rows is not None and not job.rows.empty else pd.DataFrame()
+            )
+            all_matched_channels = sorted({int(ch) for ch in all_matched_rows.get("channel", pd.Series(dtype="int64")).dropna()})
             for outcome in job.files:
                 file_rows = rows_by_file.get_group(outcome.name) if hasattr(rows_by_file, "get_group") and outcome.name in rows_by_file.groups else pd.DataFrame()
                 status_counts = file_rows["status"].value_counts() if not file_rows.empty else pd.Series(dtype="int64")
                 matches = int(status_counts.get(Status.MATCH, 0))
                 mismatches = int(status_counts.get(Status.MISMATCH, 0))
                 compared_samples = matches + mismatches
+                matched_rows = file_rows[file_rows["status"] == Status.MATCH] if not file_rows.empty else pd.DataFrame()
+                matched_channels = sorted({int(ch) for ch in matched_rows.get("channel", pd.Series(dtype="int64")).dropna()})
                 summary_rows.append({
                     "File": outcome.name,
+                    "Decode channels": decode_channels_label,
+                    "Matched channel count": len(matched_channels),
+                    "Channels with matches": ", ".join(map(str, matched_channels)) or "—",
                     "Compared samples": compared_samples,
                     "Matches": matches,
                     "Match %": f"{100 * matches / compared_samples:.2f}%" if compared_samples else "—",
@@ -1274,6 +1289,9 @@ def page_reports() -> None:
             overall_mismatches = int(overall.get("mismatch", 0) or 0)
             summary_rows.insert(0, {
                 "File": "ALL FILES",
+                "Decode channels": decode_channels_label,
+                "Matched channel count": len(all_matched_channels),
+                "Channels with matches": ", ".join(map(str, all_matched_channels)) or "—",
                 "Compared samples": overall_compared,
                 "Matches": int(overall.get("match", 0) or 0),
                 "Match %": f"{float(overall['match_percentage']):.2f}%" if overall.get("match_percentage") is not None else "—",
@@ -1290,17 +1308,46 @@ def page_reports() -> None:
                 **stretch(st.dataframe),
             )
 
-    show_mismatches_only = False
+            dbc_summary_rows = []
+            dbc_short_names = list(dict.fromkeys(
+                name.split(" (", 1)[0] for name in job.dbc_names
+            ))
+            for outcome in job.files:
+                file_rows = rows_by_file.get_group(outcome.name) if hasattr(rows_by_file, "get_group") and outcome.name in rows_by_file.groups else pd.DataFrame()
+                for dbc_name in dbc_short_names:
+                    dbc_rows = file_rows[file_rows["dbc_name"] == dbc_name] if not file_rows.empty and "dbc_name" in file_rows else pd.DataFrame()
+                    dbc_matches = int((dbc_rows["status"] == Status.MATCH).sum()) if not dbc_rows.empty else 0
+                    dbc_mismatches = int((dbc_rows["status"] == Status.MISMATCH).sum()) if not dbc_rows.empty else 0
+                    dbc_compared = dbc_matches + dbc_mismatches
+                    dbc_summary_rows.append({
+                        "File": outcome.name,
+                        "DBC": dbc_name,
+                        "Compared samples": dbc_compared,
+                        "Matches": dbc_matches,
+                        "Match %": f"{100 * dbc_matches / dbc_compared:.2f}%" if dbc_compared else "—",
+                        "Mismatches": dbc_mismatches,
+                    })
+            if dbc_summary_rows:
+                st.markdown("**Match rate by file and DBC**")
+                st.caption("Each DBC percentage is calculated from that DBC's MATCH + MISMATCH samples in the file.")
+                st.dataframe(pd.DataFrame(dbc_summary_rows), hide_index=True, **stretch(st.dataframe))
+
+    comparison_status_filter = None
     if compared:
-        show_mismatches_only = st.checkbox(
-            "Show mismatch samples only in Comparison results",
-            key=f"report_mismatches_only_{jid}",
-            help="Filters the comparison table to rows where Python and Java values or channels disagree.",
+        comparison_view = st.selectbox(
+            "Comparison rows",
+            ["All rows", "Matching rows only", "Mismatching rows only"],
+            key=f"report_comparison_view_{jid}",
         )
+        comparison_status_filter = {
+            "All rows": None,
+            "Matching rows only": Status.MATCH,
+            "Mismatching rows only": Status.MISMATCH,
+        }[comparison_view]
 
     def report_csv_part(kind: str, part_number: int, rows_per_part: int) -> bytes:
         if kind == "comparison":
-            if show_mismatches_only:
+            if comparison_status_filter:
                 start = (part_number - 1) * rows_per_part
                 stop = start + rows_per_part
                 return report_page_csv("comparison", comparison_source_indexes[start:stop])
@@ -1364,9 +1411,9 @@ def page_reports() -> None:
     comparison_source_indexes = (
         [
             index for index, status in enumerate(job.rows["status"].tolist())
-            if status == Status.MISMATCH
+            if status == comparison_status_filter
         ]
-        if show_mismatches_only and job.rows is not None and not job.rows.empty
+        if comparison_status_filter and job.rows is not None and not job.rows.empty
         else list(range(rep.comparison_export_row_count(job)))
     )
     table_specs = [
@@ -1384,9 +1431,9 @@ def page_reports() -> None:
         for kind, title, total_rows in table_specs:
             if kind == "java" and total_rows == 0:
                 continue
-            mismatch_suffix = ":mismatches" if kind == "comparison" and show_mismatches_only else ""
-            state_key = f"{jid}:report_table:{kind}{mismatch_suffix}"
-            widget_prefix = f"report_{jid}_{kind}{mismatch_suffix}"
+            filter_suffix = f":{comparison_status_filter.lower()}" if kind == "comparison" and comparison_status_filter else ""
+            state_key = f"{jid}:report_table:{kind}{filter_suffix}"
+            widget_prefix = f"report_{jid}_{kind}{filter_suffix}"
             table_state = ss.get(state_key, {"term": "", "matches": None})
             collapsed_key = f"{widget_prefix}_collapsed"
             fullscreen_key = f"{widget_prefix}_fullscreen"
@@ -1559,7 +1606,7 @@ def page_reports() -> None:
                 else:
                     first_index = (page_number - 1) * 1000
                     row_indexes = list(matches[first_index:first_index + 1000])
-                if kind == "comparison" and show_mismatches_only:
+                if kind == "comparison" and comparison_status_filter:
                     row_indexes = [comparison_source_indexes[index] for index in row_indexes]
                 csv_text = report_page_csv(kind, row_indexes).decode("utf-8")
                 csv_reader = csv.reader(io.StringIO(csv_text, newline=""))

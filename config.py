@@ -111,6 +111,18 @@ class AppConfig:
     )
     java_verify_tls: bool = field(default_factory=lambda: _env_bool("JAVA_API_VERIFY_TLS", True))
 
+    # --- Phase 2 report email settings (unused while EMAIL_REPORT_ENABLED=False) ---
+    email_primary_host: str = field(default_factory=lambda: _env_str("EMAIL_PRIMARY_HOST", "smtp.zoho.in"))
+    email_primary_port: int = field(default_factory=lambda: _env_int("EMAIL_PRIMARY_PORT", 587))
+    email_primary_username: str = field(default_factory=lambda: _env_str("EMAIL_PRIMARY_USERNAME"))
+    email_primary_password: str = field(default_factory=lambda: _env_str("EMAIL_PRIMARY_PASSWORD"))
+    email_primary_from: str = field(default_factory=lambda: _env_str("EMAIL_PRIMARY_FROM"))
+    email_fallback_host: str = field(default_factory=lambda: _env_str("EMAIL_FALLBACK_HOST", "smtp-mail.outlook.com"))
+    email_fallback_port: int = field(default_factory=lambda: _env_int("EMAIL_FALLBACK_PORT", 587))
+    email_fallback_username: str = field(default_factory=lambda: _env_str("EMAIL_FALLBACK_USERNAME"))
+    email_fallback_password: str = field(default_factory=lambda: _env_str("EMAIL_FALLBACK_PASSWORD"))
+    email_fallback_from: str = field(default_factory=lambda: _env_str("EMAIL_FALLBACK_FROM"))
+
     @property
     def max_dbc_bytes(self) -> int:
         return self.max_dbc_size_mb * 1024 * 1024

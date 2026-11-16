@@ -11,10 +11,16 @@ import pytest
 from config import AppConfig
 from services import history_service as hist
 from services import report_service as rep
-from services.dbc_service import DbcFile, DbcInfo
+from services.dbc_service import DbcFile, DbcInfo, MessageDef
 from services.file_service import ValidationError
 from services.java_decoder_client import JavaApiConfig, JavaDecoderClient
-from services.job_runner import FileOutcome, JobResult, MeasurementRef, run_job
+from services.job_runner import (
+    FileOutcome,
+    JobResult,
+    MeasurementRef,
+    _dbc_can_id_match_summary,
+    run_job,
+)
 from services.models import ComparisonSettings, DecoderResult, EngineState, Status, normalize_frame
 
 from tests.conftest import make_frame
@@ -99,6 +105,63 @@ def test_both_engines_receive_same_file_dbcs_and_settings(cfg):
     assert path.name == seen[0]
     assert [p.name for p in dbc_paths] == ["x.dbc", "y.dbc"]
     assert s is settings
+
+
+def test_dbc_can_id_summary_separates_python_and_java_decoded_ids():
+    selected_dbc = dbc()
+    selected_dbc.catalog = [
+        MessageDef(0x100, False, "Message100", 8, ()),
+        MessageDef(0x200, False, "Message200", 8, ()),
+    ]
+    python_data = normalize_frame(pd.DataFrame([
+        {"signal": "PythonSignal", "timestamp": 0.0, "value": 1.0, "can_id": 0x100, "channel": 1},
+    ]))
+    java_data = normalize_frame(pd.DataFrame([
+        {"signal": "JavaSignal", "timestamp": 0.0, "value": 1.0, "can_id": 0x200, "channel": 1},
+    ]))
+
+    summary = _dbc_can_id_match_summary(
+        [selected_dbc],
+        {
+            "can_ids_by_channel": {
+                "1": [
+                    {"can_id": "0x100", "extended": False},
+                    {"can_id": "0x200", "extended": False},
+                ]
+            }
+        },
+        python_data=python_data,
+        java_data=java_data,
+    )
+
+    assert len(summary) == 1
+    assert summary[0]["matched_can_ids"] == ["Channel 1: 0x100", "Channel 1: 0x200"]
+    assert summary[0]["python_can_ids"] == ["Channel 1: 0x100"]
+    assert summary[0]["java_can_ids"] == ["Channel 1: 0x200"]
+
+
+def test_dbc_can_id_summary_shows_engine_ids_without_raw_inventory():
+    selected_dbc = dbc()
+    selected_dbc.catalog = [
+        MessageDef(0x100, False, "Message100", 8, ()),
+    ]
+    python_data = normalize_frame(pd.DataFrame([
+        {"signal": "PythonSignal", "timestamp": 0.0, "value": 1.0, "can_id": 0x100, "channel": 1},
+    ]))
+    java_data = normalize_frame(pd.DataFrame([
+        {"signal": "JavaSignal", "timestamp": 0.0, "value": 1.0, "can_id": 0x100, "channel": 1},
+    ]))
+
+    summary = _dbc_can_id_match_summary(
+        [selected_dbc], {}, python_data=python_data, java_data=java_data
+    )
+
+    assert len(summary) == 1
+    assert summary[0]["python_can_ids"] == ["Channel 1: 0x100"]
+    assert summary[0]["java_can_ids"] == ["Channel 1: 0x100"]
+    assert summary[0]["match_percent"] is None
+    assert summary[0]["matched_count"] is None
+    assert summary[0]["dbc_id_count"] is None
 
 
 def test_job_with_real_java_output_compares(cfg):
@@ -310,6 +373,26 @@ def test_comparison_csv_roundtrip(compared_job):
     assert list(df["index"]) == list(range(1, len(df) + 1))
     assert set(df["status"]) == {Status.MATCH, Status.MISMATCH, Status.MISSING_IN_JAVA}
     assert len(df) == len(compared_job.rows)
+
+
+def test_comparison_csv_parts_zip_contains_only_numbered_comparison_parts(compared_job):
+    compared_job.rows = pd.concat([compared_job.rows] * 5, ignore_index=True)
+    prefix = "DecoderComparator_test"
+    archive_bytes = rep.comparison_csv_parts_zip(compared_job, prefix, rows_per_part=2)
+    with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
+        names = archive.namelist()
+        expected_count = rep.comparison_csv_part_count(compared_job, rows_per_part=2)
+        assert expected_count > 1
+        expected_names = [
+            f"{prefix}_comparison{'' if part == 1 else f'_{part}'}.csv.gz"
+            for part in range(1, expected_count + 1)
+        ]
+        assert names == expected_names
+        assert all(name.endswith(".csv.gz") for name in names)
+        for part_number, name in enumerate(names, start=1):
+            assert archive.read(name) == rep.comparison_csv_part(
+                compared_job, part_number, rows_per_part=2, compress=True
+            )
 
 
 def test_json_report_is_valid_strict_json_with_summary(compared_job):

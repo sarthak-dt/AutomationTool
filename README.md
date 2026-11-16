@@ -154,7 +154,7 @@ Match if `|p−j| ≤ max(abs_tol, rel_tol·max(|p|,|j|))`; discrete signals com
 
 ## Supported formats and limitations
 
-BLF / ASC / LOG via python-can + cantools; MF4 with raw CAN logging via asammdf `extract_bus_logging`; MF4 with already-decoded channels is read as-is (DBCs not applied). CAN / CAN-FD only; no J1939 transport reassembly; MF4 text/array channels skipped; files are processed in memory (limit `MAX_MEASUREMENT_SIZE_MB`, default 2048). Timestamps are relative to the first frame (BLF/ASC/LOG) — the Java adapter must use the same convention.
+BLF / ASC / LOG via python-can + cantools; MF4 with raw CAN logging via asammdf `extract_bus_logging`; MF4 with already-decoded channels is read as-is (DBCs not applied). CAN / CAN-FD only; no J1939 transport reassembly; MF4 text/array channels skipped; files are processed in memory (limit `MAX_MEASUREMENT_SIZE_MB`, default 2048). Python BLF/ASC/LOG timestamps are relative to the first frame; Java timestamps are shifted to that origin before comparison and Java CSV export.
 
 ## Security
 

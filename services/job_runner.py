@@ -62,6 +62,7 @@ class FileOutcome:
     warnings: list[str] = field(default_factory=list)
     python_stats: dict[str, Any] = field(default_factory=dict)
     java_stats: dict[str, Any] = field(default_factory=dict)
+    dbc_match_summary: list[dict[str, Any]] = field(default_factory=list)
     comparison_performed: bool = False
     comparison_reason: str = ""
     seconds: float = 0.0
@@ -158,6 +159,90 @@ def _add_dbc_names(rows: pd.DataFrame, dbcs: list[DbcFile]) -> pd.DataFrame:
         )
     ]
     return rows
+
+
+def _dbc_can_id_match_summary(
+    dbcs: list[DbcFile],
+    python_stats: dict[str, Any],
+    selected_channels: tuple[int, ...] = (),
+    python_data: pd.DataFrame | None = None,
+    java_data: pd.DataFrame | None = None,
+) -> list[dict[str, Any]]:
+    """Summarize raw measurement coverage and each decoder's output CAN IDs."""
+    inventory = python_stats.get("can_ids_by_channel")
+    has_raw_inventory = isinstance(inventory, dict)
+    raw_inventory = inventory if has_raw_inventory else {}
+    if not has_raw_inventory and (
+        (python_data is None or python_data.empty)
+        and (java_data is None or java_data.empty)
+    ):
+        return []
+    observed: dict[int, set[tuple[str, bool]]] = {}
+    for channel_text, items in raw_inventory.items():
+        try:
+            channel = int(channel_text)
+        except (TypeError, ValueError):
+            continue
+        if selected_channels and channel not in selected_channels:
+            continue
+        observed[channel] = {
+            (str(item.get("can_id", "")), bool(item.get("extended", False)))
+            for item in items if isinstance(item, dict) and item.get("can_id")
+        }
+
+    def decoded_ids(data: pd.DataFrame | None, dbc: DbcFile) -> list[str]:
+        if data is None or data.empty or not {"can_id", "channel"}.issubset(data.columns):
+            return []
+        binding = dbc_channel_bindings(dbc)
+        dbc_ids = {int(message.frame_id) for message in dbc.catalog}
+        if not dbc_ids:
+            return []
+        can_ids = data["can_id"].map(_can_id_value)
+        channels = pd.to_numeric(data["channel"], errors="coerce")
+        keep = can_ids.isin(dbc_ids) & channels.notna()
+        if selected_channels:
+            keep &= channels.isin(selected_channels)
+        if binding is not None:
+            keep &= channels.isin(binding)
+        matched = {
+            (int(channel), int(can_id))
+            for channel, can_id in zip(channels[keep], can_ids[keep])
+        }
+        return [
+            f"Channel {channel}: 0x{can_id:X}"
+            for channel, can_id in sorted(matched)
+        ]
+
+    summary: list[dict[str, Any]] = []
+    for dbc in dbcs:
+        binding = dbc_channel_bindings(dbc)
+        channels = sorted(
+            channel for channel in observed
+            if binding is None or channel in binding
+        )
+        definitions = ({
+            (channel, f"0x{message.frame_id:X}", message.extended)
+            for channel in channels for message in dbc.catalog
+        } if has_raw_inventory else set())
+        observed_ids = {
+            (channel, can_id, extended)
+            for channel in channels
+            for can_id, extended in observed.get(channel, set())
+        }
+        matched = sorted(definitions & observed_ids)
+        summary.append({
+            "dbc": dbc.name,
+            "matched_count": len(matched) if has_raw_inventory else None,
+            "dbc_id_count": len(definitions) if has_raw_inventory else None,
+            "match_percent": 100.0 * len(matched) / len(definitions) if definitions else None,
+            "matched_can_ids": [
+                f"Channel {channel}: {can_id}{' (extended)' if extended else ''}"
+                for channel, can_id, extended in matched
+            ],
+            "python_can_ids": decoded_ids(python_data, dbc),
+            "java_can_ids": decoded_ids(java_data, dbc),
+        })
+    return summary
 
 
 def _decode_java_dbcs(
@@ -358,6 +443,24 @@ def run_job(
                 java_future = pool.submit(_decode_java_dbcs, java_client, local_path, dbc_paths, dbcs, settings)
                 py = py_future.result()
                 jr = java_future.result()
+            # python-can makes ASC/BLF/LOG timestamps relative to the first
+            # frame, while the Java API returns timestamps relative to the
+            # recording's zero. Normalize Java to the same first-frame origin
+            # before comparison and before exporting its output CSV.
+            if jr.state == EngineState.OK and Path(ref.name).suffix.lower() in {".asc", ".blf", ".log"}:
+                timestamp_origin = py.stats.get("timestamp_origin")
+                try:
+                    timestamp_origin = float(timestamp_origin)
+                except (TypeError, ValueError):
+                    timestamp_origin = 0.0
+                if timestamp_origin > 0 and not jr.data.empty:
+                    jr.data = jr.data.copy()
+                    jr.data["timestamp"] = pd.to_numeric(jr.data["timestamp"], errors="coerce") - timestamp_origin
+                    jr.stats["timestamp_origin_adjustment"] = timestamp_origin
+                    jr.warnings.append(
+                        "Java timestamps were shifted by the first Python CAN-frame time "
+                        f"({timestamp_origin:.6f} s) to match the Python relative timestamp origin."
+                    )
             # The Java API has no channel filter parameter. Fence its output to
             # channels observed by the Python file reader, which also prevents
             # missing channel numbers from appearing in an All Channels run.
@@ -381,6 +484,13 @@ def run_job(
             outcome.python_state, outcome.java_state = py.state, jr.state
             outcome.python_error, outcome.java_error = py.error, jr.error
             outcome.python_stats, outcome.java_stats = py.stats, jr.stats
+            outcome.dbc_match_summary = _dbc_can_id_match_summary(
+                dbcs,
+                py.stats,
+                tuple(settings.decode_channels),
+                py.data,
+                jr.data,
+            )
             outcome.warnings.extend(f"python: {w}" for w in py.warnings)
             outcome.warnings.extend(f"java: {w}" for w in jr.warnings)
             job.python_data[ref.name] = py.data

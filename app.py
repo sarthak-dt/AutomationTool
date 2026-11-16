@@ -1309,27 +1309,29 @@ def page_reports() -> None:
             )
 
             dbc_summary_rows = []
-            dbc_short_names = list(dict.fromkeys(
-                name.split(" (", 1)[0] for name in job.dbc_names
-            ))
             for outcome in job.files:
-                file_rows = rows_by_file.get_group(outcome.name) if hasattr(rows_by_file, "get_group") and outcome.name in rows_by_file.groups else pd.DataFrame()
-                for dbc_name in dbc_short_names:
-                    dbc_rows = file_rows[file_rows["dbc_name"] == dbc_name] if not file_rows.empty and "dbc_name" in file_rows else pd.DataFrame()
-                    dbc_matches = int((dbc_rows["status"] == Status.MATCH).sum()) if not dbc_rows.empty else 0
-                    dbc_mismatches = int((dbc_rows["status"] == Status.MISMATCH).sum()) if not dbc_rows.empty else 0
-                    dbc_compared = dbc_matches + dbc_mismatches
+                for dbc_match in outcome.dbc_match_summary:
+                    pct = dbc_match.get("match_percent")
                     dbc_summary_rows.append({
                         "File": outcome.name,
-                        "DBC": dbc_name,
-                        "Compared samples": dbc_compared,
-                        "Matches": dbc_matches,
-                        "Match %": f"{100 * dbc_matches / dbc_compared:.2f}%" if dbc_compared else "—",
-                        "Mismatches": dbc_mismatches,
+                        "DBC": dbc_match["dbc"],
+                        "DBC Match %": f"{pct:.2f}%" if pct is not None else "—",
+                        "Matched CAN IDs": ", ".join(dbc_match["matched_can_ids"]) or "—",
+                        "Python decoded CAN IDs": ", ".join(dbc_match.get("python_can_ids", [])) or "—",
+                        "Java CAN IDs": ", ".join(dbc_match.get("java_can_ids", [])) or "—",
+                        "Matched / DBC IDs": (
+                            f"{dbc_match['matched_count']} / {dbc_match['dbc_id_count']}"
+                            if dbc_match["matched_count"] is not None
+                            else "—"
+                        ),
                     })
             if dbc_summary_rows:
-                st.markdown("**Match rate by file and DBC**")
-                st.caption("Each DBC percentage is calculated from that DBC's MATCH + MISMATCH samples in the file.")
+                st.markdown("**DBC CAN ID match by file**")
+                st.caption(
+                    "DBC Match % is the share of that DBC's message IDs found in the measurement "
+                    "on channels where the DBC applies. Python/Java CAN IDs are taken from each "
+                    "decoder's decoded output (Python uses asammdf for MF4)."
+                )
                 st.dataframe(pd.DataFrame(dbc_summary_rows), hide_index=True, **stretch(st.dataframe))
 
     comparison_status_filter = None

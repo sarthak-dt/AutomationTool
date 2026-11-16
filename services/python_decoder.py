@@ -213,6 +213,7 @@ def decode_frames(
     }
     warnings: list[str] = []
     error_examples: dict[str, int] = {}
+    can_ids_by_channel: dict[int, set[tuple[int, bool]]] = {}
     t0: float | None = None
 
     for frame in frames:
@@ -228,6 +229,9 @@ def decode_frames(
             continue
         ch = frame_channel(frame)
         channels_seen.add(ch)
+        can_ids_by_channel.setdefault(ch, set()).add(
+            (int(frame.arbitration_id), bool(frame.is_extended_id))
+        )
         if selected_channels and ch not in selected_channels:
             continue
         if isinstance(lookup, ChannelLookups):
@@ -272,7 +276,18 @@ def decode_frames(
             stats["samples"] += 1
 
     stats["start_time"] = timeutil.epoch_to_start(t0)
+    # python-can samples are normalized relative to the first frame below.
+    # Keep that origin so Java timestamps for ASC/BLF/LOG can be normalized to
+    # the same timeline before sample alignment.
+    stats["timestamp_origin"] = float(t0) if t0 is not None else 0.0
     stats["channels_seen"] = sorted(channels_seen)
+    stats["can_ids_by_channel"] = {
+        str(channel): [
+            {"can_id": fmt_can_id(can_id), "extended": extended}
+            for can_id, extended in sorted(ids)
+        ]
+        for channel, ids in can_ids_by_channel.items()
+    }
     if stats["truncated"]:
         warnings.append(f"Stopped after {max_frames} frames (max_frames setting); results are partial.")
     if stats["frames_total"] == 0:

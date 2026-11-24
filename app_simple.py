@@ -453,15 +453,26 @@ def match_section(source: str, refs: list[MeasurementRef], settings: ComparisonS
                 if matches.empty:
                     st.info("No CAN IDs were found on the selected channels.")
                 else:
-                    st.dataframe(matches, hide_index=True, **stretch(st.dataframe))
-                    counts = matches["status"].value_counts().to_dict()
-                    st.caption(
-                        "Matched: {matched} · Unmatched in measurement: {file} · Unmatched in DBC: {dbc}".format(
-                            matched=counts.get("MATCHED", 0),
-                            file=sum(count for status, count in counts.items() if status.startswith("UNMATCHED IN ") and status != "UNMATCHED IN DBC"),
-                            dbc=counts.get("UNMATCHED IN DBC", 0),
+                    # Display only IDs present in the measurement file; DBC-only IDs
+                    # ("UNMATCHED IN DBC" = defined in DBC but absent from the file) are hidden.
+                    file_rows = matches[matches["status"] != "UNMATCHED IN DBC"].copy()
+                    missing_channels = file_rows[file_rows["status"].str.startswith("CHANNEL NOT PRESENT")]
+                    file_rows = file_rows[~file_rows["status"].str.startswith("CHANNEL NOT PRESENT")]
+                    if file_rows.empty:
+                        st.info("No CAN IDs from the measurement file were found on the selected channels.")
+                    else:
+                        file_rows["matched_with_dbc"] = file_rows["status"].eq("MATCHED").map({True: "Yes", False: "No"})
+                        view = file_rows[["channel", "can_id", "extended", "matched_with_dbc", "dbc"]]
+                        st.dataframe(view, hide_index=True, **stretch(st.dataframe))
+                        total_ids = len(file_rows)
+                        matched_ids = int((file_rows["matched_with_dbc"] == "Yes").sum())
+                        st.caption(
+                            "Overall match (file → DBC): {pct:.2f}% · Matched: {m} of {t} file IDs · Not in DBC: {u}".format(
+                                pct=matched_ids * 100 / total_ids, m=matched_ids, t=total_ids, u=total_ids - matched_ids,
+                            )
                         )
-                    )
+                    for ch in missing_channels["channel"].tolist():
+                        st.warning(f"Channel {ch} is not present in the measurement file.")
             except (ValidationError, OSError, ValueError, ImportError) as exc:
                 st.error(f"DBC Match to This File failed: {exc}")
             except Exception as exc:

@@ -458,6 +458,55 @@ def _signal_source_can_id(signal: Any) -> str:
     return fmt_can_id(int(match.group(1), 16)) if match else ""
 
 
+def _signal_source_id(signal: Any) -> tuple[int, bool] | None:
+    """(DBC message ID, extended) that asammdf used to decode ``signal``."""
+    source = getattr(signal, "source", None)
+    path = str(getattr(source, "path", "") or "")
+    match = re.search(r"\.ID=0x([0-9A-Fa-f]+)(?:\s+EXT=(True|False))?", path)
+    if not match:
+        return None
+    extended = match.group(2) == "True" if match.group(2) else int(match.group(1), 16) > 0x7FF
+    return int(match.group(1), 16), extended
+
+
+def _signal_source_address(signal: Any) -> set[int] | None:
+    """Possible J1939 source addresses of the *logged* frame; None if unknown.
+
+    asammdf 8.x writes the acquisition name as ``f"SourceAddress = 0x{sa}"``,
+    i.e. decimal digits behind a ``0x`` prefix. Both readings are returned so
+    a future asammdf that writes real hex keeps working.
+    """
+    source = getattr(signal, "source", None)
+    name = str(getattr(source, "name", "") or "")
+    match = re.search(r"SourceAddress\s*=\s*0x([0-9A-Fa-f]+)", name)
+    if not match:
+        return None
+    digits = match.group(1)
+    out = {int(digits, 16)}
+    if digits.isdigit():
+        out.add(int(digits, 10))
+    return out
+
+
+def _is_exact_id_match(signal: Any, observed_ids: set[tuple[int, bool]]) -> bool:
+    """True when ``signal`` was decoded from a logged frame whose ID equals the DBC message ID.
+
+    For J1939 DBCs asammdf also decodes frames whose ID only shares the PGN with a
+    DBC message (different source address / priority) and labels the result with
+    the DBC message ID - an ID that may not be in the file at all. Those signals
+    are excluded so the decoded CAN IDs agree with the DBC/MF4 match table.
+    """
+    source_id = _signal_source_id(signal)
+    if source_id is None:
+        return True  # cannot judge; keep previous behaviour
+    if source_id not in observed_ids:
+        return False
+    addresses = _signal_source_address(signal)
+    if addresses is not None and source_id[1] and (source_id[0] & 0xFF) not in addresses:
+        return False
+    return True
+
+
 def _signals_to_frame(
     signals: Iterable[Any],
     warnings: list[str],
@@ -465,6 +514,8 @@ def _signals_to_frame(
     meta: dict[str, tuple[str, str]] | None = None,
     expected_channel: int | None = None,
     choice_values: dict[str, dict[str, float]] | None = None,
+    observed_ids: set[tuple[int, bool]] | None = None,
+    pgn_only: set[str] | None = None,
 ) -> pd.DataFrame:
     parts = []
     skipped = 0
@@ -477,6 +528,11 @@ def _signals_to_frame(
                     continue
                 if signal_channel != expected_channel:
                     continue
+            if observed_ids is not None and not _is_exact_id_match(sig, observed_ids):
+                if pgn_only is not None:
+                    source_id = _signal_source_id(sig)
+                    pgn_only.add(fmt_can_id(source_id[0]) if source_id else str(sig.name))
+                continue
             samples = np.asarray(sig.samples)
             ts = np.asarray(sig.timestamps, dtype=float)
             if samples.ndim != 1 or samples.size == 0 or samples.size != ts.size:
@@ -818,9 +874,31 @@ def _decode_mf4(
                 runs = [(0, [(str(path), 0) for path in dbc_paths])]
                 warnings.append("CAN channel numbers could not be read from this MF4; signals have no channel. "
                                 "Bind the DBC to a channel in the DBC manager if you need channel-wise results.")
+            # Logged (ID, extended) pairs per bus: used to drop J1939 PGN-only matches.
+            try:
+                observed_by_channel: dict[int, set[tuple[int, bool]]] | None = mf4_can_messages(mdf)
+            except Exception as exc:
+                observed_by_channel = None
+                log.debug("Could not read logged MF4 CAN IDs: %s", type(exc).__name__)
+            if observed_by_channel is not None:
+                # Raw CAN-ID inventory (same shape as the ASC/BLF path) for the DBC match summary.
+                stats["can_ids_by_channel"] = {
+                    str(channel): [
+                        {"can_id": fmt_can_id(can_id), "extended": extended}
+                        for can_id, extended in sorted(ids)
+                    ]
+                    for channel, ids in observed_by_channel.items()
+                }
+            pgn_only: set[str] = set()
             parts: list[pd.DataFrame] = []
             channels_without_signals: list[int] = []
             for ch, pairs in runs:
+                if observed_by_channel is None:
+                    observed_ids = None
+                elif found or selected:
+                    observed_ids = observed_by_channel.get(ch, set())
+                else:
+                    observed_ids = {key for ids in observed_by_channel.values() for key in ids}
                 label = f"channel {ch}" if found or selected else "all channels"
                 decoded = None
                 try:
@@ -833,6 +911,8 @@ def _decode_mf4(
                         _signal_meta(dbs),
                         expected_channel=ch if found or selected else None,
                         choice_values=_choice_values(dbs),
+                        observed_ids=observed_ids,
+                        pgn_only=pgn_only,
                     )
                 except Exception as exc:
                     channels_without_signals.append(ch)
@@ -851,6 +931,13 @@ def _decode_mf4(
                     )
                 else:
                     parts.append(part)
+            if pgn_only:
+                ids = sorted(pgn_only)
+                stats["j1939_pgn_only_ids_excluded"] = ids
+                warnings.append(
+                    f"{len(ids)} DBC message ID(s) not present in the file were matched by J1939 PGN only "
+                    f"(different source address/priority) and were not decoded: {', '.join(ids)}."
+                )
             frame = normalize_frame(pd.concat(parts, ignore_index=True)) if parts else normalize_frame(None)
             stats["channels_without_decoded_signals"] = sorted(set(channels_without_signals))
         else:

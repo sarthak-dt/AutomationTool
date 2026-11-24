@@ -425,3 +425,39 @@ def test_real_mf4_dbc_match_reports_matched_and_unmatched_ids_per_channel(tmp_pa
     )
     assert set(wrapped["channel"]) == {0, 1}
     assert "MATCHED" in set(wrapped["status"])
+
+
+# ---------------------------------------------------------------------------
+# MF4 / asammdf: J1939 PGN-only matches must not appear as decoded CAN IDs
+# ---------------------------------------------------------------------------
+def mdf_sig(name, can_id, sa_text, bus=1):
+    return NS(
+        name=name,
+        samples=np.array([1.0, 2.0]),
+        timestamps=np.array([0.0, 0.1]),
+        unit="",
+        source=NS(path=f"CAN{bus}.CAN_DataFrame.ID=0x{can_id:X} EXT=True", name=f"SourceAddress = 0x{sa_text}"),
+    )
+
+
+def test_exact_id_match_keeps_logged_ids_and_drops_pgn_only_matches():
+    observed = {(0x18FEFC00, True), (0x18FECA00, True), (0x18FECA05, True)}
+    # exact: logged 0x18FEFC00 decoded with DBC 0x18FEFC00 (asammdf writes SA in decimal digits)
+    assert pd_._is_exact_id_match(mdf_sig("a", 0x18FEFC00, "0"), observed)
+    # DBC 0x18FEFC27 never logged: logged 0x18FEFC00 matched only by PGN
+    assert not pd_._is_exact_id_match(mdf_sig("b", 0x18FEFC27, "0"), observed)
+    # DBC 0x18FECA00 is logged, but this group came from logged 0x18FECA05 (SA 5)
+    assert not pd_._is_exact_id_match(mdf_sig("c", 0x18FECA00, "5"), observed)
+    # SA 0xDC written by asammdf 8.x as "0x220"
+    assert pd_._is_exact_id_match(mdf_sig("d", 0x18E000DC, "220"), {(0x18E000DC, True)})
+
+
+def test_signals_to_frame_reports_pgn_only_ids():
+    observed = {(0x18FEFC00, True)}
+    pgn_only: set[str] = set()
+    df = pd_._signals_to_frame(
+        [mdf_sig("Kept", 0x18FEFC00, "0"), mdf_sig("Fuel", 0x18FEFC27, "0")],
+        [], 1, expected_channel=1, observed_ids=observed, pgn_only=pgn_only,
+    )
+    assert set(df["signal"]) == {"Kept"}
+    assert pgn_only == {"0x18FEFC27"}
